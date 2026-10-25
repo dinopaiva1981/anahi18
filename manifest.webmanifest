@@ -1,0 +1,16 @@
+{
+  "name": "Casa 18 Anahi · Guia do hóspede",
+  "short_name": "Casa 18 Anahi",
+  "description": "Guia da Casa 18 Anahi na Praia do Marceneiro, Rota dos Milagres (AL): estadia, praias, maré, onde comer e contatos úteis.",
+  "lang": "pt-BR",
+  "start_url": "./#/inicio",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5EFE4",
+  "theme_color": "#1F3D2F",
+  "icons": [
+    { "src": "icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

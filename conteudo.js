@@ -1,0 +1,2429 @@
+window.CONTEUDO = {
+  "versao": 3,
+  "atualizado_em": "2026-10-23",
+  "casa": {
+    "nome": "Casa 18 Anahi",
+    "subtitulo": "Praia do Marceneiro · Rota dos Milagres",
+    "anfitriao": "",
+    "whatsapp": "",
+    "checkin": "",
+    "checkout": "",
+    "area_m2": 90,
+    "hospedes": 6,
+    "quartos": 3,
+    "banheiros": null,
+    "camas": [],
+    "endereco_publico": "Condomínio Vila Anahi · Praia do Marceneiro, Passo de Camaragibe, Alagoas",
+    "link_maps": "",
+    "coordenadas": null,
+    "fotos": [],
+    "ambientes": [],
+    "comodidades": [
+      {
+        "icone": "wifi",
+        "nome": "Wi-Fi de alta velocidade",
+        "descricao": "Dados de acesso enviados pelo anfitrião por mensagem.",
+        "destaque": true
+      },
+      {
+        "icone": "piscina",
+        "nome": "Piscina do condomínio",
+        "descricao": "Área comum do condomínio. Confira as regras de uso.",
+        "destaque": true
+      },
+      {
+        "icone": "praia",
+        "nome": "Praia a poucos metros",
+        "descricao": "A Praia do Marceneiro fica a uma curta caminhada.",
+        "destaque": true
+      },
+      {
+        "icone": "carro",
+        "nome": "Estacionamento gratuito",
+        "descricao": "Vaga no condomínio.",
+        "destaque": true
+      }
+    ],
+    "regras_casa": [],
+    "regras_condominio": [],
+    "lixo_limpeza": [],
+    "seguranca": [],
+    "faq": [],
+    "chegada": {
+      "como_chegar": "",
+      "entrada": "",
+      "chaves": "",
+      "estacionamento": "",
+      "saida": [],
+      "imprevistos": "",
+      "trajetos": [
+        {
+          "icone": "aviao",
+          "titulo": "Aeroporto de Maceió (MCZ)",
+          "texto": "Cerca de 100 km pela AL-101 Norte: entre 1h30 e 2h de carro."
+        },
+        {
+          "icone": "estrada",
+          "titulo": "Rodovia",
+          "texto": "AL-101 Norte, a estrada da Rota dos Milagres."
+        },
+        {
+          "icone": "pino",
+          "titulo": "Acesso",
+          "texto": "Pela AL-101 Norte, no sentido de Maragogi. A Praia do Marceneiro fica no litoral de Passo de Camaragibe, entre Barra de Camaragibe e São Miguel dos Milagres."
+        }
+      ]
+    },
+    "frase": "Aqui, o tempo desacelera e a vida acontece.",
+    "sobre": "Pensada para o conforto e a praticidade, com ambientes integrados, decoração acolhedora e atmosfera praiana. Ideal para famílias e amigos que buscam descanso, natureza e boa companhia.",
+    "instagram": "casa18.anahi",
+    "link_reserva": "",
+    "video_url": "",
+    "suites": 1
+  },
+  "config": {
+    "feedback_endpoint": "",
+    "og_imagem": null
+  },
+  "regiao": {
+    "centro": {
+      "lat": -9.2378,
+      "lng": -35.4928
+    },
+    "cidades": [
+      {
+        "nome": "Passo de Camaragibe",
+        "lat": -9.2378,
+        "lng": -35.4928
+      },
+      {
+        "nome": "São Miguel dos Milagres",
+        "lat": -9.2658,
+        "lng": -35.3728
+      },
+      {
+        "nome": "Porto de Pedras",
+        "lat": -9.1578,
+        "lng": -35.295
+      },
+      {
+        "nome": "Japaratinga",
+        "lat": -9.0878,
+        "lng": -35.2578
+      }
+    ],
+    "quando_ir": [
+      "De outubro a março o tempo costuma ser mais seco e ensolarado; novembro é, em média, o mês com menos chuva.",
+      "Junho é, em média, o mês mais chuvoso. De abril a julho, a chuva pode cancelar ou encurtar passeios no mar.",
+      "Dezembro, janeiro e feriados lotam a rota: reserve passeios e restaurantes com antecedência.",
+      "Em qualquer época, quem manda nas piscinas naturais é a maré: programe o dia a partir dela."
+    ],
+    "mares": [
+      "As piscinas naturais aparecem na maré baixa. Os jangadeiros preferem os dias de maré bem baixa: 0,3 m ou menos na tábua; quanto mais perto de 0 m, melhor.",
+      "Acima de uns 0,7 m, sempre pela tábua, as piscinas ficam cobertas e a água perde transparência.",
+      "Aqui no guia você vê os horários estimados das marés e se a baixa do dia é mais forte ou mais fraca. A altura em metros está na tábua oficial da Marinha, porto de Maceió.",
+      "As marés mais baixas costumam cair perto da lua nova e da lua cheia.",
+      "Prefira as baixas com luz do dia: algumas caem de madrugada.",
+      "Na maré baixa a faixa de areia fica mais larga: é a melhor hora para caminhar de uma praia a outra.",
+      "Na hora de embarcar, pergunte ao jangadeiro como estão as piscinas."
+    ],
+    "mobilidade": [
+      "O carro é a forma mais prática de circular: não há transporte público frequente entre as praias da rota.",
+      "Maceió fica a cerca de 100 km, algo entre 1h30 e 2h de estrada.",
+      "Fora da AL-101, muitos acessos às praias são de terra e ficam difíceis com chuva.",
+      "Para ir a Japaratinga e Maragogi, a balsa sobre o Rio Manguaba, em Porto de Pedras, encurta o caminho. A travessia leva menos de 10 minutos, mas a balsa é pequena e a fila pode passar de 1 hora na alta temporada. Se a fila estiver longa, o caminho por Porto Calvo evita a balsa."
+    ],
+    "dias_de_chuva": [
+      "Passear pela Vilinha do Marceneiro: tapiocas, doces regionais e artesanato.",
+      "Conhecer o centro de São Miguel dos Milagres e a igreja matriz.",
+      "Visitar a Associação Peixe-Boi, em Porto de Pedras (pergunte antes se o passeio sai com o tempo do dia).",
+      "Evite estradas de terra depois de chuva forte, como as de acesso a Tatuamunha."
+    ],
+    "fontes": [
+      {
+        "titulo": "Mala de Aventuras · Rota Ecológica dos Milagres",
+        "url": "https://www.maladeaventuras.com/rota-ecologica-dos-milagres/"
+      },
+      {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      {
+        "titulo": "TNH1 · clima de São Miguel dos Milagres (out. 2026)",
+        "url": "https://www.tnh1.com.br/tnh1-variedades/uma-historia-de-milagre-marcou-o-nascimento-desta-vila-alagoana-que-hoje-atrai-visitantes-pelas-piscinas-naturais/"
+      },
+      {
+        "titulo": "Esse Mundo é Nosso · O que fazer em Japaratinga (2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67345"
+      }
+    ],
+    "dicas": [
+      "Leve algum dinheiro em espécie: caixas eletrônicos são raros na rota, e muitos passeios aceitam Pix.",
+      "Em dezembro e janeiro, reserve com antecedência restaurantes, o passeio do peixe-boi e as jangadas.",
+      "Barracas e beach clubs cobram de formas diferentes (day use, consumação mínima ou só o consumo): pergunte antes de sentar.",
+      "Jangadas não têm tabela fixa: combine valor, duração e ponto de volta antes de embarcar.",
+      "O buggy não anda pela faixa de areia: a rota fica na APA Costa dos Corais. Não espere dunas.",
+      "Nas piscinas naturais, passe o protetor antes de sair e não use dentro da água; deixe caixas de som e comida na areia."
+    ]
+  },
+  "lugares": [
+    {
+      "id": "praia-do-marceneiro",
+      "nome": "Praia do Marceneiro",
+      "categoria": "praia",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "natureza",
+        "familia",
+        "casal"
+      ],
+      "resumo": "A praia da casa: mar calmo, água clara e piscinas naturais na maré baixa.",
+      "descricao": "Enseada de areia clara e mar tranquilo, protegida pelos recifes. Na maré baixa formam-se piscinas naturais, e os jangadeiros fazem a travessia até elas. As barracas, com mesas e guarda-sóis, ficam no centro da praia.",
+      "dica": "Entre no mar com calma: em alguns trechos há pedras de recife logo na beira.",
+      "bom_saber": [
+        "Piscinas naturais só na maré baixa",
+        "Jangadeiros num quiosque entre a praia e a avenida de acesso",
+        "Barracas no centro da praia",
+        "Dá para estacionar na avenida que liga a AL-101 à praia"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Marceneiro, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Maré baixa, de manhã",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praia do Marceneiro (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "capela-dos-milagres",
+      "nome": "Capela dos Milagres",
+      "categoria": "cultura",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "casal",
+        "cultura"
+      ],
+      "resumo": "A capelinha na ponta norte do Marceneiro, na divisa com o Riacho.",
+      "descricao": "Construída em 2016 no extremo norte do Marceneiro, na divisa com a Praia do Riacho, fica em propriedade particular e é usada para casamentos e eventos. Não há visitação interna: a capela é vista e fotografada de fora, pela areia.",
+      "dica": "A foto mais bonita costuma sair do lado do Riacho. Do centro do Marceneiro são cerca de 1,2 km a pé pela beira-mar.",
+      "bom_saber": [
+        "Propriedade particular: só vista de fora",
+        "Cerca de 1,2 km a pé pela areia, rumo norte"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Capela dos Milagres, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Fim de tarde",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praia do Marceneiro (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "vilinha-do-marceneiro",
+      "nome": "Vilinha do Marceneiro",
+      "categoria": "compras",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "gastronomia",
+        "cultura",
+        "familia"
+      ],
+      "resumo": "Um trecho curto da AL-101 com tapiocarias, doces regionais e artesanato.",
+      "descricao": "Pouco mais de 100 metros de avenida reúnem restaurantes e lojinhas: uma tapiocaria com dezenas de sabores, uma loja de doces e produtos alagoanos e um armazém de arte regional, com carrancas de artesãos locais.",
+      "dica": "Bom programa para o fim de tarde ou para um dia nublado. Estacionar na rua da Vilinha é gratuito.",
+      "bom_saber": [
+        "Fica junto à AL-101, no acesso à praia",
+        "Lojas e horários podem mudar ao longo do ano"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Fim de tarde",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praia do Marceneiro",
+        "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "barra-de-camaragibe",
+      "nome": "Barra de Camaragibe",
+      "categoria": "praia",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "natureza",
+        "familia",
+        "casal"
+      ],
+      "resumo": "Onde o Rio Camaragibe encontra o mar: água morna, mangue e pôr do sol.",
+      "descricao": "Vila de ritmo lento no início da rota. O Rio Camaragibe corre entre manguezais e, perto da foz, forma águas calmas e mornas, boas para um banho de água doce. Há passeios de barco e restaurantes de frente para o mar. Do outro lado do rio fica a Praia dos Morros.",
+      "dica": "Fique para o pôr do sol sobre o rio.",
+      "bom_saber": [
+        "Passeios de barco no rio",
+        "Banho de água doce perto da foz",
+        "Travessia para a Praia dos Morros"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Barra de Camaragibe, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Fim de tarde",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Mala de Aventuras · Rota Ecológica dos Milagres",
+        "url": "https://www.maladeaventuras.com/rota-ecologica-dos-milagres/"
+      },
+      "verificado": null
+    },
+    {
+      "id": "piscinas-naturais-jangada",
+      "nome": "Piscinas naturais de jangada",
+      "categoria": "passeio",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "natureza",
+        "aventura",
+        "familia",
+        "casal"
+      ],
+      "resumo": "O passeio clássico da rota: jangada até os recifes na maré baixa.",
+      "descricao": "Na maré baixa, os recifes formam piscinas de água transparente a poucos minutos da areia. A travessia é feita em jangadas, embarcações tradicionais a vela, com saídas do Marceneiro e de outras praias da rota.",
+      "dica": "Escolha um dia de maré bem baixa e saia cedo: a luz é melhor e as piscinas ficam mais vazias.",
+      "bom_saber": [
+        "Depende da maré: confira a tábua antes",
+        "Não há tabela fixa: combine o valor antes de embarcar",
+        "Não pise nem toque nos corais",
+        "Não alimente os peixes"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Marceneiro, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Maré bem baixa (0,3 m ou menos na tábua)",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Mala de Aventuras · Rota Ecológica dos Milagres",
+        "url": "https://www.maladeaventuras.com/rota-ecologica-dos-milagres/"
+      },
+      "verificado": null
+    },
+    {
+      "id": "praia-do-riacho",
+      "nome": "Praia do Riacho",
+      "categoria": "praia",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "natureza",
+        "casal"
+      ],
+      "resumo": "Vizinha do Marceneiro, calma e quase sem comércio, com piscinas na maré baixa.",
+      "descricao": "Começa logo depois da Capela dos Milagres, já em São Miguel dos Milagres. Mar calmo e transparente, longos trechos de areia sem construções e pouquíssimo comércio. Na maré baixa formam-se piscinas naturais.",
+      "dica": "Dá para chegar a pé pela areia desde o Marceneiro. Leve água: quase não há barracas.",
+      "bom_saber": [
+        "Recifes perto da beira: entre devagar",
+        "Pouco comércio na areia",
+        "Piscinas naturais na maré baixa"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Riacho, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "sao-miguel-dos-milagres",
+      "nome": "Centro de São Miguel dos Milagres",
+      "categoria": "cultura",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "cultura",
+        "gastronomia",
+        "familia"
+      ],
+      "resumo": "A vila que dá nome à rota, com igreja matriz, mirante e serviços.",
+      "descricao": "O nome vem da história de um pescador que teria encontrado uma imagem de São Miguel Arcanjo na areia. O povoado surgiu no século XVII e virou município em 1960, ao se separar de Porto de Pedras. Hoje é o principal centro de serviços da rota, com restaurantes, pousadas, a igreja matriz e o Mirante do Alto do Cruzeiro.",
+      "dica": "A subida ao Alto do Cruzeiro é curta, mas íngreme e sem sombra: vá de calçado firme, cedo ou no fim da tarde.",
+      "bom_saber": [
+        "Centro de serviços da rota",
+        "Mirante sem estrutura, só com uma cruz"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "São Miguel dos Milagres, Alagoas",
+      "lat": -9.2658,
+      "lng": -35.3728,
+      "precisao": "aproximada",
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Estado de Minas · história de São Miguel dos Milagres",
+        "url": "https://www.em.com.br/emfoco/2026/04/18/fundada-durante-a-invasao-holandesa-essa-vila-alagoana-de-8-mil-moradores-guarda-a-praia-eleita-a-mais-bonita-do-brasil/"
+      },
+      "verificado": null
+    },
+    {
+      "id": "praia-do-toque",
+      "nome": "Praia do Toque",
+      "categoria": "praia",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "natureza",
+        "casal"
+      ],
+      "resumo": "A mais vazia de Milagres: coqueiral denso e piscinas a pé na maré baixa.",
+      "descricao": "Coqueiral denso e quase nenhuma barraca: o acesso costuma ser pelas pousadas e pelo beach club. Na maré baixa dá para ir a pé até as piscinas entre os corais e ver peixes e, com sorte, tartarugas. Pela areia, chega-se caminhando a Porto da Rua.",
+      "dica": "Leve cadeira, guarda-sol e água: quase não há estrutura na areia.",
+      "bom_saber": [
+        "Melhor na maré baixa",
+        "Pouca estrutura para quem não está hospedado",
+        "Caminhada pela areia até Porto da Rua"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Toque, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Maré baixa",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "praia-da-lage",
+      "nome": "Praia da Lage",
+      "categoria": "praia",
+      "area": "Porto de Pedras",
+      "tags": [
+        "natureza",
+        "casal"
+      ],
+      "resumo": "Tranquila, com piscinas de corais na maré baixa e Bandeira Azul 2026/27.",
+      "descricao": "Pouco frequentada e de mar calmo, forma piscinas de corais na maré baixa e tem um pôr do sol bonito. Duas barracas montam cadeiras e guarda-sóis todos os dias, e há uma ducha junto ao pequeno estacionamento público. Recebeu o selo internacional Bandeira Azul para a temporada 2026/2027.",
+      "dica": "Boa escolha para quem quer a paisagem do Patacho com menos movimento.",
+      "bom_saber": [
+        "Selo Bandeira Azul 2026/27",
+        "Piscinas de corais na maré baixa",
+        "Pouco comércio além das barracas"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia da Lage, Porto de Pedras, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Fim de tarde",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "TNH1 · Praia da Lage conquista Bandeira Azul (out. 2026)",
+        "url": "https://www.tnh1.com.br/noticia/nid/praia-da-lage-conquista-bandeira-azul-e-torna-porto-de-pedras-a-unica-cidade-de-alagoas-com-duas-praias-certificadas/"
+      },
+      "verificado": null
+    },
+    {
+      "id": "praia-do-patacho",
+      "nome": "Praia do Patacho",
+      "categoria": "praia",
+      "area": "Porto de Pedras",
+      "tags": [
+        "natureza",
+        "casal",
+        "familia"
+      ],
+      "resumo": "Coqueiral, mar calmo e selo Bandeira Azul renovado para 2026/27.",
+      "descricao": "Uma das praias mais celebradas do litoral alagoano: areia clara, coqueirais, mar calmo e piscinas naturais. Foi a primeira de Alagoas a receber o selo internacional Bandeira Azul, renovado para 2026/2027. Tem banheiros públicos, duchas, passarelas de madeira sobre a vegetação de restinga, barracas e passeios de jangada.",
+      "dica": "O estacionamento do acesso principal tem poucas vagas: chegue cedo. Caminhando um pouco para além do trecho com estrutura, a praia fica quase vazia.",
+      "bom_saber": [
+        "Selo Bandeira Azul 2026/27",
+        "Piscinas naturais na maré baixa",
+        "Banheiros públicos e duchas",
+        "Barracas cobram aluguel ou consumação mínima"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Patacho, Porto de Pedras, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Maré baixa",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "TNH1 · Lage ganha e Patacho renova a Bandeira Azul (out. 2026)",
+        "url": "https://www.tnh1.com.br/noticia/nid/praia-da-lage-conquista-bandeira-azul-e-torna-porto-de-pedras-a-unica-cidade-de-alagoas-com-duas-praias-certificadas/"
+      },
+      "verificado": null
+    },
+    {
+      "id": "tunel-verde",
+      "nome": "Túnel Verde",
+      "categoria": "natureza",
+      "area": "Porto de Pedras",
+      "tags": [
+        "natureza",
+        "casal"
+      ],
+      "resumo": "Uma estrada coberta de árvores, a caminho do Patacho.",
+      "descricao": "As copas das árvores se fecham sobre a rua e formam um túnel natural de cerca de 8 metros de altura, no caminho para a Praia do Patacho.",
+      "dica": "Passe devagar e, se for parar para fotos, faça isso em segurança, fora da pista.",
+      "bom_saber": [
+        "No caminho para o Patacho"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Túnel Verde, Porto de Pedras, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Mala de Aventuras · Rota Ecológica dos Milagres",
+        "url": "https://www.maladeaventuras.com/rota-ecologica-dos-milagres/"
+      },
+      "verificado": null
+    },
+    {
+      "id": "peixe-boi-tatuamunha",
+      "nome": "Peixe-boi no Rio Tatuamunha",
+      "categoria": "passeio",
+      "area": "Porto de Pedras",
+      "tags": [
+        "natureza",
+        "familia",
+        "casal"
+      ],
+      "resumo": "Passeio de jangada sem motor para avistar o peixe-boi marinho.",
+      "descricao": "A Associação Peixe-Boi, organização de conservação em Porto de Pedras, conduz passeios em jangadas sem motor pelo Rio Tatuamunha. Um guia acompanha o grupo e explica a vida do peixe-boi marinho, uma das espécies mais ameaçadas do país. O avistamento não é garantido.",
+      "dica": "Reserve com antecedência pelo site da Associação, principalmente na alta temporada: as vagas são limitadas.",
+      "bom_saber": [
+        "Reserva antecipada recomendada",
+        "Duração de cerca de 1 hora",
+        "Avistamento não garantido",
+        "Embarcação sem motor para proteger os animais"
+      ],
+      "depende_mare": false,
+      "reserva": true,
+      "foto": null,
+      "endereco": "Associação Peixe-Boi, R. Luiz Ferreira Dorta, 25, Tatuamunha, Porto de Pedras, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "Cerca de 1 hora",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "https://www.peixeboi.org.br/",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Associação Peixe-Boi",
+        "url": "https://guia.melhoresdestinos.com.br/associacao-peixe-boi.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "farol-porto-de-pedras",
+      "nome": "Farol de Porto de Pedras",
+      "categoria": "cultura",
+      "area": "Porto de Pedras",
+      "tags": [
+        "cultura",
+        "casal"
+      ],
+      "resumo": "Farol de 1933 no alto do morro, com vista do rio encontrando o mar.",
+      "descricao": "Inaugurado em 1933 e eletrificado em 1973, fica no Morro Nossa Senhora da Piedade, a cerca de 90 metros de altitude, sobre a cidade de Porto de Pedras. Do alto se vê o Rio Manguaba encontrar o mar, especialmente bonito no fim da tarde.",
+      "dica": "A subida é íngreme: leve água e vá sem pressa para pegar o pôr do sol.",
+      "bom_saber": [
+        "Subida íngreme",
+        "Vista ao pôr do sol"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Farol de Porto de Pedras, Porto de Pedras, Alagoas",
+      "lat": -9.1565,
+      "lng": -35.2982,
+      "precisao": "exata",
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Pôr do sol",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Marinha do Brasil · Capitania dos Portos de Alagoas, Farol de Porto de Pedras",
+        "url": "https://www.marinha.mil.br/cpal/node/15"
+      },
+      "verificado": null
+    },
+    {
+      "id": "araca-restaurante",
+      "nome": "Araçá Restaurante",
+      "categoria": "restaurante",
+      "tipo": "Cozinha alagoana",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "gastronomia"
+      ],
+      "resumo": "Cozinha alagoana na Pousada O Casarão, no Marceneiro.",
+      "descricao": "Restaurante de cozinha alagoana na Pousada O Casarão, no Marceneiro. Entre os pratos da casa estão a galinha de cabidela e o polvo.",
+      "dica": "",
+      "bom_saber": [],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Pousada O Casarão, Marceneiro, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "TNH1 · Sabores e o aconchego da Praia do Marceneiro (2022)",
+        "url": "https://www.tnh1.com.br/noticia/nid/sabores-e-o-aconchego-da-praia-do-marceneiro/"
+      },
+      "verificado": null,
+      "nota_interna": "Fonte: reportagem TNH1 de 2022. Antes de publicar, confirme se segue funcionando, se recebe não hóspedes, horários e cardápio."
+    },
+    {
+      "id": "tapioca-elizangela",
+      "nome": "Tapioca da Elizângela",
+      "categoria": "restaurante",
+      "tipo": "Café e padaria",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "gastronomia",
+        "familia"
+      ],
+      "resumo": "Tapiocaria da Vilinha com dezenas de sabores.",
+      "descricao": "Tapiocaria da Vilinha do Marceneiro com dezenas de sabores.",
+      "dica": "",
+      "bom_saber": [],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Vilinha do Marceneiro, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praia do Marceneiro",
+        "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
+      },
+      "verificado": null,
+      "nota_interna": "Citada no Melhores Destinos pela variedade de sabores. Antes de publicar, confirme funcionamento, horários e preços."
+    },
+    {
+      "id": "restaurantes-milagres-citados",
+      "nome": "Mais restaurantes em São Miguel dos Milagres",
+      "categoria": "restaurante",
+      "tipo": "Jantar especial",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "gastronomia"
+      ],
+      "resumo": "Tenda de Milagres, Enildo e Banami, outras mesas de São Miguel dos Milagres.",
+      "descricao": "",
+      "dica": "",
+      "bom_saber": [],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Mala de Aventuras · Rota Ecológica dos Milagres",
+        "url": "https://www.maladeaventuras.com/rota-ecologica-dos-milagres/"
+      },
+      "verificado": null,
+      "nota_interna": "Lista de partida (Mala de Aventuras): visite, confirme e cadastre cada um como um lugar separado, com horário, contato e faixa de preço. Depois, apague este item. Não publicar como está. Patrícia Bistrô e Sur já têm item próprio."
+    },
+    {
+      "id": "praia-de-porto-da-rua",
+      "nome": "Praia de Porto da Rua",
+      "categoria": "praia",
+      "tipo": "",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "natureza",
+        "familia"
+      ],
+      "resumo": "Vila de pescadores com jangadas, mar de piscininha e comércio do dia a dia.",
+      "descricao": "Povoado de pescadores ao norte do centro de São Miguel dos Milagres, com jangadas, restaurantes de frutos do mar e pousadas. A água fica represada entre os arrecifes e forma um mar calmo de piscininha. É um dos povoados com mais estrutura da rota: farmácias, mercadinhos, beach club e ambulantes.",
+      "dica": "Na maré baixa a água recua bastante: caminhe alguns metros até um ponto bom para o banho.",
+      "bom_saber": [
+        "Jangadas para as piscinas: valor combinado na hora",
+        "Farmácias e mercadinhos no povoado",
+        "Pela areia, chega-se a pé à Praia do Toque"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Porto da Rua, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Maré baixa",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "praia-de-sao-miguel-dos-milagres",
+      "nome": "Praia de São Miguel dos Milagres",
+      "categoria": "praia",
+      "tipo": "",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "natureza",
+        "familia"
+      ],
+      "resumo": "Cerca de 2 km de mar claro entre o Riacho e o Toque, com barracas no centro.",
+      "descricao": "A praia central da cidade tem cerca de 2 km, entre o Riacho e o Toque. As barracas e os beach clubs ficam no meio, onde há também posto de salva-vidas; nas pontas a areia fica quase vazia. Na maré baixa, as jangadas levam às piscinas naturais.",
+      "dica": "Pode haver pedras escondidas na areia e algas na beira: andar alguns metros para o lado costuma resolver.",
+      "bom_saber": [
+        "Barracas e salva-vidas no trecho central",
+        "Estacionamento gratuito no fim da R. Pref. Augusto de Barros Falcão",
+        "Jangadas para as piscinas na maré baixa"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia de São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Maré baixa",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "praia-de-tatuamunha",
+      "nome": "Praia de Tatuamunha",
+      "categoria": "praia",
+      "tipo": "",
+      "area": "Porto de Pedras",
+      "tags": [
+        "natureza",
+        "casal"
+      ],
+      "resumo": "Pôr do sol na foz do Rio Tatuamunha, entre coqueiros e manguezal.",
+      "descricao": "Fica entre a Praia de Lages e a foz do Rio Tatuamunha, área de proteção do peixe-boi. Tem pouca estrutura, mas estacionamento amplo e gratuito. Na boca do rio, água doce e salgada se misturam e, conforme a maré, a água fica mais quente que a do mar.",
+      "dica": "Cuidado ao entrar na foz: o fundo é irregular e pode ficar fundo de repente.",
+      "bom_saber": [
+        "Pouca estrutura na areia",
+        "Estacionamento gratuito",
+        "Fora da AL-101, as estradas de terra ficam difíceis com chuva"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia de Tatuamunha, Porto de Pedras, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Pôr do sol",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null
+    },
+    {
+      "id": "praia-dos-morros",
+      "nome": "Praia dos Morros",
+      "categoria": "praia",
+      "tipo": "",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "natureza",
+        "aventura"
+      ],
+      "resumo": "Do outro lado do Rio Camaragibe: jangada curta e trilha pelos coqueirais.",
+      "descricao": "Fica em frente a Barra de Camaragibe, do outro lado do rio. A travessia de jangada leva cerca de 5 minutos, e depois são uns 15 minutos de trilha pelos coqueirais. Nos morros que dão nome à praia, uma bica de água escorre sobre uma laje.",
+      "dica": "Vá de calçado leve e leve água e lanche: a praia quase não tem estrutura. Combine a volta com o jangadeiro antes de atravessar.",
+      "bom_saber": [
+        "Travessia de cerca de 5 minutos",
+        "Trilha de cerca de 15 minutos",
+        "Pouca ou nenhuma estrutura"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia dos Morros, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "Travessia de 5 min + trilha de 15 min",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Viagens e Caminhos · Barra de Camaragibe (atualizado nov. 2025)",
+        "url": "https://www.viagensecaminhos.com/barra-de-camaragibe-al/"
+      },
+      "verificado": null
+    },
+    {
+      "id": "igreja-matriz-mae-do-povo",
+      "nome": "Igreja Nossa Senhora Mãe do Povo",
+      "categoria": "cultura",
+      "tipo": "",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "cultura"
+      ],
+      "resumo": "A matriz de São Miguel dos Milagres, na praça principal, junto à AL-101.",
+      "descricao": "A igreja matriz, dedicada a Nossa Senhora Mãe do Povo, fica na praça principal, às margens da AL-101. Guias locais datam a construção do século XVII, quando o povoado se chamava Freguesia de Nossa Senhora Mãe do Povo. Perto dali, o Alto do Cruzeiro é um morro sem estrutura, com uma cruz e vista da praia central.",
+      "dica": "Combine com a subida ao Alto do Cruzeiro no fim da tarde e um passeio pelo centro.",
+      "bom_saber": [
+        "Na praça principal, junto à AL-101",
+        "Alto do Cruzeiro fica perto"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praça principal, AL-101, São Miguel dos Milagres, Alagoas",
+      "lat": -9.2658,
+      "lng": -35.3728,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Viagens e Caminhos · São Miguel dos Milagres (atualizado fev. 2026)",
+        "url": "https://www.viagensecaminhos.com/sao-miguel-dos-milagres-alagoas/"
+      },
+      "verificado": null,
+      "precisao": "aproximada"
+    },
+    {
+      "id": "balsa-rio-manguaba",
+      "nome": "Balsa do Rio Manguaba",
+      "categoria": "servico",
+      "tipo": "",
+      "area": "Porto de Pedras",
+      "tags": [
+        "mobilidade"
+      ],
+      "resumo": "Travessia de carro entre Porto de Pedras e Japaratinga: curta, mas com fila.",
+      "descricao": "A balsa atravessa o Rio Manguaba e liga Porto de Pedras a Japaratinga, encurtando o caminho para o norte. A travessia leva menos de 10 minutos, mas a balsa é pequena (as fontes falam de 4 a 8 carros por vez), o que forma filas na alta temporada.",
+      "dica": "Em dia de movimento a fila pode passar de 1 hora. Saia cedo.",
+      "bom_saber": [
+        "Poucos carros por viagem",
+        "Cerca de R$ 20 por carro (fev. 2026)",
+        "Pergunte no local o horário da última travessia"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Porto de Pedras, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "Menos de 10 min de travessia, fora a fila",
+      "preco": "Cerca de R$ 20 por carro (fev. 2026)",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Mala de Aventuras · O que fazer em Japaratinga (atualizado fev. 2026)",
+        "url": "https://maladeaventuras.com/o-que-fazer-japaratinga/"
+      },
+      "verificado": null,
+      "nota_interna": "Horários (primeira e última travessia), valor e capacidade não confirmados; as fontes falam de 4 a 8 carros e de R$ 20 a R$ 22."
+    },
+    {
+      "id": "praia-de-japaratinga",
+      "nome": "Praia de Japaratinga",
+      "categoria": "praia",
+      "tipo": "",
+      "area": "Japaratinga",
+      "tags": [
+        "natureza",
+        "familia"
+      ],
+      "resumo": "Faixa de areia extensa no centro da cidade, com restaurantes na areia.",
+      "descricao": "Fica no centro de Japaratinga, ao norte da balsa do Rio Manguaba. A faixa de areia é extensa e há restaurantes com mesas na areia. Ao lado estão as praias de Bitingui, emoldurada por falésias, e do Boqueirão, com quiosques e uma bica de água.",
+      "dica": "Em Bitingui a maré alta cobre quase toda a areia: prefira ir com a maré mais baixa.",
+      "bom_saber": [
+        "Restaurantes com mesas na areia",
+        "Bitingui quase sem areia na maré alta",
+        "Maragogi fica a cerca de 10 km"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia de Japaratinga, Japaratinga, Alagoas",
+      "lat": -9.0878,
+      "lng": -35.2578,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Mala de Aventuras · O que fazer em Japaratinga (atualizado fev. 2026)",
+        "url": "https://maladeaventuras.com/o-que-fazer-japaratinga/"
+      },
+      "verificado": null,
+      "precisao": "aproximada"
+    },
+    {
+      "id": "piscinas-naturais-japaratinga",
+      "nome": "Piscinas naturais de Japaratinga",
+      "categoria": "passeio",
+      "tipo": "",
+      "area": "Japaratinga",
+      "tags": [
+        "natureza",
+        "familia"
+      ],
+      "resumo": "Passeio de barco aos recifes de Japaratinga, só na maré baixa.",
+      "descricao": "As piscinas naturais de Japaratinga ficam em área de proteção ambiental e só podem ser visitadas na maré baixa. O passeio, de jangada ou catamarã, leva cerca de 2h30 e é feito com condutor. Corais e peixes aparecem a olho nu.",
+      "dica": "Passe o protetor solar bem antes de sair: dentro das piscinas ele não é permitido.",
+      "bom_saber": [
+        "Sem caixas de som",
+        "Sem protetor solar dentro da água",
+        "Sem comer nem beber nas piscinas",
+        "Consulte a tábua de marés"
+      ],
+      "depende_mare": true,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Japaratinga, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "Cerca de 2h30",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Maré baixa",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "publicado",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em Japaratinga (atualizado out. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67345"
+      },
+      "verificado": null
+    },
+    {
+      "id": "mirante-monte-tabor",
+      "nome": "Mirante Monte Tabor e Paraíso Sunset",
+      "categoria": "passeio",
+      "tipo": "",
+      "area": "Japaratinga",
+      "tags": [
+        "casal"
+      ],
+      "resumo": "Mirante numa pousada de Japaratinga; aos sábados, pôr do sol com música.",
+      "descricao": "O Mirante Monte Tabor fica na Pousada Paraíso dos Coqueirais. Aos sábados, o pôr do sol tem DJ e violinista (Paraíso Sunset). Nos outros dias dá para ver o pôr do sol sem música.",
+      "dica": "Bom fechamento para um dia em Japaratinga. Lembre da fila da balsa na volta.",
+      "bom_saber": [
+        "Entrada de R$ 5 (mar. 2024)",
+        "Música apenas aos sábados"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Pousada Paraíso dos Coqueirais, Japaratinga, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "R$ 5 (mar. 2024)",
+      "horario": "",
+      "melhor_periodo": "Pôr do sol",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em Japaratinga (atualizado out. 2024; preços de mar. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67345"
+      },
+      "verificado": null,
+      "nota_interna": "Fica dentro de pousada e cobra entrada (R$ 5 em mar. 2024). Confirme se segue aberto ao público, o valor e a música aos sábados."
+    },
+    {
+      "id": "trilha-das-camboas",
+      "nome": "Trilha das Camboas",
+      "categoria": "natureza",
+      "tipo": "",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "natureza",
+        "aventura"
+      ],
+      "resumo": "Caminhada guiada por biólogo no mangue e na costa, na maré baixa.",
+      "descricao": "Trilha de cerca de 5 km e 3h30 conduzida pela Camboa Ecoturismo, com guia biólogo. Acontece aos fins de semana e feriados, na maré baixa. O encontro é no povoado de Porto da Rua, na beira-mar, ao lado do restaurante do Enildo.",
+      "dica": "Agende com antecedência: as datas e os horários dependem da maré.",
+      "bom_saber": [
+        "Cerca de 5 km",
+        "Fins de semana e feriados"
+      ],
+      "depende_mare": true,
+      "reserva": true,
+      "foto": null,
+      "endereco": "Beira-mar de Porto da Rua, ao lado do restaurante do Enildo, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "Cerca de 3h30",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "Maré baixa",
+      "telefone": "(82) 99174-1599",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "CNN Brasil · Miniguia prático de São Miguel dos Milagres (2021)",
+        "url": "https://www.cnnbrasil.com.br/viagemegastronomia/viagem/guia-pratico-de-sao-miguel-dos-milagres-em-alagoas-para-o-reveillon-e-feriados/"
+      },
+      "verificado": null,
+      "nota_interna": "Contato, operador e valores publicados pela CNN em 2021: confirme antes de publicar."
+    },
+    {
+      "id": "buggy-rota-ecologica",
+      "nome": "Passeio de buggy pela Rota Ecológica",
+      "categoria": "passeio",
+      "tipo": "",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "aventura",
+        "familia"
+      ],
+      "resumo": "Do Patacho ao Marceneiro em um dia, com paradas nas praias e em Porto de Pedras.",
+      "descricao": "O roteiro percorre cerca de 27 km de litoral: Patacho, Lage, foz do Tatuamunha, Toque, São Miguel dos Milagres e Marceneiro, além do centro histórico e do farol de Porto de Pedras. A agência Patacho Receptivo oferece o passeio de buggy ou em carro com ar-condicionado, e há bugueiros locais com roteiros sob medida.",
+      "dica": "Leve toalha, protetor, chapéu e dinheiro para o almoço.",
+      "bom_saber": [
+        "O buggy não anda direto na areia: a região é área de preservação",
+        "Preço costuma ser por buggy, até 4 pessoas",
+        "Extensão opcional até Maragogi"
+      ],
+      "depende_mare": false,
+      "reserva": true,
+      "foto": null,
+      "endereco": "São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "A partir de 2 horas",
+      "preco": "A partir de R$ 220 (valor sem data na fonte)",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "https://patachoreceptivo.com.br",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Quanto Custa Viajar · Passeio de buggy em São Miguel dos Milagres (atualizado dez. 2025)",
+        "url": "https://quantocustaviajar.com/blog/passeio-de-buggy-em-sao-miguel-dos-milagres"
+      },
+      "verificado": null,
+      "nota_interna": "Preço sem data na fonte (Quanto Custa Viajar). Confirme valor e contato da agência antes de publicar."
+    },
+    {
+      "id": "sur-restaurante",
+      "nome": "Sur",
+      "categoria": "restaurante",
+      "tipo": "Jantar especial",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "gastronomia",
+        "casal"
+      ],
+      "resumo": "Cozinha alagoana contemporânea do chef Serginho Jucá, no Marceneiro.",
+      "descricao": "Restaurante do chef Serginho Jucá, finalista do Mestre do Sabor (2020), dentro da Pousada Quadrado, no Marceneiro. O prato-assinatura é a tapioquinha de siri. O cardápio traz receitas da avó do chef, como bobó de camarão, camarão crocante e carne de sol prensada, e há menu-degustação de cinco tempos.",
+      "dica": "Guarde espaço para a fatia parida na sobremesa.",
+      "bom_saber": [
+        "À la carte ou menu-degustação de cinco tempos",
+        "Reservas por telefone"
+      ],
+      "depende_mare": false,
+      "reserva": true,
+      "foto": null,
+      "endereco": "Pousada Quadrado, AL-101, 5, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "Pratos de R$ 38 a R$ 135; degustação a partir de R$ 225 (mar. 2024)",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "(82) 99678-1687",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "TNH1 · Tapioquinha com siri, espetáculo do Sur (mar. 2024)",
+        "url": "https://www.tnh1.com.br/noticia/nid/tapioquinha-com-siri-espetaculo-do-sur/"
+      },
+      "verificado": null,
+      "nota_interna": "Preços de mar. 2024 (TNH1). Confirme telefone, horários e valores antes de publicar."
+    },
+    {
+      "id": "paru-bistrot",
+      "nome": "Paru Bistrot",
+      "categoria": "restaurante",
+      "tipo": "Jantar especial",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "gastronomia",
+        "casal"
+      ],
+      "resumo": "Restaurante do Paru Boutique Hotel, no Marceneiro, aberto a não hóspedes.",
+      "descricao": "Fica dentro do Paru Boutique Hotel, no Marceneiro, e recebe quem não está hospedado. Na época da reportagem, o cardápio assinado pelo chef Jonatas Moreira tinha frutos do mar, massas, risotos e carnes, como filé de peixe em crosta de coco e risoto de queijos nordestinos.",
+      "dica": "Ligue antes para saber o horário e se é preciso reservar.",
+      "bom_saber": [
+        "Aberto a não hóspedes"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Paru Boutique Hotel, R. do Macineiro, s/n, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "(82) 3258-5155",
+      "whatsapp": "(82) 99187-1700",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "CNN Brasil · Miniguia prático de São Miguel dos Milagres (2021)",
+        "url": "https://www.cnnbrasil.com.br/viagemegastronomia/viagem/guia-pratico-de-sao-miguel-dos-milagres-em-alagoas-para-o-reveillon-e-feriados/"
+      },
+      "verificado": null,
+      "nota_interna": "Dados publicados pela CNN em 2021: confirme chef, cardápio, telefone e horário antes de publicar."
+    },
+    {
+      "id": "marinero-bistro",
+      "nome": "Marinero Bistrô",
+      "categoria": "restaurante",
+      "tipo": "Frutos do mar",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "gastronomia",
+        "casal"
+      ],
+      "resumo": "Bistrô na Vilinha do Marceneiro, com o risoto al mare entre os pratos.",
+      "descricao": "Bistrô na Vilinha do Marceneiro, a poucos passos da praia. Entre os pratos, o risoto al mare.",
+      "dica": "Bom para jantar sem pegar o carro.",
+      "bom_saber": [
+        "Risoto al mare a R$ 74 (mar. 2024)"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em São Miguel dos Milagres (atualizado ago. 2025; preços de mar./abr. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67384"
+      },
+      "verificado": null,
+      "nota_interna": "Destacado pelo Esse Mundo é Nosso (2024). Horário e telefone não informados na fonte; o Wanderlog é contraditório. Confirme antes de publicar."
+    },
+    {
+      "id": "bar-fe-e-esperanca",
+      "nome": "Bar FF Fé e Esperança",
+      "categoria": "restaurante",
+      "tipo": "Almoço",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "gastronomia",
+        "familia"
+      ],
+      "resumo": "Barraca na areia do Marceneiro, com mesa convertida em consumação.",
+      "descricao": "Bar de praia no Marceneiro. Em 2024, a mesa tinha um valor fixo, convertido em consumação.",
+      "dica": "Pergunte o valor da mesa ao chegar.",
+      "bom_saber": [
+        "Mesa de R$ 50 convertida em consumação (mar. 2024)"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Marceneiro, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "Mesa de R$ 50 em consumação (mar. 2024)",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em São Miguel dos Milagres (atualizado ago. 2025; preços de mar./abr. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67384"
+      },
+      "verificado": null,
+      "nota_interna": "Citado no Esse Mundo é Nosso (2024). Confirme funcionamento e forma de cobrança antes de publicar."
+    },
+    {
+      "id": "delicias-alagoanas",
+      "nome": "Delícias Alagoanas",
+      "categoria": "compras",
+      "tipo": "Para levar",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "gastronomia",
+        "cultura"
+      ],
+      "resumo": "Empório da Vilinha com cocada de forno, doces de leite e biscoitinhos.",
+      "descricao": "Empório de produtos alagoanos na Vilinha do Marceneiro: cocada de forno cremosa, doces de leite saborizados, biscoitinhos, doce de mamão com coco e doce de laranja.",
+      "dica": "Boa parada para levar lembranças comestíveis na volta para casa.",
+      "bom_saber": [
+        "Na Vilinha do Marceneiro"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praia do Marceneiro",
+        "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
+      },
+      "verificado": null,
+      "nota_interna": "Produtos conforme o Melhores Destinos. Confirme funcionamento e horário antes de publicar."
+    },
+    {
+      "id": "armazem-rosa-art-decor",
+      "nome": "Armazém Rosa Art Decor",
+      "categoria": "compras",
+      "tipo": "",
+      "area": "Passo de Camaragibe",
+      "tags": [
+        "cultura"
+      ],
+      "resumo": "Arte, decoração e artesanato de alto padrão, com carrancas do Mestre Aberaldo.",
+      "descricao": "Loja de arte, decoração e artesanato na Vilinha do Marceneiro. Entre as peças há carrancas e porta-xícaras do Mestre Aberaldo, artesão da região.",
+      "dica": "Vale a visita mesmo só para conhecer o trabalho dos artesãos locais.",
+      "bom_saber": [
+        "Peças de artesão, de alto valor"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praia do Marceneiro",
+        "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
+      },
+      "verificado": null,
+      "nota_interna": "O Melhores Destinos cita carrancas entre R$ 1,5 mil e R$ 2,8 mil (sem data). Confirme funcionamento e horário antes de publicar."
+    },
+    {
+      "id": "mi-casa-riacho",
+      "nome": "Mi Casa",
+      "categoria": "restaurante",
+      "tipo": "Almoço",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "gastronomia",
+        "casal"
+      ],
+      "resumo": "Restaurante e beach club no centro da Praia do Riacho, vizinha ao Marceneiro.",
+      "descricao": "Restaurante com estrutura de beach club na parte central da Praia do Riacho, a praia vizinha do Marceneiro, depois da Capela dos Milagres. A estrutura é básica. As formas de cobrança variam: já houve valor fixo pelo dia e, em outras visitas, só o consumo.",
+      "dica": "Pergunte na chegada se há cobrança pelo dia ou consumação mínima.",
+      "bom_saber": [
+        "Cobrança varia: já houve day use de R$ 150 a R$ 250 e dias só com consumo (2026)",
+        "Dá para ir a pé pela areia desde o Marceneiro"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Riacho, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null,
+      "nota_interna": "Formas de cobrança conforme o Melhores Destinos (out. 2026). Confirme valores e horário antes de publicar."
+    },
+    {
+      "id": "restaurante-pousada-haya",
+      "nome": "Restaurante da Pousada Haya",
+      "categoria": "restaurante",
+      "tipo": "Jantar especial",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "gastronomia",
+        "casal"
+      ],
+      "resumo": "Cardápio do chef Wanderson Medeiros, de frente para o mar do Riacho.",
+      "descricao": "Na Praia do Riacho, onde o comércio é pouco, o restaurante da Pousada Haya tem cardápio do chef Wanderson Medeiros (do Picuí, em Maceió). Entre os pratos: peixe em crosta de nuts, arroz de camarão com queijo coalho e blend de angus.",
+      "dica": "Ligue antes para saber se recebe não hóspedes no horário que você quer.",
+      "bom_saber": [
+        "Na Praia do Riacho"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Pousada Haya, Praia do Riacho, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null,
+      "nota_interna": "Pratos conforme o Melhores Destinos (out. 2026). Confirme se recebe não hóspedes, horários e contato antes de publicar."
+    },
+    {
+      "id": "milagres-do-toque-beach-club",
+      "nome": "Milagres do Toque Beach Club",
+      "categoria": "restaurante",
+      "tipo": "Almoço",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "gastronomia",
+        "familia"
+      ],
+      "resumo": "Day use com piscina, restaurante e guarda-sóis na Praia do Toque.",
+      "descricao": "Beach club na Praia do Toque, a mais deserta das praias de Milagres. Tem piscina ao ar livre, restaurante, áreas VIP, cadeiras e guarda-sóis, e às vezes música ao vivo.",
+      "dica": "Boa opção para passar o dia no Toque, que quase não tem barracas.",
+      "bom_saber": [
+        "Day use de R$ 100 por pessoa (fev. 2026)",
+        "Estacionamento no local"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Toque, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "Day use R$ 100 por pessoa (fev. 2026)",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null,
+      "nota_interna": "Day use de fev. 2026 (Melhores Destinos). Confirme valor e horário antes de publicar."
+    },
+    {
+      "id": "no-quintal",
+      "nome": "No Quintal",
+      "categoria": "restaurante",
+      "tipo": "Almoço",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "gastronomia",
+        "casal"
+      ],
+      "resumo": "Restaurante na Praia do Toque, com almoço de terça a domingo e jantar sob reserva.",
+      "descricao": "Restaurante na Praia do Toque, com almoço de terça a domingo e jantar só com reserva.",
+      "dica": "Para o jantar, reserve com antecedência.",
+      "bom_saber": [
+        "Jantar só com reserva",
+        "Pratos principais de R$ 90 a R$ 95 (mar. 2024)"
+      ],
+      "depende_mare": false,
+      "reserva": true,
+      "foto": null,
+      "endereco": "R. do Campo, s/n, Praia do Toque, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "Pratos principais de R$ 90 a R$ 95 (mar. 2024)",
+      "horario": "Almoço ter. a dom., 12h às 15h; jantar ter. a sáb., 19h às 21h, com reserva (2024)",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em São Miguel dos Milagres (atualizado ago. 2025; preços de mar./abr. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67384"
+      },
+      "verificado": null,
+      "nota_interna": "Horário e preços do Esse Mundo é Nosso (mar. 2024). Confirme antes de publicar."
+    },
+    {
+      "id": "patricia-bistro",
+      "nome": "Patrícia Bistrô",
+      "categoria": "restaurante",
+      "tipo": "Jantar especial",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "gastronomia",
+        "casal"
+      ],
+      "resumo": "Bistrô em Milagres; a moqueca de peixe para dois é um dos pratos da casa.",
+      "descricao": "Bistrô em São Miguel dos Milagres. Entre os pratos, a moqueca de peixe, servida para duas pessoas.",
+      "dica": "Reserve na alta temporada.",
+      "bom_saber": [
+        "Moqueca de peixe para dois a R$ 178 (mar. 2024)"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "R. Eurico Marinho, 37, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em São Miguel dos Milagres (atualizado ago. 2025; preços de mar./abr. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67384"
+      },
+      "verificado": null,
+      "nota_interna": "Aparece em vários guias da rota (Esse Mundo é Nosso, Mala de Aventuras). Confirme horário, contato e preços antes de publicar."
+    },
+    {
+      "id": "cafe-flor-de-mandacaru",
+      "nome": "Café Flor de Mandacaru",
+      "categoria": "cafe",
+      "tipo": "Café e padaria",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "gastronomia",
+        "familia"
+      ],
+      "resumo": "Café da manhã regional farto em Porto da Rua: cuscuz, macaxeira e guisados.",
+      "descricao": "Café de comida regional comandado por Luciene Alves. Serve café da manhã farto, com guisados de boi, galinha e porco e a graxinha para pôr sobre macaxeira, cuscuz ou inhame. Também faz lanches e jantar regional.",
+      "dica": "Bom para um café da manhã reforçado antes de um dia de passeio.",
+      "bom_saber": [
+        "Café da manhã, lanches e jantar regional"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Av. Francisco Lima, 99, Povoado Porto da Rua, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "R$ 8 a R$ 20 (2022)",
+      "horario": "Qua. a seg., 7h às 11h e 16h às 21h (2022)",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "TNH1 · Milagres danado de bom por Luciene (mar. 2022)",
+        "url": "https://www.tnh1.com.br/noticia/nid/milagres-danado-de-bom-por-luciene/"
+      },
+      "verificado": null,
+      "nota_interna": "Horário, preços e cartões conforme reportagem TNH1 de 2022. Confirme antes de publicar."
+    },
+    {
+      "id": "o-beco-milagres",
+      "nome": "O Beco",
+      "categoria": "restaurante",
+      "tipo": "Frutos do mar",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "gastronomia"
+      ],
+      "resumo": "Restaurante no centro de Milagres; a paella marinera para dois é um dos pratos.",
+      "descricao": "Restaurante no centro de São Miguel dos Milagres. Entre os pratos, a paella marinera, servida para duas pessoas.",
+      "dica": "Às sextas e aos sábados, o horário costumava ir até as 22h.",
+      "bom_saber": [
+        "Paella para dois a R$ 159,90 (mar. 2024)"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "R. Pref. Augusto de Barros Falcão, 129, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "Seg. a qui., 12h às 21h; sex. e sáb., 12h às 22h (2024)",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em São Miguel dos Milagres (atualizado ago. 2025; preços de mar./abr. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67384"
+      },
+      "verificado": null,
+      "nota_interna": "Destacado pelo Esse Mundo é Nosso (2024). Confirme horário e preços antes de publicar."
+    },
+    {
+      "id": "no-tacho-porto-de-pedras",
+      "nome": "No Tacho",
+      "categoria": "restaurante",
+      "tipo": "Almoço",
+      "area": "Porto de Pedras",
+      "tags": [
+        "gastronomia",
+        "familia"
+      ],
+      "resumo": "Em frente à Associação Peixe-Boi: almoço prático depois do passeio.",
+      "descricao": "Restaurante em Tatuamunha, em frente à Associação Peixe-Boi. Entre os pratos, a moqueca de frutos do mar para dois e o petit gateau.",
+      "dica": "Encaixe o almoço logo depois do passeio do peixe-boi.",
+      "bom_saber": [
+        "Moqueca de frutos do mar para dois a R$ 135 (mar. 2024)"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Em frente à Associação Peixe-Boi, Tatuamunha, Porto de Pedras, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em São Miguel dos Milagres (atualizado ago. 2025; preços de mar./abr. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67384"
+      },
+      "verificado": null,
+      "nota_interna": "Destacado pelo Esse Mundo é Nosso (2024). Confirme horário e preços antes de publicar."
+    },
+    {
+      "id": "patacho-praia-day-use",
+      "nome": "Patacho Praia",
+      "categoria": "restaurante",
+      "tipo": "Almoço",
+      "area": "Porto de Pedras",
+      "tags": [
+        "gastronomia",
+        "familia"
+      ],
+      "resumo": "Day use no Patacho com piscina, redário, restaurante e estacionamento.",
+      "descricao": "Estrutura de dia inteiro na Praia do Patacho: piscina com vista para o mar, redário, guarda-sóis, serviço de praia, salão coberto com restaurante, estacionamento e duchas. Útil porque o estacionamento público no Patacho tem poucas vagas.",
+      "dica": "Chegue cedo na alta temporada.",
+      "bom_saber": [
+        "Day use de R$ 70 por pessoa (fev. 2026)",
+        "Estacionamento próprio"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Praia do Patacho, Porto de Pedras, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "Cerca de 12 km da praia de São Miguel dos Milagres",
+      "duracao": "",
+      "preco": "Day use R$ 70 por pessoa (fev. 2026)",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null,
+      "nota_interna": "Day use de fev. 2026 (Melhores Destinos). Confirme valor e horário antes de publicar."
+    },
+    {
+      "id": "lagostao-japaratinga",
+      "nome": "Lagostão",
+      "categoria": "restaurante",
+      "tipo": "Frutos do mar",
+      "area": "Japaratinga",
+      "tags": [
+        "gastronomia"
+      ],
+      "resumo": "Lagosta e caldeirada com mesas na areia da orla de Japaratinga.",
+      "descricao": "Restaurante na orla de Japaratinga, com mesas na areia. Entre os pratos, a lagosta ao alho e óleo e a caldeirada de frutos do mar.",
+      "dica": "Combine com o passeio às piscinas de Japaratinga e lembre da fila da balsa.",
+      "bom_saber": [
+        "Lagosta ao alho e óleo a R$ 189 (mar. 2024)",
+        "Caldeirada a R$ 299 (mar. 2024)"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Orla de Japaratinga, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Esse Mundo é Nosso · O que fazer em Japaratinga (atualizado out. 2024; preços de mar. 2024)",
+        "url": "https://www.essemundoenosso.com.br/?p=67345"
+      },
+      "verificado": null,
+      "nota_interna": "Destacado pelo Esse Mundo é Nosso (2024). Confirme horário e preços antes de publicar."
+    },
+    {
+      "id": "comercio-porto-da-rua",
+      "nome": "Farmácias e mercadinhos de Porto da Rua",
+      "categoria": "mercado",
+      "tipo": "Mercado",
+      "area": "São Miguel dos Milagres",
+      "tags": [
+        "servico"
+      ],
+      "resumo": "O povoado tem farmácias e mercadinhos para compras do dia a dia.",
+      "descricao": "O povoado de Porto da Rua tem farmácias e mercadinhos para compras rápidas, além de beach club e ambulantes na praia.",
+      "dica": "Caixas eletrônicos são raros na rota: leve algum dinheiro em espécie.",
+      "bom_saber": [],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Porto da Rua, São Miguel dos Milagres, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
+        "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
+      },
+      "verificado": null,
+      "nota_interna": "Nomes e horários não informados na fonte (Melhores Destinos). Visite e cadastre cada estabelecimento antes de publicar."
+    },
+    {
+      "id": "hospital-regional-do-norte",
+      "nome": "Hospital Regional do Norte",
+      "categoria": "saude",
+      "tipo": "",
+      "area": "Porto Calvo",
+      "tags": [
+        "saude",
+        "emergencia"
+      ],
+      "resumo": "Hospital regional em Porto Calvo, referência para acidentes com animais peçonhentos.",
+      "descricao": "Hospital regional em Porto Calvo, listado pelo Ministério da Saúde como referência para atendimento de acidentes com animais peçonhentos (cobras, escorpiões e aranhas). É o hospital de maior porte mais próximo da Rota Ecológica.",
+      "dica": "Em emergência, ligue primeiro para o SAMU (192). O hospital também aparece em Ajuda, nos contatos.",
+      "bom_saber": [
+        "Referência para acidentes com animais peçonhentos",
+        "Na dúvida sobre para onde ir, o 192 (SAMU) orienta"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "Rua Alto da Forca, s/n, Bairro Mangazala, Rodovia AL-105, Porto Calvo, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "(82) 98889-9642",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Ministério da Saúde · Hospitais de referência para acidentes com animais peçonhentos em Alagoas",
+        "url": "https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/a/animais-peconhentos/hospitais-de-referencia/alagoas"
+      },
+      "verificado": null,
+      "nota_interna": "Duplica o contato de Ajuda: pode ser apagado. Se for mantido, confirme por telefone se a urgência funciona 24 horas."
+    },
+    {
+      "id": "upa-maragogi",
+      "nome": "UPA Maragogi",
+      "categoria": "saude",
+      "tipo": "",
+      "area": "Maragogi",
+      "tags": [
+        "saude",
+        "emergencia"
+      ],
+      "resumo": "Unidade de Pronto Atendimento na AL-101, em Maragogi.",
+      "descricao": "Unidade de Pronto Atendimento em Maragogi, também listada pelo Ministério da Saúde como referência para acidentes com animais peçonhentos. Fica mais ao norte, depois de Japaratinga.",
+      "dica": "Para quem está no Marceneiro, o Hospital Regional do Norte, em Porto Calvo, é a referência; na dúvida, ligue 192.",
+      "bom_saber": [
+        "Referência para acidentes com animais peçonhentos"
+      ],
+      "depende_mare": false,
+      "reserva": false,
+      "foto": null,
+      "endereco": "AL-101, 200, Maragogi, Alagoas",
+      "lat": null,
+      "lng": null,
+      "distancia": "",
+      "duracao": "",
+      "preco": "",
+      "horario": "",
+      "melhor_periodo": "",
+      "telefone": "(82) 99305-4192",
+      "whatsapp": "",
+      "link": "",
+      "link_cardapio": "",
+      "parceiro": false,
+      "patrocinado": false,
+      "status": "rascunho",
+      "fonte": {
+        "titulo": "Ministério da Saúde · Hospitais de referência para acidentes com animais peçonhentos em Alagoas",
+        "url": "https://www.gov.br/saude/pt-br/assuntos/saude-de-a-a-z/a/animais-peconhentos/hospitais-de-referencia/alagoas"
+      },
+      "verificado": null,
+      "nota_interna": "Duplica o contato de Ajuda: pode ser apagado."
+    }
+  ],
+  "destaques": [
+    "praia-do-marceneiro",
+    "piscinas-naturais-jangada",
+    "capela-dos-milagres",
+    "peixe-boi-tatuamunha",
+    "praia-do-patacho",
+    "praia-dos-morros",
+    "tunel-verde",
+    "farol-porto-de-pedras"
+  ],
+  "roteiros": [
+    {
+      "id": "piscinas-naturais",
+      "titulo": "Manhã nas piscinas naturais",
+      "subtitulo": "O clássico da rota, saindo da praia da casa.",
+      "quando": "Dia de maré baixa pela manhã",
+      "ideal": "Todos",
+      "ilustracao": "piscina",
+      "paradas": [
+        {
+          "momento": "Na véspera",
+          "titulo": "Confira a tábua de marés",
+          "texto": "Procure uma maré bem baixa pela manhã: 0,3 m ou menos na tábua da Marinha.",
+          "lugar": ""
+        },
+        {
+          "momento": "Maré baixa",
+          "titulo": "Jangada até os recifes",
+          "texto": "Combine o valor no quiosque dos jangadeiros e aproveite as piscinas sem tocar nos corais.",
+          "lugar": "piscinas-naturais-jangada"
+        },
+        {
+          "momento": "Depois",
+          "titulo": "Banho na enseada",
+          "texto": "Com a maré subindo, o mar calmo do Marceneiro segura você mais um pouco.",
+          "lugar": "praia-do-marceneiro"
+        },
+        {
+          "momento": "Almoço",
+          "titulo": "Sabores da Vilinha",
+          "texto": "Tapioca, doces regionais e uma volta pelas lojinhas.",
+          "lugar": "vilinha-do-marceneiro"
+        }
+      ],
+      "status": "publicado"
+    },
+    {
+      "id": "porto-de-pedras",
+      "titulo": "Um dia em Porto de Pedras",
+      "subtitulo": "Peixe-boi, túnel de árvores, Patacho e farol.",
+      "quando": "Dia inteiro · reserve o peixe-boi antes",
+      "ideal": "Casais e famílias",
+      "ilustracao": "peixeboi",
+      "paradas": [
+        {
+          "momento": "Manhã",
+          "titulo": "Peixe-boi no Rio Tatuamunha",
+          "texto": "Passeio de cerca de 1 hora em jangada sem motor, com guia da Associação Peixe-Boi.",
+          "lugar": "peixe-boi-tatuamunha"
+        },
+        {
+          "momento": "No caminho",
+          "titulo": "Túnel Verde",
+          "texto": "A estrada coberta de árvores que leva ao Patacho. Passe devagar.",
+          "lugar": "tunel-verde"
+        },
+        {
+          "momento": "Tarde",
+          "titulo": "Praia do Patacho",
+          "texto": "Coqueiral e mar calmo para o resto do dia. Leve água e lanche. Se a maré baixar à tarde, aproveite as piscinas.",
+          "lugar": "praia-do-patacho"
+        },
+        {
+          "momento": "Pôr do sol",
+          "titulo": "Farol de Porto de Pedras",
+          "texto": "Suba sem pressa para ver o Rio Manguaba encontrar o mar.",
+          "lugar": "farol-porto-de-pedras"
+        }
+      ],
+      "status": "publicado"
+    },
+    {
+      "id": "devagar-marceneiro",
+      "titulo": "Devagar pelo Marceneiro",
+      "subtitulo": "Uma tarde a pé, entre capela, riacho e vilinha.",
+      "quando": "Tarde de maré baixa",
+      "ideal": "Casais",
+      "ilustracao": "capela",
+      "paradas": [
+        {
+          "momento": "Tarde",
+          "titulo": "Caminhada até a capela",
+          "texto": "Cerca de 1,2 km pela areia, rumo norte. Na maré baixa a faixa de areia fica mais larga.",
+          "lugar": "capela-dos-milagres"
+        },
+        {
+          "momento": "Em seguida",
+          "titulo": "Praia do Riacho",
+          "texto": "A melhor foto da capela sai daqui. Entre no mar devagar: há recifes perto da beira.",
+          "lugar": "praia-do-riacho"
+        },
+        {
+          "momento": "Fim de tarde",
+          "titulo": "Vilinha do Marceneiro",
+          "texto": "De volta pela areia, tapioca, doces e artesanato para fechar o dia.",
+          "lugar": "vilinha-do-marceneiro"
+        }
+      ],
+      "status": "publicado"
+    },
+    {
+      "id": "rio-e-mar",
+      "titulo": "Barra de Camaragibe e Praia dos Morros",
+      "subtitulo": "Jangada curta, trilha no coqueiral e pôr do sol sobre o rio.",
+      "quando": "Tarde · leve água e calçado leve",
+      "ideal": "Famílias e casais",
+      "ilustracao": "barra",
+      "paradas": [
+        {
+          "momento": "Começo da tarde",
+          "titulo": "Travessia para os Morros",
+          "texto": "Cinco minutos de jangada pelo Rio Camaragibe e uns 15 minutos de trilha pelos coqueirais. Combine a volta antes.",
+          "lugar": "praia-dos-morros"
+        },
+        {
+          "momento": "Tarde",
+          "titulo": "Banho na foz",
+          "texto": "De volta à Barra, água morna e calma onde o rio encontra o mar.",
+          "lugar": "barra-de-camaragibe"
+        },
+        {
+          "momento": "Pôr do sol",
+          "titulo": "Fique para o fim do dia",
+          "texto": "O céu sobre o rio é o grande espetáculo da Barra.",
+          "lugar": "barra-de-camaragibe"
+        }
+      ],
+      "status": "publicado"
+    },
+    {
+      "id": "japaratinga",
+      "titulo": "Um dia em Japaratinga",
+      "subtitulo": "Balsa cedo, piscinas na maré baixa e pôr do sol no farol, na volta.",
+      "quando": "Dia inteiro · maré baixa no fim da manhã",
+      "ideal": "Casais e famílias",
+      "ilustracao": "piscina",
+      "status": "publicado",
+      "paradas": [
+        {
+          "momento": "Cedo",
+          "titulo": "Balsa do Rio Manguaba",
+          "texto": "Siga pela AL-101 até Porto de Pedras e atravesse o rio de balsa. Saia cedo: a fila cresce ao longo da manhã.",
+          "lugar": ""
+        },
+        {
+          "momento": "Maré baixa",
+          "titulo": "Piscinas naturais de Japaratinga",
+          "texto": "Cerca de 2h30 de passeio de barco até os recifes. Protetor só antes de sair.",
+          "lugar": "piscinas-naturais-japaratinga"
+        },
+        {
+          "momento": "Almoço e tarde",
+          "titulo": "Orla de Japaratinga",
+          "texto": "Mesa na areia, peixe ou frutos do mar e banho sem pressa.",
+          "lugar": "praia-de-japaratinga"
+        },
+        {
+          "momento": "Pôr do sol",
+          "titulo": "Farol de Porto de Pedras",
+          "texto": "Volte pela balsa antes do fim da tarde e suba ao farol, ao lado do rio.",
+          "lugar": "farol-porto-de-pedras"
+        }
+      ]
+    },
+    {
+      "id": "porto-da-rua-sao-miguel",
+      "titulo": "Porto da Rua e São Miguel",
+      "subtitulo": "Jangada, vila de pescadores e o centro da cidade no fim da tarde.",
+      "quando": "Dia de maré baixa pela manhã",
+      "ideal": "Todos",
+      "ilustracao": "vila",
+      "status": "publicado",
+      "paradas": [
+        {
+          "momento": "Maré baixa",
+          "titulo": "Piscinas saindo de Porto da Rua",
+          "texto": "Combine o valor com um jangadeiro na beira e vá às piscinas naturais.",
+          "lugar": "praia-de-porto-da-rua"
+        },
+        {
+          "momento": "Depois",
+          "titulo": "Caminhada até o Toque",
+          "texto": "Pela areia, rumo à praia mais vazia de Milagres. Leve água.",
+          "lugar": "praia-do-toque"
+        },
+        {
+          "momento": "Fim de tarde",
+          "titulo": "Igreja matriz e Alto do Cruzeiro",
+          "texto": "Com o sol mais baixo, suba ao mirante para ver a praia central do alto.",
+          "lugar": "igreja-matriz-mae-do-povo"
+        },
+        {
+          "momento": "Para fechar",
+          "titulo": "Praia de São Miguel",
+          "texto": "Um último banho no trecho central, perto das barracas.",
+          "lugar": "praia-de-sao-miguel-dos-milagres"
+        }
+      ]
+    },
+    {
+      "id": "lage-tatuamunha",
+      "titulo": "Tarde em Lage e Tatuamunha",
+      "subtitulo": "Piscinas de corais e pôr do sol na foz do rio do peixe-boi.",
+      "quando": "Tarde de maré baixa · evite depois de chuva forte",
+      "ideal": "Casais",
+      "ilustracao": "praia",
+      "status": "publicado",
+      "paradas": [
+        {
+          "momento": "Maré baixa",
+          "titulo": "Praia da Lage",
+          "texto": "Mar calmo e piscinas de corais com pouca gente.",
+          "lugar": "praia-da-lage"
+        },
+        {
+          "momento": "Pôr do sol",
+          "titulo": "Foz do Tatuamunha",
+          "texto": "Água morna onde o rio encontra o mar. Cuidado com o fundo irregular.",
+          "lugar": "praia-de-tatuamunha"
+        },
+        {
+          "momento": "Antes de escurecer",
+          "titulo": "Volta pela AL-101",
+          "texto": "Saia com luz: os acessos de terra são ruins à noite e com chuva.",
+          "lugar": ""
+        }
+      ]
+    }
+  ],
+  "provar": [
+    {
+      "nome": "Tapioca",
+      "descricao": "Feita na hora, com recheios doces e salgados: coco, queijo coalho, carne de sol."
+    },
+    {
+      "nome": "Peixe com pirão",
+      "descricao": "Peixe do dia frito ou ensopado, com pirão feito do caldo e farinha de mandioca."
+    },
+    {
+      "nome": "Sururu",
+      "descricao": "Molusco das lagoas alagoanas: ao coco, cremoso, ou no capote, mais caldoso."
+    },
+    {
+      "nome": "Maçunim",
+      "descricao": "Pequeno marisco dos estuários de Alagoas, servido ao coco ou em caldinho."
+    },
+    {
+      "nome": "Cocada",
+      "descricao": "De forno ou de fita. As da Massagueira são patrimônio imaterial de Alagoas."
+    },
+    {
+      "nome": "Água de coco",
+      "descricao": "Gelada, direto do coco verde, a pedida certa depois do mar."
+    },
+    {
+      "nome": "Chiclete de camarão",
+      "descricao": "Camarão em molho cremoso com queijos que derretem e esticam."
+    },
+    {
+      "nome": "Sorvete de frutas",
+      "descricao": "Picolés e sorvetes de frutas do Nordeste, como cajá, graviola e caju."
+    }
+  ],
+  "contatos": [
+    {
+      "nome": "SAMU",
+      "categoria": "Ambulância e urgência médica",
+      "nivel": "emergencia",
+      "telefone": "192",
+      "whatsapp": "",
+      "horario": "24 horas",
+      "obs": "Serviço público nacional. Ligação gratuita, também de celular.",
+      "verificado": "2026-10-23"
+    },
+    {
+      "nome": "Corpo de Bombeiros",
+      "categoria": "Resgate e salvamento",
+      "nivel": "emergencia",
+      "telefone": "193",
+      "whatsapp": "",
+      "horario": "24 horas",
+      "obs": "Resgate, incêndio, afogamentos e acidentes no mar. Ligação gratuita.",
+      "verificado": "2026-10-23"
+    },
+    {
+      "nome": "Polícia Militar",
+      "categoria": "Segurança",
+      "nivel": "emergencia",
+      "telefone": "190",
+      "whatsapp": "",
+      "horario": "24 horas",
+      "obs": "Serviço público nacional. Ligação gratuita.",
+      "verificado": "2026-10-23"
+    },
+    {
+      "nome": "Defesa Civil",
+      "categoria": "Desastres e riscos",
+      "nivel": "emergencia",
+      "telefone": "199",
+      "whatsapp": "",
+      "horario": "24 horas",
+      "obs": "Alagamentos, deslizamentos e outros riscos. Ligação gratuita.",
+      "verificado": "2026-10-23"
+    },
+    {
+      "nome": "Hospital Regional do Norte",
+      "categoria": "Hospital e pronto-socorro · Porto Calvo",
+      "nivel": "essencial",
+      "telefone": "(82) 98889-9642",
+      "whatsapp": "",
+      "horario": "",
+      "obs": "Rua Alto da Forca, s/n, Mangazala (AL-105), Porto Calvo. Referência para urgências na região e para acidentes com animais peçonhentos. Em emergência, ligue primeiro para o 192 (SAMU). Fonte: Ministério da Saúde (gov.br)",
+      "verificado": null,
+      "nota_interna": "Fonte: Ministério da Saúde (gov.br), hospitais de referência em Alagoas, CNES 7042671. Ligar para conferir o número e se a urgência atende 24 h; então preencher horário e verificado."
+    },
+    {
+      "nome": "UPA Maragogi",
+      "categoria": "Pronto atendimento (UPA) · Maragogi",
+      "nivel": "essencial",
+      "telefone": "(82) 99305-4192",
+      "whatsapp": "",
+      "horario": "",
+      "obs": "AL-101, 200, Maragogi. Fica mais ao norte, depois de Japaratinga. Também referência para acidentes com animais peçonhentos. Fonte: Ministério da Saúde (gov.br)",
+      "verificado": null,
+      "nota_interna": "Fonte: Ministério da Saúde (gov.br), CNES 7916043. Ligar para conferir o número e o horário; então preencher horário e verificado."
+    }
+  ],
+  "beneficios": [],
+  "avaliacoes": [],
+  "_confirmar": [
+    "Proposta visual · confirme cada dado da casa (já publicados como estão): 3 quartos, 1 suíte, até 6 hóspedes, 90 m², Instagram @casa18.anahi.",
+    "Proposta visual · confirme as 4 comodidades em destaque: \"Wi-Fi de alta velocidade\" (qual velocidade? se não souber, trocar por \"Wi-Fi\"), \"Piscina do condomínio\", \"Praia a poucos metros\" (quantos metros ou minutos a pé até a areia?) e \"Estacionamento gratuito\" (vaga no condomínio? quantas?).",
+    "Proposta visual · confirme os trajetos da página Chegada: \"cerca de 100 km\" e \"1h30 a 2h\" desde o aeroporto de Maceió.",
+    "Nome do condomínio: o briefing diz Vila Anahi; a proposta visual diz Condomínio Anahi.",
+    "Lugares novos publicados com base em guias de viagem (Porto da Rua, praia central de Milagres, Tatuamunha, Praia dos Morros, igreja matriz, Praia de Japaratinga e piscinas de Japaratinga): visitar ou confirmar e preencher 'verificado'.",
+    "Peixe-boi: confirmar se o site de reserva é peixeboi.org.br (Melhores Destinos, out. 2026) e o valor atual (R$ 100 por pessoa em 2026, saídas de hora em hora) antes de publicar preço e horário.",
+    "Capela dos Milagres: o texto diz que não há visitação interna (Melhores Destinos, 2026). Se o anfitrião souber de visita agendada, ajustar.",
+    "Balsa do Rio Manguaba: confirmar horários (primeira e última travessia), valor e capacidade; as fontes falam de 4 a 8 carros e de R$ 20 a R$ 22.",
+    "Mirante Monte Tabor (Pousada Paraíso dos Coqueirais): confirmar se segue aberto ao público, valor e o pôr do sol com música aos sábados; se sim, pode entrar no roteiro de Japaratinga.",
+    "Hospital Regional do Norte e UPA Maragogi (contatos, fonte Ministério da Saúde): ligar para conferir os telefones e se a urgência funciona 24 horas; perguntar à prefeitura qual é a unidade de saúde mais próxima do Marceneiro.",
+    "Os lugares 'hospital-regional-do-norte' e 'upa-maragogi' (rascunho) duplicam os contatos de Ajuda: podem ser apagados.",
+    "Restaurantes, cafés, lojas e serviços em rascunho (Sur, Paru, Marinero, No Quintal, Patrícia Bistrô, O Beco, No Tacho, Lagostão, Mi Casa, Haya, beach clubs e day uses, Café Flor de Mandacaru, Delícias Alagoanas, Armazém Rosa, Tapioca da Elizângela, Araçá): confirmar funcionamento, horário, telefone e preço antes de publicar.",
+    "Trilha das Camboas e buggy: dados de 2021 e sem data, respectivamente; confirmar operador, contato e valores.",
+    "Indicar farmácias e mercados perto do Marceneiro (inclusive na AL-101) para a seção Ajuda.",
+    "Jangadeiros e associações de jangadeiros do Marceneiro e de Porto da Rua: se o anfitrião tiver um contato de confiança, pode virar parceiro.",
+    "O filtro de áreas em Explorar só mostra Passo de Camaragibe, São Miguel dos Milagres e Porto de Pedras; os lugares de Japaratinga aparecem em 'Toda a rota' (pedido registrado em pedidos.md).",
+    "Trajeto \"Acesso\" (Chegada): acrescente a referência exata para entrar no condomínio a partir da AL-101 (placa, posto, nome da rua ou portaria). Hoje o texto só diz AL-101 Norte, sentido Maragogi, entre Barra de Camaragibe e São Miguel dos Milagres.",
+    "Onde comer: nenhum restaurante está publicado. Cada rascunho tem uma \"nota_interna\" com o que conferir; ao publicar, preencha horário ou contato e marque \"verificado\"."
+  ]
+};
