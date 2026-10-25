@@ -20,8 +20,24 @@ window.CONTEUDO = {
     "coordenadas": null,
     "fotos": [
       {
-        "src": "fotos/improve-image-like-fuji-mx-20261025195255-mvofcid1.jpg",
-        "alt": "Orla da Praia de Camaragibe"
+        "src": "fotos/chatgpt-image-28-de-set-de-2026-11-00-56-mvofhs5v.jpg",
+        "alt": "Sala"
+      },
+      {
+        "src": "fotos/chatgpt-image-28-de-set-de-2026-11-04-23-mvofhtrw.jpg",
+        "alt": "Sofá Cama"
+      },
+      {
+        "src": "fotos/chatgpt-image-28-de-set-de-2026-11-13-10-mvofhvcr.jpg",
+        "alt": "TV"
+      },
+      {
+        "src": "fotos/chatgpt-image-28-de-set-de-2026-11-24-12-mvofhwp4.jpg",
+        "alt": "Quarto Casal"
+      },
+      {
+        "src": "fotos/chatgpt-image-28-de-set-de-2026-11-29-20-mvofhy9c.jpg",
+        "alt": "Quarto"
       }
     ],
     "ambientes": [],
