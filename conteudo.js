@@ -16,7 +16,7 @@ window.CONTEUDO = {
       "1 cama de casal, 2 camas de solteiro e 1 sofá cama."
     ],
     "endereco_publico": "Condomínio Vila Anahi · Praia do Marceneiro, Passo de Camaragibe, Alagoas",
-    "link_maps": "",
+    "link_maps": "https://maps.app.goo.gl/9QgDsWNoGdz5JEcH6",
     "coordenadas": null,
     "fotos": [
       {
