@@ -40,7 +40,40 @@ window.CONTEUDO = {
         "alt": "Quarto"
       }
     ],
-    "ambientes": [],
+    "ambientes": [
+      {
+        "nome": "Sala",
+        "descricao": "Sala aconchegante com sofá cama",
+        "foto": {
+          "src": "fotos/chatgpt-image-28-de-set-de-2026-11-00-56-mvofhs5v.jpg",
+          "alt": ""
+        }
+      },
+      {
+        "nome": "Sala",
+        "descricao": "Smart TV",
+        "foto": {
+          "src": "fotos/chatgpt-image-28-de-set-de-2026-11-13-10-mvofhvcr.jpg",
+          "alt": ""
+        }
+      },
+      {
+        "nome": "Suite Master",
+        "descricao": "",
+        "foto": {
+          "src": "fotos/chatgpt-image-28-de-set-de-2026-11-24-12-mvofhwp4.jpg",
+          "alt": ""
+        }
+      },
+      {
+        "nome": "",
+        "descricao": "",
+        "foto": {
+          "src": "fotos/chatgpt-image-28-de-set-de-2026-11-29-20-mvofhy9c.jpg",
+          "alt": ""
+        }
+      }
+    ],
     "comodidades": [
       {
         "icone": "wifi",
