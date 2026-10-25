@@ -1,6 +1,6 @@
 window.CONTEUDO = {
   "versao": 3,
-  "atualizado_em": "2026-10-23",
+  "atualizado_em": "2026-10-25",
   "casa": {
     "nome": "Casa 18 Anahi",
     "subtitulo": "Praia do Marceneiro · Rota dos Milagres",
@@ -9,9 +9,9 @@ window.CONTEUDO = {
     "checkin": "",
     "checkout": "",
     "area_m2": 90,
-    "hospedes": 6,
-    "quartos": 3,
-    "banheiros": null,
+    "hospedes": 4,
+    "quartos": 2,
+    "banheiros": 1,
     "camas": [],
     "endereco_publico": "Condomínio Vila Anahi · Praia do Marceneiro, Passo de Camaragibe, Alagoas",
     "link_maps": "",
