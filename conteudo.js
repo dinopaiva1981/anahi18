@@ -701,7 +701,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": true,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/blog-praia-patacho-piscinas-mvpiydm0.jpg",
+        "alt": ""
+      },
       "endereco": "Praia do Patacho, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
