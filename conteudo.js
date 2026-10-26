@@ -789,7 +789,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": false,
       "reserva": true,
-      "foto": null,
+      "foto": {
+        "src": "fotos/visitacao-peixe-boi-tatuamunha-mvpj3hz1.jpg",
+        "alt": ""
+      },
       "endereco": "Associação Peixe-Boi, R. Luiz Ferreira Dorta, 25, Tatuamunha, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
@@ -829,7 +832,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": false,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/images-2-mvpj52my.jpg",
+        "alt": ""
+      },
       "endereco": "Farol de Porto de Pedras, Porto de Pedras, Alagoas",
       "lat": -9.1565,
       "lng": -35.2982,
@@ -867,7 +873,10 @@ window.CONTEUDO = {
       "bom_saber": [],
       "depende_mare": false,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/captura-de-tela-2026-10-26-as-14-31-13-mvpja9j7.jpg",
+        "alt": ""
+      },
       "endereco": "Pousada O Casarão, Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
@@ -879,7 +888,7 @@ window.CONTEUDO = {
       "telefone": "",
       "whatsapp": "",
       "link": "",
-      "link_cardapio": "",
+      "link_cardapio": "https://www.instagram.com/restaurantearaca/",
       "parceiro": false,
       "patrocinado": false,
       "status": "rascunho",
