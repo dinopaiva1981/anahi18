@@ -1,6 +1,6 @@
 window.CONTEUDO = {
   "versao": 3,
-  "atualizado_em": "2026-10-25",
+  "atualizado_em": "2026-10-26",
   "casa": {
     "nome": "Casa 18 Anahi",
     "subtitulo": "Praia do Marceneiro · Rota dos Milagres",
@@ -83,7 +83,7 @@ window.CONTEUDO = {
       },
       {
         "icone": "piscina",
-        "nome": "Piscina do condomínio",
+        "nome": "Piscina privativa",
         "descricao": "Área comum do condomínio. Confira as regras de uso.",
         "destaque": true
       },
@@ -100,11 +100,53 @@ window.CONTEUDO = {
         "destaque": true
       }
     ],
-    "regras_casa": [],
-    "regras_condominio": [],
-    "lixo_limpeza": [],
-    "seguranca": [],
-    "faq": [],
+    "regras_casa": [
+      "- Respeite o imóvel e os itens disponibilizados para sua estadia.",
+      "- Mantenha portas e janelas fechadas ao sair.",
+      "- Desligue ar-condicionado, luzes e equipamentos ao deixar os ambientes.",
+      "- Não é permitido fumar dentro da casa.",
+      "- Evite barulho excessivo, especialmente à noite.",
+      "- Comunique qualquer dano ou problema durante a estadia.",
+      "- Confira seus pertences antes do checkout."
+    ],
+    "regras_condominio": [
+      "- Respeite as normas de convivência do condomínio.",
+      "- Respeite os horários de silêncio estabelecidos.",
+      "- Utilize as áreas comuns conforme as regras locais.",
+      "- Não ultrapasse o limite de hóspedes autorizado.",
+      "- Siga as orientações de acesso, identificação e estacionamento.",
+      "- Não estacione em vagas de outros moradores.",
+      "- Descarte o lixo nos locais indicados pelo condomínio.",
+      "Importante: confirme essas regras com a administração do condomínio antes de publicar, especialmente as relativas a visitantes, estacionamento e áreas comuns."
+    ],
+    "lixo_limpeza": [
+      "- Descarte o lixo nos pontos de coleta indicados pelo condomínio.",
+      "- Mantenha a cozinha organizada após o uso.",
+      "- Lave as louças utilizadas e guarde os utensílios.",
+      "- Evite deixar alimentos expostos.",
+      "- Utilize toalhas e roupas de cama com cuidado.",
+      "- Avise o anfitrião caso identifique algum vazamento, defeito ou necessidade de manutenção.",
+      "- Ao sair, confira se os equipamentos elétricos e o ar-condicionado estão desligados."
+    ],
+    "seguranca": [
+      "- Mantenha portas e janelas trancadas ao sair.",
+      "- Não compartilhe senhas, códigos de acesso ou chaves com terceiros.",
+      "- Não autorize a entrada de pessoas não cadastradas ou não autorizadas.",
+      "- Mantenha crianças supervisionadas nas áreas de risco.",
+      "- Nunca deixe velas, fogão ou outros equipamentos de aquecimento ligados sem supervisão.",
+      "- Em caso de emergência, acione os serviços competentes e avise o anfitrião.",
+      "- Informe imediatamente qualquer situação suspeita ou problema de segurança."
+    ],
+    "faq": [
+      {
+        "pergunta": "Qual é o horário de check-in e check-out? ",
+        "resposta": "Os horários combinados para sua reserva são informados pelo anfitrião. Caso precise de flexibilidade, consulte a disponibilidade com antecedência."
+      },
+      {
+        "pergunta": "Como faço para entrar na casa?",
+        "resposta": "Consulte as instruções de chegada e acesso disponibilizadas pelo anfitrião antes do início da estadia."
+      }
+    ],
     "chegada": {
       "como_chegar": "",
       "entrada": "",
