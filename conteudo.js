@@ -566,7 +566,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": false,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/imagemprojeto-65eb31d0b9155-mvpipxbi.jpg",
+        "alt": ""
+      },
       "endereco": "São Miguel dos Milagres, Alagoas",
       "lat": -9.2658,
       "lng": -35.3728,
