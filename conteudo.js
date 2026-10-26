@@ -915,7 +915,10 @@ window.CONTEUDO = {
       "bom_saber": [],
       "depende_mare": false,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/captura-de-tela-2026-10-26-as-14-37-07-mvpjhok4.jpg",
+        "alt": ""
+      },
       "endereco": "Vilinha do Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
