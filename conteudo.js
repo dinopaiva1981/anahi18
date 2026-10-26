@@ -84,7 +84,7 @@ window.CONTEUDO = {
       {
         "icone": "piscina",
         "nome": "Piscina privativa",
-        "descricao": "Área comum do condomínio. Confira as regras de uso.",
+        "descricao": "Piscina exclusiva no rooftop da casa. Confira as regras de uso.",
         "destaque": true
       },
       {
