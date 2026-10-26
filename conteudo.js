@@ -148,12 +148,23 @@ window.CONTEUDO = {
       }
     ],
     "chegada": {
-      "como_chegar": "",
-      "entrada": "",
-      "chaves": "",
-      "estacionamento": "",
-      "saida": [],
-      "imprevistos": "",
+      "como_chegar": "Bem-vindo à Casa 18 Anahi!\n\nO condomínio Vila Anahi fica na região da Praia do Marceneiro, em Passo de Camaragibe, Alagoas.\n\nAntes de sair, consulte a localização enviada pelo anfitrião e utilize um aplicativo de navegação para chegar com tranquilidade.\n\nAo se aproximar, reduza a velocidade e siga as placas e orientações de acesso ao condomínio.\n\nEm caso de dúvida durante o trajeto, entre em contato com o anfitrião.",
+      "entrada": "Ao chegar, identifique-se na portaria e informe que está hospedado na Casa 18 Anahi.\n\nTenha em mãos os dados da reserva e os documentos dos hóspedes, caso sejam solicitados.\n\nSiga as orientações da equipe de segurança para liberação da entrada.\n\nImportante: confirme previamente com o anfitrião se é necessário enviar os nomes dos hóspedes ou os dados do veículo antes da chegada.",
+      "chaves": "As instruções para retirada das chaves e entrada na casa serão enviadas pelo anfitrião antes do check-in.\n\nConfira as orientações recebidas e, em caso de dificuldade para acessar o imóvel, entre em contato pelo canal de atendimento informado na seção Contatos.\n\nAo sair, certifique-se de fechar e trancar todas as portas e janelas.",
+      "estacionamento": "Estacione somente na vaga destinada à Casa 18 Anahi ou no local autorizado pelo condomínio.\n\nNão bloqueie acessos, garagens ou a circulação de outros veículos.\n\nCaso tenha dúvidas sobre a localização da vaga ou as regras de estacionamento, consulte o anfitrião antes de estacionar.",
+      "saida": [
+        "Antes de deixar a Casa 18 Anahi:",
+        "- Confira seus pertences pessoais.",
+        "- Recolha o lixo e descarte-o no local indicado.",
+        "- Lave as louças utilizadas e deixe a cozinha organizada.",
+        "- Desligue luzes, ar-condicionado e equipamentos elétricos.",
+        "- Feche as janelas e desligue torneiras.",
+        "- Confira se portas e acessos estão trancados.",
+        "- Devolva as chaves conforme as instruções do anfitrião.",
+        "- Avise o anfitrião quando concluir a saída.",
+        "Obrigado por escolher a Casa 18 Anahi. Esperamos receber você novamente em breve!"
+      ],
+      "imprevistos": "Imprevistos acontecem. Se houver atraso na chegada, mudança no horário previsto ou dificuldade de acesso, avise o anfitrião assim que possível.\n\nSe perceber algum problema na casa ao chegar, como falha elétrica, vazamento ou equipamento sem funcionar, entre em contato para que possamos ajudar.\n\nEstamos aqui para que sua experiência seja tranquila do início ao fim.",
       "trajetos": [
         {
           "icone": "aviao",
