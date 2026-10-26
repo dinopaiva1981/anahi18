@@ -194,7 +194,10 @@ window.CONTEUDO = {
   },
   "config": {
     "feedback_endpoint": "",
-    "og_imagem": null
+    "og_imagem": {
+      "src": "fotos/chatgpt-image-28-de-set-de-2026-11-00-56-mvofhs5v.jpg",
+      "alt": ""
+    }
   },
   "regiao": {
     "centro": {
@@ -2246,7 +2249,7 @@ window.CONTEUDO = {
           "momento": "Na véspera",
           "titulo": "Confira a tábua de marés",
           "texto": "Procure uma maré bem baixa pela manhã: 0,3 m ou menos na tábua da Marinha.",
-          "lugar": ""
+          "lugar": "piscinas-naturais-jangada"
         },
         {
           "momento": "Maré baixa",
