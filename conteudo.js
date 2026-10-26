@@ -611,7 +611,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": true,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/milagres-do-toque-jpg-mvpisvzq.jpg",
+        "alt": ""
+      },
       "endereco": "Praia do Toque, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
