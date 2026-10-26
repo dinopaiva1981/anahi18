@@ -297,11 +297,14 @@ window.CONTEUDO = {
       ],
       "depende_mare": true,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/improve-image-like-fuji-mx-20261025195255-mvofcid1.jpg",
+        "alt": ""
+      },
       "endereco": "Praia do Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
-      "distancia": "",
+      "distancia": "5 min",
       "duracao": "",
       "preco": "",
       "horario": "",
