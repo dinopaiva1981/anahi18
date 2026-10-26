@@ -655,7 +655,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": true,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/6e-mvpivxks.jpg",
+        "alt": ""
+      },
       "endereco": "Praia da Lage, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
