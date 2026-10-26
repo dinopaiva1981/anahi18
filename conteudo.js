@@ -386,7 +386,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": false,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/improve-photo-quality-and-lighting-20261026140259-mvpi9ms7.jpg",
+        "alt": ""
+      },
       "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
@@ -428,7 +431,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": false,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/o-que-fazer-na-praia-de-camaragibe-alagoas-brasil-1140x608-j-mvpicdox.jpg",
+        "alt": ""
+      },
       "endereco": "Barra de Camaragibe, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
@@ -472,7 +478,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": true,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/piscinas-naturais-no-brasil-jpg-mvpiecx6.jpg",
+        "alt": ""
+      },
       "endereco": "Praia do Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
