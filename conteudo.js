@@ -340,7 +340,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": false,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/1-guia-de-fornecedores-constance-zahn-capela-dos-milagres-mvpgb0en.jpg",
+        "alt": ""
+      },
       "endereco": "Capela dos Milagres, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
