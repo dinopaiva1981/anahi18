@@ -32,6 +32,10 @@ window.CONTEUDO = {
         "alt": "TV"
       },
       {
+        "src": "fotos/chatgpt-image-28-de-set-de-2026-13-18-13-mvpjrgr2.jpg",
+        "alt": "Cozinha"
+      },
+      {
         "src": "fotos/chatgpt-image-28-de-set-de-2026-11-24-12-mvofhwp4.jpg",
         "alt": "Quarto Casal"
       },
@@ -50,16 +54,16 @@ window.CONTEUDO = {
         }
       },
       {
-        "nome": "Sala",
-        "descricao": "Smart TV",
+        "nome": "Cozinha",
+        "descricao": "Cozinha equipada",
         "foto": {
-          "src": "fotos/chatgpt-image-28-de-set-de-2026-11-13-10-mvofhvcr.jpg",
+          "src": "fotos/chatgpt-image-28-de-set-de-2026-13-18-13-mvpjrgr2.jpg",
           "alt": ""
         }
       },
       {
         "nome": "Suite Master",
-        "descricao": "",
+        "descricao": "Cama King Size confortável",
         "foto": {
           "src": "fotos/chatgpt-image-28-de-set-de-2026-11-24-12-mvofhwp4.jpg",
           "alt": ""
