@@ -522,7 +522,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": true,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/sao-miguel-dos-milagres-alagoas-jpg-mvpiiyz8.jpg",
+        "alt": ""
+      },
       "endereco": "Praia do Riacho, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
