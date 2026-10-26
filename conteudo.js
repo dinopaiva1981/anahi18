@@ -743,7 +743,10 @@ window.CONTEUDO = {
       ],
       "depende_mare": false,
       "reserva": false,
-      "foto": null,
+      "foto": {
+        "src": "fotos/tunel-verde-para-acesso-mvpizzjm.jpg",
+        "alt": ""
+      },
       "endereco": "Túnel Verde, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
