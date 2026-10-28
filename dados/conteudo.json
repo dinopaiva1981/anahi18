@@ -1,6 +1,6 @@
 {
-  "versao": 3,
-  "atualizado_em": "2026-10-26",
+  "esquema": 2,
+  "atualizado_em": "2026-10-28",
   "casa": {
     "nome": "Casa 18 Anahi",
     "subtitulo": "Praia do Marceneiro · Rota dos Milagres",
@@ -11,6 +11,7 @@
     "area_m2": 90,
     "hospedes": 4,
     "quartos": 2,
+    "suites": 1,
     "banheiros": 1,
     "camas": [
       "1 cama de casal, 2 camas de solteiro e 1 sofá cama."
@@ -192,16 +193,17 @@
     "frase": "Aqui, o tempo desacelera e a vida acontece.",
     "sobre": "Pensada para o conforto e a praticidade, com ambientes integrados, decoração acolhedora e atmosfera praiana. Ideal para famílias e amigos que buscam descanso, natureza e boa companhia.",
     "instagram": "casa18anahi",
-    "link_reserva": "",
-    "video_url": "",
-    "suites": 1
+    "link_reserva": "https://www.airbnb.com.br",
+    "video_url": ""
   },
   "config": {
     "feedback_endpoint": "",
     "og_imagem": {
       "src": "fotos/chatgpt-image-28-de-set-de-2026-11-00-56-mvofhs5v.jpg",
       "alt": ""
-    }
+    },
+    "url_publica": "",
+    "agenda_visivel": true
   },
   "regiao": {
     "centro": {
@@ -282,13 +284,15 @@
       "Jangadas não têm tabela fixa: combine valor, duração e ponto de volta antes de embarcar.",
       "O buggy não anda pela faixa de areia: a rota fica na APA Costa dos Corais. Não espere dunas.",
       "Nas piscinas naturais, passe o protetor antes de sair e não use dentro da água; deixe caixas de som e comida na areia."
-    ]
+    ],
+    "o_que_levar": []
   },
   "lugares": [
     {
       "id": "praia-do-marceneiro",
       "nome": "Praia do Marceneiro",
       "categoria": "praia",
+      "tipo": "",
       "area": "Passo de Camaragibe",
       "tags": [
         "natureza",
@@ -313,6 +317,7 @@
       "endereco": "Praia do Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "5 min",
       "duracao": "",
       "preco": "",
@@ -329,12 +334,14 @@
         "titulo": "Melhores Destinos · Praia do Marceneiro (atualizado out. 2026)",
         "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "capela-dos-milagres",
       "nome": "Capela dos Milagres",
       "categoria": "cultura",
+      "tipo": "",
       "area": "Passo de Camaragibe",
       "tags": [
         "casal",
@@ -356,6 +363,7 @@
       "endereco": "Capela dos Milagres, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -372,12 +380,14 @@
         "titulo": "Melhores Destinos · Praia do Marceneiro (atualizado out. 2026)",
         "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "vilinha-do-marceneiro",
       "nome": "Vilinha do Marceneiro",
       "categoria": "compras",
+      "tipo": "",
       "area": "Passo de Camaragibe",
       "tags": [
         "gastronomia",
@@ -400,6 +410,7 @@
       "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -416,12 +427,14 @@
         "titulo": "Melhores Destinos · Praia do Marceneiro",
         "url": "https://guia.melhoresdestinos.com.br/praia-do-marceneiro-alagoas.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "barra-de-camaragibe",
       "nome": "Barra de Camaragibe",
       "categoria": "praia",
+      "tipo": "",
       "area": "Passo de Camaragibe",
       "tags": [
         "natureza",
@@ -445,6 +458,7 @@
       "endereco": "Barra de Camaragibe, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -461,12 +475,14 @@
         "titulo": "Mala de Aventuras · Rota Ecológica dos Milagres",
         "url": "https://www.maladeaventuras.com/rota-ecologica-dos-milagres/"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "piscinas-naturais-jangada",
       "nome": "Piscinas naturais de jangada",
       "categoria": "passeio",
+      "tipo": "",
       "area": "Passo de Camaragibe",
       "tags": [
         "natureza",
@@ -492,6 +508,7 @@
       "endereco": "Praia do Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -508,12 +525,14 @@
         "titulo": "Mala de Aventuras · Rota Ecológica dos Milagres",
         "url": "https://www.maladeaventuras.com/rota-ecologica-dos-milagres/"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "praia-do-riacho",
       "nome": "Praia do Riacho",
       "categoria": "praia",
+      "tipo": "",
       "area": "São Miguel dos Milagres",
       "tags": [
         "natureza",
@@ -536,6 +555,7 @@
       "endereco": "Praia do Riacho, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -552,12 +572,14 @@
         "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
         "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "sao-miguel-dos-milagres",
       "nome": "Centro de São Miguel dos Milagres",
       "categoria": "cultura",
+      "tipo": "",
       "area": "São Miguel dos Milagres",
       "tags": [
         "cultura",
@@ -597,12 +619,14 @@
         "titulo": "Estado de Minas · história de São Miguel dos Milagres",
         "url": "https://www.em.com.br/emfoco/2026/04/18/fundada-durante-a-invasao-holandesa-essa-vila-alagoana-de-8-mil-moradores-guarda-a-praia-eleita-a-mais-bonita-do-brasil/"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "praia-do-toque",
       "nome": "Praia do Toque",
       "categoria": "praia",
+      "tipo": "",
       "area": "São Miguel dos Milagres",
       "tags": [
         "natureza",
@@ -625,6 +649,7 @@
       "endereco": "Praia do Toque, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -641,12 +666,14 @@
         "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
         "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "praia-da-lage",
       "nome": "Praia da Lage",
       "categoria": "praia",
+      "tipo": "",
       "area": "Porto de Pedras",
       "tags": [
         "natureza",
@@ -669,6 +696,7 @@
       "endereco": "Praia da Lage, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -685,12 +713,14 @@
         "titulo": "TNH1 · Praia da Lage conquista Bandeira Azul (out. 2026)",
         "url": "https://www.tnh1.com.br/noticia/nid/praia-da-lage-conquista-bandeira-azul-e-torna-porto-de-pedras-a-unica-cidade-de-alagoas-com-duas-praias-certificadas/"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "praia-do-patacho",
       "nome": "Praia do Patacho",
       "categoria": "praia",
+      "tipo": "",
       "area": "Porto de Pedras",
       "tags": [
         "natureza",
@@ -715,6 +745,7 @@
       "endereco": "Praia do Patacho, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -731,12 +762,14 @@
         "titulo": "TNH1 · Lage ganha e Patacho renova a Bandeira Azul (out. 2026)",
         "url": "https://www.tnh1.com.br/noticia/nid/praia-da-lage-conquista-bandeira-azul-e-torna-porto-de-pedras-a-unica-cidade-de-alagoas-com-duas-praias-certificadas/"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "tunel-verde",
       "nome": "Túnel Verde",
       "categoria": "natureza",
+      "tipo": "",
       "area": "Porto de Pedras",
       "tags": [
         "natureza",
@@ -757,6 +790,7 @@
       "endereco": "Túnel Verde, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -773,12 +807,14 @@
         "titulo": "Mala de Aventuras · Rota Ecológica dos Milagres",
         "url": "https://www.maladeaventuras.com/rota-ecologica-dos-milagres/"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "peixe-boi-tatuamunha",
       "nome": "Peixe-boi no Rio Tatuamunha",
       "categoria": "passeio",
+      "tipo": "",
       "area": "Porto de Pedras",
       "tags": [
         "natureza",
@@ -803,6 +839,7 @@
       "endereco": "Associação Peixe-Boi, R. Luiz Ferreira Dorta, 25, Tatuamunha, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "Cerca de 1 hora",
       "preco": "",
@@ -819,12 +856,14 @@
         "titulo": "Melhores Destinos · Associação Peixe-Boi",
         "url": "https://guia.melhoresdestinos.com.br/associacao-peixe-boi.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "farol-porto-de-pedras",
       "nome": "Farol de Porto de Pedras",
       "categoria": "cultura",
+      "tipo": "",
       "area": "Porto de Pedras",
       "tags": [
         "cultura",
@@ -863,7 +902,8 @@
         "titulo": "Marinha do Brasil · Capitania dos Portos de Alagoas, Farol de Porto de Pedras",
         "url": "https://www.marinha.mil.br/cpal/node/15"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "araca-restaurante",
@@ -887,6 +927,7 @@
       "endereco": "Pousada O Casarão, Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -929,6 +970,7 @@
       "endereco": "Vilinha do Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -967,6 +1009,7 @@
       "endereco": "São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1010,6 +1053,7 @@
       "endereco": "Porto da Rua, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1026,7 +1070,8 @@
         "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
         "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "praia-de-sao-miguel-dos-milagres",
@@ -1052,6 +1097,7 @@
       "endereco": "Praia de São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1068,7 +1114,8 @@
         "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
         "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "praia-de-tatuamunha",
@@ -1094,6 +1141,7 @@
       "endereco": "Praia de Tatuamunha, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1110,7 +1158,8 @@
         "titulo": "Melhores Destinos · Praias de São Miguel dos Milagres (atualizado out. 2026)",
         "url": "https://guia.melhoresdestinos.com.br/praias-de-sao-miguel-dos-milagres.html"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "praia-dos-morros",
@@ -1136,6 +1185,7 @@
       "endereco": "Praia dos Morros, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "Travessia de 5 min + trilha de 15 min",
       "preco": "",
@@ -1152,7 +1202,8 @@
         "titulo": "Viagens e Caminhos · Barra de Camaragibe (atualizado nov. 2025)",
         "url": "https://www.viagensecaminhos.com/barra-de-camaragibe-al/"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "igreja-matriz-mae-do-povo",
@@ -1176,6 +1227,7 @@
       "endereco": "Praça principal, AL-101, São Miguel dos Milagres, Alagoas",
       "lat": -9.2658,
       "lng": -35.3728,
+      "precisao": "aproximada",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1193,7 +1245,7 @@
         "url": "https://www.viagensecaminhos.com/sao-miguel-dos-milagres-alagoas/"
       },
       "verificado": null,
-      "precisao": "aproximada"
+      "nota_interna": ""
     },
     {
       "id": "balsa-rio-manguaba",
@@ -1218,6 +1270,7 @@
       "endereco": "Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "Menos de 10 min de travessia, fora a fila",
       "preco": "Cerca de R$ 20 por carro (fev. 2026)",
@@ -1261,6 +1314,7 @@
       "endereco": "Praia de Japaratinga, Japaratinga, Alagoas",
       "lat": -9.0878,
       "lng": -35.2578,
+      "precisao": "aproximada",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1278,7 +1332,7 @@
         "url": "https://maladeaventuras.com/o-que-fazer-japaratinga/"
       },
       "verificado": null,
-      "precisao": "aproximada"
+      "nota_interna": ""
     },
     {
       "id": "piscinas-naturais-japaratinga",
@@ -1305,6 +1359,7 @@
       "endereco": "Japaratinga, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "Cerca de 2h30",
       "preco": "",
@@ -1321,7 +1376,8 @@
         "titulo": "Esse Mundo é Nosso · O que fazer em Japaratinga (atualizado out. 2024)",
         "url": "https://www.essemundoenosso.com.br/?p=67345"
       },
-      "verificado": null
+      "verificado": null,
+      "nota_interna": ""
     },
     {
       "id": "mirante-monte-tabor",
@@ -1345,6 +1401,7 @@
       "endereco": "Pousada Paraíso dos Coqueirais, Japaratinga, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "R$ 5 (mar. 2024)",
@@ -1387,6 +1444,7 @@
       "endereco": "Beira-mar de Porto da Rua, ao lado do restaurante do Enildo, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "Cerca de 3h30",
       "preco": "",
@@ -1430,6 +1488,7 @@
       "endereco": "São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "A partir de 2 horas",
       "preco": "A partir de R$ 220 (valor sem data na fonte)",
@@ -1472,6 +1531,7 @@
       "endereco": "Pousada Quadrado, AL-101, 5, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "Pratos de R$ 38 a R$ 135; degustação a partir de R$ 225 (mar. 2024)",
@@ -1513,6 +1573,7 @@
       "endereco": "Paru Boutique Hotel, R. do Macineiro, s/n, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1554,6 +1615,7 @@
       "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1595,6 +1657,7 @@
       "endereco": "Praia do Marceneiro, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "Mesa de R$ 50 em consumação (mar. 2024)",
@@ -1636,6 +1699,7 @@
       "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1676,6 +1740,7 @@
       "endereco": "Vilinha do Marceneiro, AL-101, Passo de Camaragibe, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1718,6 +1783,7 @@
       "endereco": "Praia do Riacho, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1759,6 +1825,7 @@
       "endereco": "Pousada Haya, Praia do Riacho, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1801,6 +1868,7 @@
       "endereco": "Praia do Toque, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "Day use R$ 100 por pessoa (fev. 2026)",
@@ -1843,6 +1911,7 @@
       "endereco": "R. do Campo, s/n, Praia do Toque, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "Pratos principais de R$ 90 a R$ 95 (mar. 2024)",
@@ -1884,6 +1953,7 @@
       "endereco": "R. Eurico Marinho, 37, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -1925,6 +1995,7 @@
       "endereco": "Av. Francisco Lima, 99, Povoado Porto da Rua, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "R$ 8 a R$ 20 (2022)",
@@ -1965,6 +2036,7 @@
       "endereco": "R. Pref. Augusto de Barros Falcão, 129, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -2006,6 +2078,7 @@
       "endereco": "Em frente à Associação Peixe-Boi, Tatuamunha, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -2048,6 +2121,7 @@
       "endereco": "Praia do Patacho, Porto de Pedras, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "Cerca de 12 km da praia de São Miguel dos Milagres",
       "duracao": "",
       "preco": "Day use R$ 70 por pessoa (fev. 2026)",
@@ -2089,6 +2163,7 @@
       "endereco": "Orla de Japaratinga, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -2127,6 +2202,7 @@
       "endereco": "Porto da Rua, São Miguel dos Milagres, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -2169,6 +2245,7 @@
       "endereco": "Rua Alto da Forca, s/n, Bairro Mangazala, Rodovia AL-105, Porto Calvo, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -2210,6 +2287,7 @@
       "endereco": "AL-101, 200, Maragogi, Alagoas",
       "lat": null,
       "lng": null,
+      "precisao": "",
       "distancia": "",
       "duracao": "",
       "preco": "",
@@ -2248,6 +2326,7 @@
       "quando": "Dia de maré baixa pela manhã",
       "ideal": "Todos",
       "ilustracao": "piscina",
+      "status": "publicado",
       "paradas": [
         {
           "momento": "Na véspera",
@@ -2273,8 +2352,7 @@
           "texto": "Tapioca, doces regionais e uma volta pelas lojinhas.",
           "lugar": "vilinha-do-marceneiro"
         }
-      ],
-      "status": "publicado"
+      ]
     },
     {
       "id": "porto-de-pedras",
@@ -2283,6 +2361,7 @@
       "quando": "Dia inteiro · reserve o peixe-boi antes",
       "ideal": "Casais e famílias",
       "ilustracao": "peixeboi",
+      "status": "publicado",
       "paradas": [
         {
           "momento": "Manhã",
@@ -2308,8 +2387,7 @@
           "texto": "Suba sem pressa para ver o Rio Manguaba encontrar o mar.",
           "lugar": "farol-porto-de-pedras"
         }
-      ],
-      "status": "publicado"
+      ]
     },
     {
       "id": "devagar-marceneiro",
@@ -2318,6 +2396,7 @@
       "quando": "Tarde de maré baixa",
       "ideal": "Casais",
       "ilustracao": "capela",
+      "status": "publicado",
       "paradas": [
         {
           "momento": "Tarde",
@@ -2337,8 +2416,7 @@
           "texto": "De volta pela areia, tapioca, doces e artesanato para fechar o dia.",
           "lugar": "vilinha-do-marceneiro"
         }
-      ],
-      "status": "publicado"
+      ]
     },
     {
       "id": "rio-e-mar",
@@ -2347,6 +2425,7 @@
       "quando": "Tarde · leve água e calçado leve",
       "ideal": "Famílias e casais",
       "ilustracao": "barra",
+      "status": "publicado",
       "paradas": [
         {
           "momento": "Começo da tarde",
@@ -2366,8 +2445,7 @@
           "texto": "O céu sobre o rio é o grande espetáculo da Barra.",
           "lugar": "barra-de-camaragibe"
         }
-      ],
-      "status": "publicado"
+      ]
     },
     {
       "id": "japaratinga",
@@ -2512,7 +2590,10 @@
       "whatsapp": "",
       "horario": "24 horas",
       "obs": "Serviço público nacional. Ligação gratuita, também de celular.",
-      "verificado": "2026-10-23"
+      "endereco": "",
+      "distancia": "",
+      "verificado": "2026-10-23",
+      "nota_interna": ""
     },
     {
       "nome": "Corpo de Bombeiros",
@@ -2522,7 +2603,10 @@
       "whatsapp": "",
       "horario": "24 horas",
       "obs": "Resgate, incêndio, afogamentos e acidentes no mar. Ligação gratuita.",
-      "verificado": "2026-10-23"
+      "endereco": "",
+      "distancia": "",
+      "verificado": "2026-10-23",
+      "nota_interna": ""
     },
     {
       "nome": "Polícia Militar",
@@ -2532,7 +2616,10 @@
       "whatsapp": "",
       "horario": "24 horas",
       "obs": "Serviço público nacional. Ligação gratuita.",
-      "verificado": "2026-10-23"
+      "endereco": "",
+      "distancia": "",
+      "verificado": "2026-10-23",
+      "nota_interna": ""
     },
     {
       "nome": "Defesa Civil",
@@ -2542,7 +2629,10 @@
       "whatsapp": "",
       "horario": "24 horas",
       "obs": "Alagamentos, deslizamentos e outros riscos. Ligação gratuita.",
-      "verificado": "2026-10-23"
+      "endereco": "",
+      "distancia": "",
+      "verificado": "2026-10-23",
+      "nota_interna": ""
     },
     {
       "nome": "Hospital Regional do Norte",
@@ -2552,6 +2642,8 @@
       "whatsapp": "",
       "horario": "",
       "obs": "Rua Alto da Forca, s/n, Mangazala (AL-105), Porto Calvo. Referência para urgências na região e para acidentes com animais peçonhentos. Em emergência, ligue primeiro para o 192 (SAMU). Fonte: Ministério da Saúde (gov.br)",
+      "endereco": "",
+      "distancia": "",
       "verificado": null,
       "nota_interna": "Fonte: Ministério da Saúde (gov.br), hospitais de referência em Alagoas, CNES 7042671. Ligar para conferir o número e se a urgência atende 24 h; então preencher horário e verificado."
     },
@@ -2563,6 +2655,8 @@
       "whatsapp": "",
       "horario": "",
       "obs": "AL-101, 200, Maragogi. Fica mais ao norte, depois de Japaratinga. Também referência para acidentes com animais peçonhentos. Fonte: Ministério da Saúde (gov.br)",
+      "endereco": "",
+      "distancia": "",
       "verificado": null,
       "nota_interna": "Fonte: Ministério da Saúde (gov.br), CNES 7916043. Ligar para conferir o número e o horário; então preencher horário e verificado."
     }
