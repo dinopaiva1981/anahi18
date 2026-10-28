@@ -1,7 +1,11 @@
 /* Painel do anfitrião · Casa 18 Anahi
-   - Edita conteudo.js e publica no GitHub pela API (commit direto no repositório).
-   - O token fica só neste navegador: na sessão (sessionStorage) ou, se o anfitrião pedir para lembrar,
-     criptografado com uma senha local (PBKDF2 + AES-GCM). Nunca vai para o repositório.
+   - Edita os DADOS do guia (dados/conteudo.json; em repositórios antigos, conteudo.js) e publica no GitHub pela API.
+     O painel nunca reescreve código: além dos dados, só grava o bloco <!-- compartilhar:inicio/fim --> do index.html,
+     a imagem fixa compartilhar.jpg, fotos/ e admin/acesso.json. Normaliza com assets/dados.js (o mesmo contrato do site).
+   - Entrada: senha do anfitrião (no repositório só o hash PBKDF2, em admin/acesso.json). A senha abre o cofre deste
+     aparelho (AES-GCM), onde ficam o token do GitHub (informado uma única vez), a chave do feedback, os dados privados
+     da casa (Wi-Fi, portão) e os modelos de mensagem. Nada disso vai para o repositório.
+   - admin/?demo: modo demonstração, com GitHub e feedback simulados em memória.
    - Todo dado que vem de fora (conteudo.js, cópias, JSON colado, CSV, feedback) é validado e escapado.
    - Fotos são reduzidas e convertidas antes do envio para manter o site leve. */
 (function () {
@@ -20,12 +24,17 @@ const RE_DIA = /^\d{4}-\d{2}-\d{2}$/;
 const dataBR = (iso) => { if (!iso) return ''; const d = new Date(RE_DIA.test(iso) ? iso + 'T12:00:00-03:00' : iso); return isNaN(d) ? '' : esc(d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'America/Maceio' })); };
 const dataCurta = (iso) => RE_DIA.test(String(iso || '')) ? esc(String(iso).split('-').reverse().join('/')) : '';
 
+/* ---------------- modo demonstração (contrato 3) ----------------
+   admin/?demo: carrega ../dados/conteudo.json (ou ../conteudo.js), simula o GitHub e o feedback em memória e não toca no armazenamento real do aparelho. */
+const DEMO = /[?&]demo(?:[=&]|$)/.test(location.search);
+
 /* ---------------- armazenamento (à prova de bloqueio) ----------------
-   Se o navegador bloquear o armazenamento, o painel continua funcionando com memória (e avisa). */
+   Se o navegador bloquear o armazenamento, o painel continua funcionando com memória (e avisa).
+   Na demonstração, tudo fica só na memória desta aba. */
 function abrirArmaz(nome) { try { const s = window[nome]; s.setItem('__teste', '1'); s.removeItem('__teste'); return s; } catch (e) { return null; } }
 const memoria = { local: new Map(), sessao: new Map() };
-const LS = abrirArmaz('localStorage'), SS = abrirArmaz('sessionStorage');
-const ARMAZ_BLOQUEADO = !LS || !SS;
+const LS = DEMO ? null : abrirArmaz('localStorage'), SS = DEMO ? null : abrirArmaz('sessionStorage');
+const ARMAZ_BLOQUEADO = !DEMO && (!LS || !SS);
 function armaz(tipo) {
   const s = tipo === 'sessao' ? SS : LS, m = memoria[tipo];
   return {
@@ -38,7 +47,7 @@ function armaz(tipo) {
 const ls = armaz('local'), ss = armaz('sessao');
 const apagar = (k) => { ls.del(k); ss.del(k); };
 
-function toast(msg, erro) { const t = $('#toast'); t.textContent = msg; t.className = 'toast on' + (erro ? ' erro' : ''); t.setAttribute('role', erro ? 'alert' : 'status'); clearTimeout(toast._t); toast._t = setTimeout(() => t.className = 'toast', erro ? 7000 : 3200); }
+function toast(msg, erro) { const t = $('#toast'); t.textContent = msg; t.className = 'toast on' + (erro ? ' erro' : ''); t.setAttribute('role', erro ? 'alert' : 'status'); clearTimeout(toast._t); toast._t = setTimeout(() => t.className = 'toast', erro ? 7000 : 3600); }
 
 /* ---------------- estado ---------------- */
 const A = {
@@ -46,8 +55,10 @@ const A = {
   token: ss.get('admin:token', null), tokenExp: ss.get('admin:token-exp', null),
   remoto: null, draft: null, baseSha: null, baseObj: null, correcoes: [],
   view: 'visao', busca: '',
-  fb: { itens: null, erro: null, periodo: '90', sent: 'todos', tema: '', exemplo: false, carregando: false, tabela: false },
-  fotos: null, cacheFotos: {}
+  fb: { itens: null, erro: null, periodo: '90', sent: 'todos', tema: '', exemplo: DEMO, carregando: false, tabela: false },
+  fotos: null, cacheFotos: {},
+  cofreDados: null, senhaPendente: null,
+  estadia: { nome: '', chegada: '', saida: '', fone: '' }, modelosEdit: {}
 };
 /* A02: hospedado em <conta>.github.io/<repositório>/admin/ (ou <conta>.github.io/admin/), o painel deduz onde está o guia. */
 function deduzirRepo(host, caminho) {
@@ -63,41 +74,119 @@ if (A.repoAuto && !tem(A.cfg.owner) && !tem(A.cfg.repo)) { A.cfg.owner = A.repoA
 ['admin:token', 'admin:token-lembrado'].forEach(k => ls.del(k)); // formatos antigos, sem criptografia
 ls.del('admin:fbchave');                                       // a chave de feedback não fica mais em texto puro
 
-/* ---------------- cofre: token e chave de feedback criptografados com senha local ---------------- */
+/* ---------------- cofre do aparelho ----------------
+   Tudo o que é segredo DESTE aparelho, num só bloco cifrado com a senha do anfitrião:
+   { token, exp, tokenAte, fbchave, privados: { wifi_rede, wifi_senha, wifi_tipo, wifi_oculta, portao, chaves, notas }, modelos: { … } }
+   PBKDF2-SHA256 (600 mil iterações, sal próprio, diferente do sal do hash da senha) + AES-GCM 256 via WebCrypto.
+   A chave derivada fica só na sessão da aba (sessionStorage) para regravar sem pedir a senha de novo; fechar a aba apaga.
+   Nada disto vai para os dados publicados (dados/conteudo.json), para o rascunho ou para qualquer requisição ao GitHub. */
 const b64u = { de: (s) => Uint8Array.from(atob(s), c => c.charCodeAt(0)), para: (u) => btoa(String.fromCharCode.apply(null, u)) };
+const ITER = 600000;
+const novoCofre = () => ({ token: null, exp: null, tokenAte: null, fbchave: '', privados: {}, modelos: {} });
+const tokenAte = (exp) => { const t = exp ? new Date(exp).getTime() : NaN; return isFinite(t) ? t : Date.now() + 30 * 864e5; };
 const Cofre = {
-  ITER: 310000,
-  existe() { const c = ls.get('admin:cofre', null); if (c && c.exp && c.exp < Date.now()) { ls.del('admin:cofre'); return false; } return !!(c && c.ct); },
-  async derivar(senha, sal) {
-    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(senha), 'PBKDF2', false, ['deriveKey']);
-    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: sal, iterations: this.ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+  ITER,
+  ler() { const c = ls.get('admin:cofre', null); return c && c.ct && c.sal && c.iv ? c : null; },
+  existe() { const c = this.ler(); if (c && c.v !== 2 && c.exp && c.exp < Date.now()) { ls.del('admin:cofre'); return false; } return !!c; },
+  async derivar(senha, sal, iter) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(String(senha)), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: sal, iterations: iter || ITER, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
   },
   async chaveSessao() { const r = ss.get('admin:cofre-chave', null); return r ? crypto.subtle.importKey('raw', b64u.de(r), 'AES-GCM', false, ['encrypt', 'decrypt']) : null; },
   async lembrarChave(k) { ss.set('admin:cofre-chave', b64u.para(new Uint8Array(await crypto.subtle.exportKey('raw', k)))); },
   async criar(senha, dados) {
-    const sal = crypto.getRandomValues(new Uint8Array(16)); const k = await this.derivar(senha, sal);
-    await this.lembrarChave(k); await this.gravar(k, sal, dados);
+    const sal = crypto.getRandomValues(new Uint8Array(16)); const k = await this.derivar(senha, sal, ITER);
+    await this.lembrarChave(k); await this.gravar(k, sal, ITER, dados);
   },
-  async gravar(k, sal, dados) {
+  async gravar(k, sal, iter, dados) {
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, k, new TextEncoder().encode(JSON.stringify(dados))));
-    const exp = Math.min(Date.now() + 30 * 864e5, A.tokenExp ? new Date(A.tokenExp).getTime() || Infinity : Infinity);
-    ls.set('admin:cofre', { v: 1, iter: this.ITER, sal: b64u.para(sal), iv: b64u.para(iv), ct: b64u.para(ct), exp });
+    ls.set('admin:cofre', { v: 2, iter, sal: b64u.para(sal), iv: b64u.para(iv), ct: b64u.para(ct) });
   },
+  async decifrar(k, c) { const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64u.de(c.iv) }, k, b64u.de(c.ct)); return JSON.parse(new TextDecoder().decode(pt)); },
   async abrir(senha) {
-    const c = ls.get('admin:cofre', null); if (!c) throw new Error('Nada guardado neste aparelho.');
-    const k = await this.derivar(senha, b64u.de(c.sal));
-    let pt; try { pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64u.de(c.iv) }, k, b64u.de(c.ct)); } catch (e) { throw new Error('Senha local incorreta.'); }
-    await this.lembrarChave(k); return JSON.parse(new TextDecoder().decode(pt));
+    const c = this.ler(); if (!c) throw new Error('Nada guardado neste aparelho.');
+    const k = await this.derivar(senha, b64u.de(c.sal), c.iter || 310000);
+    let d; try { d = await this.decifrar(k, c); } catch (e) { throw Object.assign(new Error('Senha incorreta para o acesso guardado neste aparelho.'), { codigo: 'senha' }); }
+    await this.lembrarChave(k); return d;
   },
-  async atualizar(dados) { // regrava (ex.: chave de feedback nova) se o cofre estiver aberto nesta sessão
-    const c = ls.get('admin:cofre', null), k = await this.chaveSessao(); if (!c || !k) return false;
-    await this.gravar(k, b64u.de(c.sal), dados); return true;
+  async abrirSessao() { const c = this.ler(); if (!c) return null; const k = await this.chaveSessao().catch(() => null); if (!k) return null; try { return await this.decifrar(k, c); } catch (e) { return null; } },
+  async atualizar(dados) { // regrava com a chave da sessão (sem pedir a senha)
+    const c = this.ler(), k = await this.chaveSessao(); if (!c || !k) return false;
+    await this.gravar(k, b64u.de(c.sal), c.iter || ITER, dados); return true;
   },
   apagar() { ls.del('admin:cofre'); ss.del('admin:cofre-chave'); }
 };
 const fbChave = () => ss.get('admin:fbchave', '') || '';
-const segredosAtuais = () => ({ token: A.token, fbchave: fbChave(), exp: A.tokenExp });
+const temChaveSessao = () => !!ss.raw('admin:cofre-chave');
+async function salvarCofre() {
+  if (!A.cofreDados) return false;
+  A.cofreDados.fbchave = fbChave();
+  if (DEMO) return true;
+  try { return await Cofre.atualizar(A.cofreDados); } catch (e) { return false; }
+}
+/* Abre o que veio do cofre: token (se ainda vale), chave do feedback, dados privados e modelos. */
+function usarCofre(d) {
+  A.cofreDados = Object.assign(novoCofre(), d && typeof d === 'object' ? d : {});
+  if (!A.cofreDados.privados || typeof A.cofreDados.privados !== 'object') A.cofreDados.privados = {};
+  if (!A.cofreDados.modelos || typeof A.cofreDados.modelos !== 'object') A.cofreDados.modelos = {};
+  let venceu = false;
+  if (A.cofreDados.token && A.cofreDados.tokenAte && A.cofreDados.tokenAte < Date.now()) { A.cofreDados.token = null; A.cofreDados.exp = null; venceu = true; salvarCofre(); }
+  if (A.cofreDados.token) { A.token = A.cofreDados.token; A.tokenExp = A.cofreDados.exp || null; ss.set('admin:token', A.token); if (A.tokenExp) ss.set('admin:token-exp', A.tokenExp); }
+  if (A.cofreDados.fbchave) ss.set('admin:fbchave', A.cofreDados.fbchave);
+  return { venceu };
+}
+function esquecerToken() {
+  A.token = null; A.tokenExp = null; ss.del('admin:token'); ss.del('admin:token-exp');
+  if (A.cofreDados && A.cofreDados.token) { A.cofreDados.token = null; A.cofreDados.exp = null; A.cofreDados.tokenAte = null; salvarCofre(); }
+}
+
+/* ---------------- senha do anfitrião ----------------
+   No repositório fica só o hash (admin/acesso.json): PBKDF2-SHA256, sal aleatório, 600 mil iterações (OWASP).
+   A senha protege ESTE aparelho (abre o cofre acima). Quem dá acesso ao GitHub é o token.
+   Se admin/acesso.json for apagado do repositório, vale o hash original abaixo (é o caminho para recuperar uma senha esquecida). */
+const ACESSO_ORIGINAL = { v: 1, alg: 'PBKDF2-SHA256', iter: 600000, sal: 'KEvuMCnxy5EM2eBod8LJbA==', hash: 'wc3x6MxD3zD6nobLXCrlJmgfE4zci1iBrRvtJrqJ94o=', atualizado_em: '2026-10-24T18:00:00.000Z' };
+const OBS_ACESSO = 'Só o hash da senha do painel (PBKDF2-SHA256). A senha em si nunca fica no repositório. Apagar este arquivo faz o painel voltar à senha original.';
+const acessoValido = (a) => a && typeof a === 'object' && a.alg === 'PBKDF2-SHA256' && Number.isInteger(a.iter) && a.iter >= 100000 && a.iter <= 5000000 &&
+  /^[A-Za-z0-9+/]{16,}={0,2}$/.test(String(a.sal || '')) && /^[A-Za-z0-9+/]{43}=$/.test(String(a.hash || '')) ? a : null;
+const PROPAGACAO = 30 * 60e3; // o GitHub Pages pode levar alguns minutos para servir o acesso.json novo
+async function carregarAcesso() {
+  if (DEMO) return A.acessoDemo || ACESSO_ORIGINAL;
+  const local = acessoValido(ls.get('admin:acesso', null));
+  const trocadaAqui = local && local.trocadaAqui && Date.now() - local.trocadaAqui < PROPAGACAO ? local : null;
+  let r = null; try { r = await fetch('acesso.json', { cache: 'no-store', credentials: 'same-origin' }); } catch (e) { r = null; }
+  if (r && r.ok) {
+    const remoto = acessoValido(await r.json().catch(() => null));
+    if (remoto) {
+      if (trocadaAqui && String(trocadaAqui.atualizado_em) > String(remoto.atualizado_em)) return trocadaAqui;
+      ls.set('admin:acesso', remoto); return remoto;
+    }
+    return local || ACESSO_ORIGINAL;
+  }
+  if (r && r.status === 404) { if (trocadaAqui) return trocadaAqui; ls.del('admin:acesso'); return ACESSO_ORIGINAL; }
+  return local || ACESSO_ORIGINAL; // sem conexão: a última versão vista neste aparelho
+}
+async function hashSenha(senha, salB64, iter) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(String(senha)), 'PBKDF2', false, ['deriveBits']);
+  return b64u.para(new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: b64u.de(salB64), iterations: iter, hash: 'SHA-256' }, base, 256)));
+}
+async function conferirSenha(senha, acesso) {
+  if (!senha || !acessoValido(acesso)) return false;
+  const h = await hashSenha(senha, acesso.sal, acesso.iter); if (h.length !== acesso.hash.length) return false;
+  let d = 0; for (let i = 0; i < h.length; i++) d |= h.charCodeAt(i) ^ acesso.hash.charCodeAt(i); return d === 0;
+}
+async function gerarAcesso(senha) {
+  const sal = b64u.para(crypto.getRandomValues(new Uint8Array(16)));
+  return { v: 1, alg: 'PBKDF2-SHA256', iter: ITER, sal, hash: await hashSenha(senha, sal, ITER), atualizado_em: new Date().toISOString(), obs: OBS_ACESSO };
+}
+/* Tentativas: 2 erros livres; a partir do 3º, espera crescente (30 s, 1, 2, 4, 8 min… até 15 min). Vale também depois de recarregar. */
+const Tentativas = {
+  ler() { const t = ls.get('admin:tentativas', null); return t && Number.isFinite(t.n) && Number.isFinite(t.ate) ? t : { n: 0, ate: 0 }; },
+  espera() { return Math.max(0, Math.ceil((this.ler().ate - Date.now()) / 1000)); },
+  falhou() { const t = this.ler(); t.n += 1; const s = t.n < 3 ? 0 : Math.min(900, 30 * 2 ** (t.n - 3)); t.ate = Date.now() + s * 1000; ls.set('admin:tentativas', t); return { n: t.n, espera: s }; },
+  zerar() { ls.del('admin:tentativas'); }
+};
+const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
 /* ---------------- GitHub ---------------- */
 const API = 'https://api.github.com';
@@ -106,7 +195,29 @@ function lerValidade(h) { // "2026-11-20 12:00:00 UTC" ou "2026-11-20 12:00:00 -
   if (!m) return null; const z = !m[3] || m[3] === 'UTC' ? 'Z' : m[3].slice(0, 3) + ':' + m[3].slice(3);
   const d = new Date(m[1] + 'T' + m[2] + z); return isNaN(d) ? null : d.toISOString();
 }
+/* GitHub simulado da demonstração: arquivos, SHAs e commits só na memória desta aba. Nenhuma requisição sai do aparelho. */
+const GHD = { arquivos: {}, shas: {}, n: 0, log: [] };
+function ghDemo(caminho, opt) {
+  opt = opt || {}; const m = opt.method || 'GET';
+  return new Promise(ok => setTimeout(ok, 160)).then(() => {
+    const erro = (st, msg) => { throw Object.assign(new Error(msg), { status: st }); };
+    const p = caminho.replace(/^\/repos\/[^/]+\/[^/]+/, '').split('?')[0];
+    if (p === '') return { permissions: { push: true } };
+    if (!p.startsWith('/contents/')) erro(404, 'Not Found');
+    const f = decodeURIComponent(p.slice('/contents/'.length));
+    if (m === 'GET') {
+      if (f === 'fotos') { const fs = Object.keys(GHD.arquivos).filter(k => k.startsWith('fotos/')).map(k => ({ type: 'file', name: k.slice(6), path: k, sha: GHD.shas[k], size: Math.round(GHD.arquivos[k].length * 3 / 4) })); if (!fs.length) erro(404, 'Not Found'); return fs; }
+      if (!(f in GHD.arquivos)) erro(404, 'Not Found');
+      return { content: GHD.arquivos[f], sha: GHD.shas[f] };
+    }
+    const b = opt.body || {};
+    if (m === 'PUT') { if (f in GHD.arquivos && b.sha !== GHD.shas[f]) erro(409, 'conflict'); GHD.arquivos[f] = b.content; GHD.shas[f] = 'demo' + (++GHD.n); GHD.log.push({ arquivo: f, mensagem: b.message, em: Date.now() }); faixaDemo(); return { content: { sha: GHD.shas[f], path: f } }; }
+    if (m === 'DELETE') { delete GHD.arquivos[f]; GHD.log.push({ arquivo: f, mensagem: b.message, em: Date.now() }); faixaDemo(); return null; }
+    erro(405, 'Método não suportado');
+  });
+}
 async function gh(caminho, opt) {
+  if (DEMO) return ghDemo(caminho, opt);
   opt = opt || {};
   let r;
   try { r = await fetch(API + caminho, { method: opt.method || 'GET', headers: Object.assign({ 'Authorization': 'Bearer ' + A.token, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }, opt.body ? { 'Content-Type': 'application/json' } : {}), body: opt.body ? JSON.stringify(opt.body) : undefined, cache: 'no-store' }); }
@@ -130,14 +241,36 @@ function msgErro(e, acao) {
 const repoPath = () => `/repos/${encodeURIComponent(A.cfg.owner)}/${encodeURIComponent(A.cfg.repo)}`;
 const b64 = { de(s) { const bin = atob(s.replace(/\n/g, '')); const u = Uint8Array.from(bin, c => c.charCodeAt(0)); return new TextDecoder().decode(u); },
   para(str) { const u = new TextEncoder().encode(str); let bin = ''; for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(bin); } };
-const lerConteudo = (txt) => JSON.parse(txt.replace(/^﻿?\s*window\.CONTEUDO\s*=\s*/, '').replace(/;\s*$/, ''));
-const escreverConteudo = (o) => 'window.CONTEUDO = ' + JSON.stringify(o, null, 2) + ';\n';
+/* ---------------- dados do guia: leitura e escrita ----------------
+   Fonte: dados/conteudo.json (JSON puro, esquema em dados/ESQUEMA.md). Repositório antigo: conteudo.js (window.CONTEUDO = …).
+   O painel lê o arquivo que existir e, ao publicar, grava no MESMO formato até o anfitrião tocar em "Atualizar formato".
+   Nunca apaga conteudo.js sozinho. */
+const ARQ_JSON = 'dados/conteudo.json', ARQ_JS = 'conteudo.js';
+const arqDe = (formato) => formato === 'js' ? ARQ_JS : ARQ_JSON;
+const carregarScript = (src) => new Promise((ok, falha) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => falha(new Error('não consegui carregar ' + src)); document.head.appendChild(s); });
+async function garantirContrato() { if (!window.GuiaDados) await carregarScript('../assets/dados.js'); if (!window.GuiaDados) throw new Error('o arquivo assets/dados.js não carregou'); }
+/* Mesma normalização do site + saneamento do painel (links, datas, fotos). Devolve { obj, fix }. */
+function preparar_(bruto) {
+  if (!window.GuiaDados) { const x = new Error('O contrato dos dados (assets/dados.js) não carregou. Recarregue a página.'); x.status = -1; throw x; }
+  const av = []; const obj = GuiaDados.normalizar(bruto, av);
+  const fix = sanear(obj);
+  return { obj, fix: av.filter(a => !/^formato migrado/.test(a)).concat(fix) };
+}
+const lerConteudo = (txt) => { const t = String(txt).replace(/^﻿/, '').trim(); return JSON.parse(/^window\.CONTEUDO\s*=/.test(t) ? t.replace(/^window\.CONTEUDO\s*=\s*/, '').replace(/;\s*$/, '') : t); };
+const escreverConteudo = (o, formato) => { const n = preparar_(o).obj; const j = JSON.stringify(n, null, 2); return formato === 'js' ? 'window.CONTEUDO = ' + j + ';\n' : j + '\n'; };
+async function baixarArquivo(caminho) {
+  const j = await gh(`${repoPath()}/contents/${caminho}?ref=${encodeURIComponent(A.cfg.branch)}`);
+  const texto = b64.de(j.content || '');
+  let bruto; try { bruto = lerConteudo(texto); } catch (e) { const x = new Error(`O arquivo ${caminho} do repositório não é um JSON válido.`); x.status = -1; throw x; }
+  if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) { const x = new Error(`O arquivo ${caminho} do repositório está num formato inesperado.`); x.status = -1; throw x; }
+  return { sha: j.sha, bruto, texto };
+}
 async function baixarConteudo() {
-  const j = await gh(`${repoPath()}/contents/conteudo.js?ref=${encodeURIComponent(A.cfg.branch)}`);
-  const texto = b64.de(j.content);
-  let obj; try { obj = lerConteudo(texto); } catch (e) { const x = new Error('O arquivo conteudo.js do repositório não é um JSON válido.'); x.status = -1; throw x; }
-  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) { const x = new Error('O arquivo conteudo.js do repositório está num formato inesperado.'); x.status = -1; throw x; }
-  return { sha: j.sha, obj, texto };
+  let r, formato = 'json';
+  try { r = await baixarArquivo(ARQ_JSON); }
+  catch (e) { if (e.status !== 404) throw e; formato = 'js'; r = await baixarArquivo(ARQ_JS); }
+  const p = preparar_(r.bruto);
+  return { sha: r.sha, obj: p.obj, texto: r.texto, formato, fix: p.fix, esquemaArquivo: Number(r.bruto.esquema) || 1 };
 }
 
 /* ---------------- validação de formatos ---------------- */
@@ -166,6 +299,7 @@ function sanear(o) {
       if (/^(__proto__|constructor|prototype)$/.test(k)) { delete x[k]; fix.push(q + ': chave proibida'); return; }
       if (CHAVES_DATA.test(k) && v != null && v !== '' && !(typeof v === 'string' && RE_DIA.test(v) && !isNaN(new Date(v)))) { x[k] = null; fix.push(q + ': data inválida removida'); return; }
       if (CHAVES_URL.test(k) && v != null && v !== '' && !(typeof v === 'string' && urlValida(v))) { x[k] = ''; fix.push(q + ': link inválido removido'); return; }
+      if (CHAVES_URL.test(k) && typeof v === 'string' && ehIcal(v)) { x[k] = ''; fix.push(q + ': link secreto do calendário removido (ele vai só no Apps Script, em ICAL_URL)'); return; }
       if (k === 'src' && v != null && v !== '' && !srcValido(v)) { x[k] = ''; fix.push(q + ': endereço de foto inválido removido'); return; }
       if ((k === 'lat' || k === 'lng') && v != null && v !== '' && !(typeof v === 'number' && isFinite(v))) { const n = Number(String(v).replace(',', '.')); x[k] = isFinite(n) && String(v).trim() !== '' ? n : null; if (x[k] !== v) fix.push(q + ': coordenada corrigida'); return; }
       if (/^(tags|bom_saber|camas|regras_casa|regras_condominio|lixo_limpeza|seguranca|saida)$/.test(k) && v != null && !Array.isArray(v)) { x[k] = []; fix.push(q + ': lista inválida'); return; }
@@ -350,6 +484,7 @@ function mesclar(base, minha, deles, preferir) {
 function urlPublica() {
   const c = (A.draft && A.draft.config) || {};
   if (tem(c.url_publica) && urlValida(c.url_publica, true)) return String(c.url_publica).trim().replace(/\/?$/, '/');
+  if (DEMO) { try { return new URL('../', location.href).href; } catch (e) { return ''; } }
   const o = String(A.cfg.owner || '').toLowerCase(), r = String(A.cfg.repo || '');
   if (!o) return '';
   return r.toLowerCase() === o + '.github.io' ? `https://${o}.github.io/` : `https://${o}.github.io/${r}/`;
@@ -424,6 +559,12 @@ function verificar() {
   ck((C.contatos || []).some(c => c.nivel === 'essencial'), 'Contatos essenciais cadastrados', 'Nenhum contato essencial (farmácia, mercado, saúde)', 'Contatos', 'contatos');
   (C.contatos || []).forEach(c => { if (tem(c.telefone) && /[^\d\s()+-]/.test(c.telefone)) it.push({ e: 'erro', txt: `Telefone com caracteres inválidos: ${c.nome}`, grupo: 'Contatos', ir: 'contatos' }); });
   (C.beneficios || []).forEach(b => { if (tem(b.validade) && b.validade < hoje()) it.push({ e: 'falta', txt: `Benefício vencido (já não aparece no site): ${b.titulo || b.parceiro}`, grupo: 'Benefícios', ir: 'beneficios' }); });
+  { const cfg = C.config || {}, res = String(casa.link_reserva || '').trim();
+    if (tem(res) && urlValida(res, true) && !ehIcal(res) && !ehAirbnb(res)) it.push({ e: 'falta', txt: 'O link de reserva não é do Airbnb (airbnb.com ou airbnb.com.br): o botão aparece como “Reservar”. Confira se é o anúncio certo.', grupo: 'Reservas', ir: 'casa' });
+    else if (tem(res) && ehAirbnb(res)) it.push({ e: 'ok', txt: 'Botão “Reservar no Airbnb” ativo', grupo: 'Reservas', ir: 'casa' });
+    if (cfg.agenda_visivel === true) ck(tem(cfg.feedback_endpoint), 'Agenda de disponibilidade ligada (confira em A casa › Testar agenda)', 'A agenda está ligada, mas falta o endereço do Apps Script (Configurações › Feedback): no site ela não aparece', 'Reservas', tem(cfg.feedback_endpoint) ? 'casa' : 'config', true); }
+  { const vaz = []; const andar = (x, p) => { if (typeof x === 'string') { if (ehIcal(x)) vaz.push(p); } else if (x && typeof x === 'object') Object.keys(x).forEach(k => andar(x[k], p ? p + '.' + k : k)); }; andar(C, '');
+    vaz.forEach(p => { const o = ondeFica(p); it.push({ e: 'erro', txt: `Link secreto do calendário (iCal) no conteúdo público: apague · ${o.nome}`, grupo: 'Segurança', ir: o.ir }); }); }
   ck(tem((C.config || {}).feedback_endpoint), 'Feedback ligado ao painel', 'Conecte o formulário de feedback ao painel (veja Configurações)', 'Feedback', 'config');
   ck(!!((C.config || {}).og_imagem && C.config.og_imagem.src), 'Imagem de compartilhamento', 'Escolha a imagem que aparece ao enviar o link no WhatsApp', 'Publicação', 'config');
   linksInvalidos(C).forEach(l => { const o = ondeFica(l.campo); it.push({ e: 'erro', txt: `Link precisa começar com https:// · ${o.nome}`, grupo: 'Publicação', ir: o.ir }); });
@@ -470,22 +611,115 @@ function marca(tipo, tema) {
 }
 const avisoArmaz = () => ARMAZ_BLOQUEADO ? `<div class="aviso" role="alert" style="margin-bottom:14px">${ic('alerta')}<span><b>O navegador está bloqueando o armazenamento deste site.</b> Dá para editar e publicar normalmente, mas o rascunho e o login não ficam salvos se você fechar a aba. Para corrigir, permita cookies e dados de sites para este endereço.</span></div>` : '';
 
-/* ---------------- entrada ---------------- */
-const RECURSOS_ENTRADA = `<ul class="entrada-lista"><li>${ic('casa')}Atualize textos, fotos e dicas do guia</li><li>${ic('olho')}Veja como fica antes de publicar</li><li>${ic('feedback')}Acompanhe o que os hóspedes dizem</li></ul>`;
-function moldura(corpo) {
-  return `<main class="entrada"><div class="entrada-card">
-    <div class="entrada-lado"><div class="entrada-logo">${marca('vertical', 'escuro')}</div><p class="assinatura">Seja bem-vindo!</p>${RECURSOS_ENTRADA}</div>
+/* ---------------- entrada ----------------
+   Uma única senha (a do anfitrião). 1) senha → 2) só na primeira vez neste aparelho: o token do GitHub, uma vez → painel.
+   Se o aparelho já tem o cofre, a mesma senha o abre. */
+const RECURSOS_ENTRADA = `<ul class="entrada-lista"><li>${ic('casa')}<span>Textos, fotos e dicas do guia</span></li><li>${ic('mala')}<span>Mensagens prontas para cada hóspede</span></li><li>${ic('impressora')}<span>Cartões impressos com a marca da casa</span></li><li>${ic('feedback')}<span>O que os hóspedes dizem da estadia</span></li></ul>`;
+function moldura(corpo, classe) {
+  return `<main class="entrada ${classe || ''}"><div class="entrada-card">
+    <div class="entrada-lado"><div class="entrada-logo">${marca('vertical', 'escuro')}</div><p class="assinatura">Seja bem-vindo!</p><p class="entrada-frase">Aqui, o tempo desacelera e a vida acontece.</p>${RECURSOS_ENTRADA}</div>
     <div class="entrada-form">${avisoArmaz()}${corpo}</div></div></main>`;
 }
+const caixaSenha = (id, rot, auto, extra) => `<div class="campo"><label for="${id}">${rot}</label><div class="senha-caixa"><input type="password" id="${id}" required autocomplete="${auto}" autocapitalize="off" spellcheck="false" ${extra || ''}><button type="button" class="ver-senha" data-ver-senha="${id}" aria-label="Mostrar a senha" aria-pressed="false">${ic('olho')}</button></div></div>`;
+const HONESTO = `<p class="honesto">${ic('cadeado')}<span>A senha protege este aparelho; o token do GitHub é informado uma única vez.</span></p>`;
+function telaSenha(msg) {
+  A.senhaPendente = null; limparImpressao();
+  $('#app').innerHTML = moldura(`
+    <span class="olho">Área do anfitrião</span><h1 class="t1 entrada-tit">Casa 18 <em>Anahi</em></h1>
+    <p class="entrada-lead">Digite a senha do anfitrião para abrir o painel.</p>
+    <div id="s-msg">${msg ? `<div class="aviso erro" role="alert">${ic('alerta')}<span>${esc(msg)}</span></div>` : ''}</div>
+    <form class="form" id="f-senha" novalidate>
+      ${caixaSenha('s-senha', 'Senha do anfitrião', 'current-password')}
+      <p class="espera" id="s-espera" aria-live="polite" hidden></p>
+      <button class="btn btn-prim btn-grande" type="submit">${ic('cadeado')}Entrar</button>
+    </form>
+    ${HONESTO}
+    <div class="ou" role="separator"><span>ou</span></div>
+    <a class="btn btn-sec btn-grande" href="?demo" id="btn-demo">${ic('olho')}Conhecer em modo demonstração</a>
+    <p class="peq mudo centro">Na demonstração nada é publicado e nada deste aparelho é usado.</p>
+    <details class="esqueci"><summary>Esqueceu a senha?</summary>
+      <p>A senha fica registrada só como um código embaralhado (hash) no arquivo <code>admin/acesso.json</code> do seu repositório. Para voltar à senha original do painel, entre no GitHub com a conta dona do guia, abra esse arquivo e apague-o (<span class="en">Delete file</span>). Em alguns minutos a senha original volta a valer.</p>
+      <p>Depois, entre e cole o token de novo: o que estava guardado neste aparelho foi trancado com a senha esquecida e não pode ser aberto sem ela.</p></details>`, 'tela-senha');
+  const f = $('#f-senha');
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault(); if (Tentativas.espera()) { ligarEspera(); return; }
+    const senha = $('#s-senha').value; if (!senha) { erroSenha('Digite a senha do anfitrião.'); $('#s-senha').focus(); return; }
+    const btn = f.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Conferindo…';
+    let ok = false;
+    try { ok = await conferirSenha(senha, await carregarAcesso()); }
+    catch (x) { btn.disabled = false; btn.textContent = 'Entrar'; erroSenha('Este navegador não conseguiu conferir a senha (o painel precisa de um endereço https://).'); return; }
+    if (!ok) {
+      const t = Tentativas.falhou();
+      telaSenha(t.espera ? `Senha incorreta. Por segurança, aguarde ${mmss(t.espera)} para tentar de novo.` : `Senha incorreta. ${t.n === 1 ? 'Mais 1 tentativa' : 'Esta foi a última tentativa'} antes de uma pausa.`);
+      return;
+    }
+    Tentativas.zerar(); btn.textContent = 'Abrindo…';
+    try { await depoisDaSenha(senha); } catch (x) { telaSenha('Não consegui abrir: ' + x.message); }
+  });
+  ligarEspera();
+  if (!Tentativas.espera()) $('#s-senha').focus();
+}
+function erroSenha(m) { const box = $('#s-msg'); if (box) box.innerHTML = `<div class="aviso erro" role="alert">${ic('alerta')}<span>${esc(m)}</span></div>`; }
+function ligarEspera() {
+  clearInterval(ligarEspera._t);
+  const atualizar = () => {
+    const s = Tentativas.espera(), el = $('#s-espera'), inp = $('#s-senha'), btn = $('#f-senha button[type=submit]'); if (!el || !inp) { clearInterval(ligarEspera._t); return; }
+    el.hidden = !s; el.textContent = s ? `Muitas tentativas. Tente de novo em ${mmss(s)}.` : '';
+    inp.disabled = !!s; btn.disabled = !!s;
+    if (!s) { clearInterval(ligarEspera._t); if (ligarEspera._ativo) { ligarEspera._ativo = false; inp.focus(); } }
+  };
+  if (Tentativas.espera()) { ligarEspera._ativo = true; ligarEspera._t = setInterval(atualizar, 1000); }
+  atualizar();
+}
+async function depoisDaSenha(senha) {
+  if (Cofre.existe()) {
+    let d;
+    try { d = await Cofre.abrir(senha); }
+    catch (e) { if (e.codigo === 'senha') { telaSenhaAnterior(senha); return; } throw e; }
+    const r = usarCofre(d);
+    if (A.token && tem(A.cfg.owner) && tem(A.cfg.repo)) { await carregar(); return; }
+    telaEntrada(r.venceu ? 'O token guardado neste aparelho venceu. Crie um novo no GitHub (passo a passo abaixo) e cole aqui.' : null);
+    return;
+  }
+  A.senhaPendente = senha; A.cofreDados = novoCofre(); A.primeiraEntrada = true;
+  telaEntrada();
+}
+/* O cofre deste aparelho foi trancado com outra senha: a anterior (trocada em outro aparelho) ou a antiga "senha local". */
+function telaSenhaAnterior(senhaNova, msg) {
+  $('#app').innerHTML = moldura(`
+    <span class="olho">Área do anfitrião</span><h1 class="t1 entrada-tit">Só mais <em>um passo</em></h1>
+    <p class="entrada-lead">A senha está certa, mas o acesso guardado neste aparelho foi trancado com outra senha: a anterior (se ela foi trocada em outro aparelho) ou a antiga senha local do painel.</p>
+    ${msg ? `<div class="aviso erro" role="alert">${ic('alerta')}<span>${esc(msg)}</span></div>` : ''}
+    <form class="form" id="f-anterior" novalidate>
+      ${caixaSenha('a-senha', 'Senha anterior', 'off')}
+      <span class="ajuda">Ela é pedida só esta vez: depois, o acesso guardado passa a abrir com a senha atual.</span>
+      <button class="btn btn-prim btn-grande" type="submit">${ic('cadeado')}Atualizar e entrar</button>
+    </form>
+    <p class="peq mudo" style="margin-top:18px">Não lembra? <button type="button" class="btn-link" data-acao="recomecar-cofre">Informar o token de novo</button>. Os dados privados da casa e os modelos de mensagem guardados neste aparelho serão apagados.</p>`);
+  $('#a-senha').focus();
+  $('#f-anterior').addEventListener('submit', async (e) => {
+    e.preventDefault(); const btn = e.target.querySelector('button[type=submit]');
+    if (Tentativas.espera()) { telaSenhaAnterior(senhaNova, `Aguarde ${mmss(Tentativas.espera())} para tentar de novo.`); return; }
+    btn.disabled = true; btn.textContent = 'Abrindo…';
+    let d; try { d = await Cofre.abrir($('#a-senha').value); }
+    catch (x) { const t = Tentativas.falhou(); telaSenhaAnterior(senhaNova, t.espera ? `Senha anterior incorreta. Aguarde ${mmss(t.espera)} para tentar de novo.` : 'Senha anterior incorreta.'); return; }
+    Tentativas.zerar(); await Cofre.criar(senhaNova, d); toast('Pronto: o acesso guardado agora abre com a senha atual.');
+    const r = usarCofre(d);
+    if (A.token && tem(A.cfg.owner) && tem(A.cfg.repo)) await carregar(); else telaEntrada(r.venceu ? 'O token guardado venceu. Cole um novo.' : null);
+  });
+  telaSenhaAnterior.nova = senhaNova;
+}
+/* Token: pedido uma única vez por aparelho (ou quando vence), logo depois da senha. */
 function telaEntrada(msg) {
+  if (!DEMO && !A.senhaPendente && !(Cofre.existe() && temChaveSessao())) { telaSenha(msg); return; }
   const conhecido = tem(A.cfg.owner) && tem(A.cfg.repo);
   const auto = !!(A.repoAuto && A.repoAuto.owner === A.cfg.owner && A.repoAuto.repo === A.cfg.repo);
-  const primeiraVez = !ls.raw('admin:cfg') && !Cofre.existe();
+  const primeiraVez = !ls.raw('admin:cfg');
   const conta = tem(A.cfg.owner) ? `<b>${esc(A.cfg.owner)}</b>` : 'dona do guia';
   const repoNome = tem(A.cfg.repo) ? `<b>${esc(A.cfg.repo)}</b>` : 'o repositório do guia';
   $('#app').innerHTML = moldura(`
-    <span class="olho">Painel do anfitrião</span><h1 class="t1" style="margin:6px 0 8px">Casa 18 Anahi</h1>
-    <p class="mudo" style="margin:0 0 18px">Aqui você cuida do guia que os hóspedes abrem pelo QR Code. Nada vai ao ar sem você tocar em <b>Publicar</b>.</p>
+    <span class="olho"><span class="passo-n">2 de 2</span>Conectar ao GitHub</span><h1 class="t1 entrada-tit">Senha conferida. <em>Agora, o token.</em></h1>
+    <p class="entrada-lead">Só desta vez neste aparelho: cole o token que deixa o painel publicar no guia. Ele fica guardado aqui, cifrado com a sua senha. Nada vai ao ar sem você tocar em <b>Publicar</b>.</p>
     ${msg ? `<div class="aviso erro" role="alert" style="margin-bottom:14px">${ic('alerta')}<span>${esc(msg)}</span></div>` : ''}
     ${conhecido ? `<p class="repo-auto">${ic('check')} Guia encontrado: <b>${esc(A.cfg.owner)}/${esc(A.cfg.repo)}</b>${auto ? ' (pelo endereço desta página)' : ''}. Você só precisa do token.</p>` : ''}
     <details class="passo-a-passo ajuda-token" ${primeiraVez ? 'open' : ''}><summary>${primeiraVez ? 'Primeira vez? Crie o seu token em 5 passos' : 'Precisa de um token novo? Veja como criar'}</summary>
@@ -493,7 +727,7 @@ function telaEntrada(msg) {
       <ol class="passos-token">
         <li>Entre no GitHub com a conta ${conta}, a conta <b>dona do guia</b>. Se ele abrir com outra conta, saia dela antes (foto no canto de cima → <span class="en">Sign out</span>).</li>
         <li><a class="link-token" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Abrir a página do GitHub que cria o token ↗</a><br><span class="mudo peq">Abre em outra aba. Deixe esta aba aberta para colar o token depois.</span></li>
-        <li>Em <span class="en">Token name</span> (nome), escreva <b>Painel Casa 18</b>. Em <span class="en">Expiration</span> (validade), escolha <b>30 days</b> (30 dias). Quando vencer, é só criar outro.</li>
+        <li>Em <span class="en">Token name</span> (nome), escreva <b>Painel Casa 18</b>. Em <span class="en">Expiration</span> (validade), escolha <b>30 days</b> (30 dias). Quando vencer, o painel pede um novo.</li>
         <li>Em <span class="en">Repository access</span> (acesso a repositórios), escolha <span class="en">Only select repositories</span> (só os que eu escolher) e marque ${repoNome}. Em <span class="en">Permissions</span> (permissões), abra <span class="en">Repository permissions</span> e, na linha <span class="en">Contents</span> (conteúdo), escolha <span class="en">Read and write</span> (ler e escrever). Não mexa no resto.</li>
         <li>Toque em <span class="en">Generate token</span> (gerar token), copie o código que começa com <b>github_pat_</b> e cole no campo abaixo. O GitHub só mostra esse código uma vez.</li>
       </ol></details>
@@ -501,29 +735,30 @@ function telaEntrada(msg) {
       <details class="repo-det" ${conhecido ? '' : 'open'}><summary>${conhecido ? 'Opções avançadas <span class="mudo">· trocar repositório ou branch</span>' : 'Onde está o guia no GitHub'}</summary>
         <div class="campos" style="margin-top:12px"><div class="campo"><label for="e-owner">Nome da conta no GitHub</label><input type="text" id="e-owner" required value="${esc(A.cfg.owner)}" autocomplete="username" spellcheck="false" autocapitalize="off"><span class="ajuda">Usuário ou organização dona do guia.</span></div>
         <div class="campo"><label for="e-repo">Nome do repositório do guia</label><input type="text" id="e-repo" required value="${esc(A.cfg.repo)}" spellcheck="false" autocapitalize="off"></div></div>
-        <details class="avancadas"><summary>Opções avançadas</summary><div class="campo" style="margin-top:8px"><label for="e-branch">Branch (ramo do repositório)</label><input type="text" id="e-branch" value="${esc(A.cfg.branch || 'main')}" spellcheck="false" autocapitalize="off"><span class="ajuda">Quase sempre é “main”. Só mude se quem montou o site pediu.</span></div></details></details>
+        <details class="avancadas"><summary>Opções avançadas</summary><div class="campo" style="margin-top:8px"><label for="e-branch">Branch (ramo do repositório)</label><input type="text" id="e-branch" value="${esc(A.cfg.branch || 'main')}" spellcheck="false" autocapitalize="off"><span class="ajuda">Quase sempre é “main”. Só mude se quem montou o site pediu.</span></div>
+        <label class="check"><input type="checkbox" id="e-nao-guardar">Aparelho compartilhado: não guardar o token (pedir de novo a cada vez)</label></details></details>
       <div class="campo"><label for="e-token">Cole aqui o token (começa com github_pat_)</label><input type="password" id="e-token" required autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="github_pat_…"><span class="ajuda">Ele dá permissão para publicar no guia. Não envie para ninguém.</span></div>
-      <label class="check"><input type="checkbox" id="e-lembrar">Lembrar neste aparelho (protegido por uma senha sua)</label>
-      <div id="lembrar-campos" class="campos" hidden><div class="campo"><label for="e-senha">Crie uma senha local</label><input type="password" id="e-senha" autocomplete="new-password" minlength="8"><span class="ajuda">Mínimo de 8 caracteres. Ela fica só na sua cabeça: será pedida sempre que abrir o painel.</span></div>
-        <div class="campo"><label for="e-senha2">Repita a senha</label><input type="password" id="e-senha2" autocomplete="new-password"></div></div>
-      <button class="btn btn-prim btn-grande" type="submit">${ic('cadeado')}Entrar no painel</button>
-    </form>`);
-  $('#e-lembrar').addEventListener('change', (e) => { $('#lembrar-campos').hidden = !e.target.checked; });
+      <button class="btn btn-prim btn-grande" type="submit">${ic('cadeado')}Conectar e entrar</button>
+    </form>
+    ${HONESTO}
+    <p class="peq mudo centro"><button type="button" class="btn-link" data-acao="voltar-senha">Voltar</button></p>`);
   $('#f-entrar').addEventListener('submit', async (e) => {
     e.preventDefault();
     const cfg = { owner: $('#e-owner').value.trim(), repo: $('#e-repo').value.trim(), branch: $('#e-branch').value.trim() || 'main' };
-    const token = $('#e-token').value.trim(), lembrar = $('#e-lembrar').checked, senha = $('#e-senha').value;
+    const token = $('#e-token').value.trim(), guardar = !$('#e-nao-guardar').checked;
     if (!cfg.owner || !cfg.repo) { $('.repo-det').open = true; telaErro('Informe o usuário e o repositório do GitHub.'); return; }
     if (!token) { telaErro('Cole o token de acesso.'); $('#e-token').focus(); return; }
-    if (lembrar && senha.length < 8) { telaErro('A senha local precisa ter pelo menos 8 caracteres.'); $('#e-senha').focus(); return; }
-    if (lembrar && senha !== $('#e-senha2').value) { telaErro('As duas senhas locais não são iguais.'); $('#e-senha2').focus(); return; }
     const btn = e.target.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Conectando…';
     A.cfg = cfg; A.token = token;
     try {
       const r = await gh(repoPath());
       if (!r.permissions || !r.permissions.push) throw Object.assign(new Error('Este token só pode ler o repositório. Gere outro com “Contents: Read and write”.'), { status: -1 });
       ls.set('admin:cfg', A.cfg); ss.set('admin:token', A.token);
-      if (lembrar) { btn.textContent = 'Protegendo o token…'; await Cofre.criar(senha, segredosAtuais()); } else Cofre.apagar();
+      btn.textContent = 'Protegendo o token…';
+      A.cofreDados = A.cofreDados || novoCofre();
+      Object.assign(A.cofreDados, guardar ? { token, exp: A.tokenExp, tokenAte: tokenAte(A.tokenExp) } : { token: null, exp: null, tokenAte: null });
+      A.cofreDados.fbchave = fbChave();
+      if (A.senhaPendente) { await Cofre.criar(A.senhaPendente, A.cofreDados); A.senhaPendente = null; } else await salvarCofre();
       await carregar();
     } catch (err) {
       A.token = null; ss.del('admin:token');
@@ -532,40 +767,24 @@ function telaEntrada(msg) {
   });
   function telaErro(m) { let a = $('#f-entrar .aviso.erro'); if (!a) { $('#f-entrar').insertAdjacentHTML('afterbegin', `<div class="aviso erro" role="alert">${ic('alerta')}<span></span></div>`); a = $('#f-entrar .aviso.erro'); } a.querySelector('span').textContent = m; }
 }
-function telaDesbloqueio(msg) {
-  $('#app').innerHTML = moldura(`
-    <span class="olho">Painel do anfitrião</span><h1 class="t1" style="margin:6px 0 8px">Que bom te ver de novo</h1>
-    <p class="mudo" style="margin:0 0 18px">O acesso ao guia <b>${esc(A.cfg.owner)}/${esc(A.cfg.repo)}</b> está guardado neste aparelho, protegido pela sua senha local.</p>
-    ${msg ? `<div class="aviso erro" role="alert" style="margin-bottom:14px">${ic('alerta')}<span>${esc(msg)}</span></div>` : ''}
-    <form class="form" id="f-abrir"><div class="campo"><label for="d-senha">Senha local</label><input type="password" id="d-senha" required autocomplete="current-password"></div>
-      <button class="btn btn-prim btn-grande" type="submit">${ic('cadeado')}Entrar no painel</button></form>
-    <p class="peq mudo" style="margin-top:16px">Esqueceu a senha? <button type="button" class="btn-link" data-acao="esquecer-cofre">Entrar com um token novo</button> (o acesso guardado é apagado).</p>`);
-  $('#d-senha').focus();
-  $('#f-abrir').addEventListener('submit', async (e) => {
-    e.preventDefault(); const btn = e.target.querySelector('button'); btn.disabled = true; btn.textContent = 'Abrindo…';
-    try {
-      const d = await Cofre.abrir($('#d-senha').value);
-      A.token = d.token; A.tokenExp = d.exp || null; ss.set('admin:token', d.token); if (d.exp) ss.set('admin:token-exp', d.exp); if (d.fbchave) ss.set('admin:fbchave', d.fbchave);
-      await carregar();
-    } catch (err) { telaDesbloqueio(err.message); }
-  });
-}
 async function carregar() {
   $('#app').innerHTML = `<main class="entrada"><div class="entrada-card carregando"><div class="entrada-logo pequeno">${marca('simbolo', 'claro')}</div><p class="t2">Abrindo o guia…</p></div></main>`;
   let remoto;
-  try { remoto = await baixarConteudo(); }
+  try { await garantirContrato(); remoto = await baixarConteudo(); }
   catch (e) {
-    if (e.status === 404) { telaEntrada('Não encontrei o arquivo conteudo.js na raiz do repositório. Envie os arquivos do guia primeiro.'); return; }
-    if (e.status === 401) { sair(true); telaEntrada('Seu acesso expirou. Entre de novo com um token válido.'); return; }
+    if (e.status === 404) { telaEntrada('Não encontrei os dados do guia no repositório (dados/conteudo.json ou conteudo.js). Envie os arquivos do guia primeiro.'); return; }
+    if (e.status === 401) { esquecerToken(); telaEntrada('Seu acesso expirou. Cole um token válido (o passo a passo está abaixo).'); return; }
     telaEntrada(e.status === -1 ? e.message : msgErro(e, 'carregar o guia')); return;
   }
-  A.remoto = remoto; A.baseSha = remoto.sha; A.baseObj = clone(remoto.obj);
+  if (A.cofreDados && A.cofreDados.token && A.tokenExp && A.cofreDados.exp !== A.tokenExp) { A.cofreDados.exp = A.tokenExp; A.cofreDados.tokenAte = tokenAte(A.tokenExp); salvarCofre(); }
+  A.remoto = remoto; A.baseSha = remoto.sha; A.baseObj = clone(remoto.obj); A.formato = remoto.formato;
   A.draft = clone(remoto.obj);
-  A.correcoes = sanear(A.draft);
+  A.correcoes = remoto.fix.slice();
+  A.legado = remoto.formato === 'js' ? true : null; if (remoto.formato === 'json') verificarLegado();
   let conflitoInicial = null;
   const r = ls.get('admin:rascunho', null);
   if (r && r.obj && !igual(r.obj, remoto.obj)) {
-    let rasc = null; try { rasc = clone(r.obj); A.correcoes = A.correcoes.concat(sanear(rasc)); } catch (e) { rasc = null; }
+    let rasc = null; try { const p = preparar_(r.obj); rasc = p.obj; A.correcoes = A.correcoes.concat(p.fix); } catch (e) { rasc = null; }
     if (rasc && confirm(`Você tem alterações não publicadas salvas neste aparelho (${dataBR(new Date(r.em).toISOString()) || 'data desconhecida'}).\n\nContinuar de onde parou?`)) {
       if (r.base === remoto.sha) A.draft = rasc;
       else {
@@ -579,21 +798,99 @@ async function carregar() {
   if (A.correcoes.length) toast(`Corrigi ${A.correcoes.length} valor(es) em formato inválido (datas, links ou fotos). Veja em Visão geral.`, true);
   if (conflitoInicial) mostrarConflitos(conflitoInicial, true);
   if (A.avisoJuncao) toast(A.avisoJuncao);
+  if (A.formato === 'js' && !conflitoInicial && !ss.get('admin:formato-ofertado', false)) { ss.set('admin:formato-ofertado', true); ofertarFormato(); }
+}
+/* ---------------- formato dos dados (migração conteudo.js → dados/conteudo.json) ---------------- */
+async function verificarLegado() { // só para mostrar o botão "Apagar conteudo.js antigo" em Configurações
+  try { const j = await gh(`${repoPath()}/contents/${ARQ_JS}?ref=${encodeURIComponent(A.cfg.branch)}`); A.legado = { sha: j.sha }; }
+  catch (e) { A.legado = null; }
+  if (A.view === 'config' && $('#card-formato')) rerender();
+}
+function ofertarFormato() {
+  const d = $('#dialogo'); if (!d || d.open) return;
+  d.innerHTML = `<div class="ed-cab"><h2 class="t2" id="dlg-titulo">Atualizar o formato dos dados</h2><button type="button" class="btn btn-sec btn-ic" data-fechar-dialogo aria-label="Fechar">${ic('x')}</button></div>
+    <div class="ed-corpo form"><p style="margin:0">Seu guia guarda o conteúdo no arquivo antigo <code>conteudo.js</code>. O formato novo separa os dados do código (<code>dados/conteudo.json</code>): atualizar o site e editar o conteúdo deixam de interferir um no outro.</p>
+    <p class="mudo" style="margin:0">Toque em <b>Atualizar formato</b> depois de subir o código novo do site. O painel cria <code>dados/conteudo.json</code> com o conteúdo publicado hoje, por commit. O <code>conteudo.js</code> não é apagado: você decide depois, em Configurações. Até lá, tudo continua funcionando como está.</p>
+    <div class="acoes"><button type="button" class="btn btn-prim" data-acao="atualizar-formato">${ic('atualizar')}Atualizar formato</button><button type="button" class="btn btn-sec" data-fechar-dialogo>Agora não</button></div></div>`;
+  d.setAttribute('aria-labelledby', 'dlg-titulo'); d.showModal();
+}
+async function atualizarFormato() {
+  const btn = $('[data-acao="atualizar-formato"]'); if (btn) { btn.disabled = true; btn.textContent = 'Atualizando…'; }
+  try {
+    if (!DEMO) { // o site publicado precisa já saber ler o JSON; senão ele continuaria no conteudo.js antigo
+      const ix = await gh(`${repoPath()}/contents/index.html?ref=${encodeURIComponent(A.cfg.branch)}`);
+      if (!/assets\/dados\.js/.test(b64.de(ix.content || ''))) throw new Error('o código do site no GitHub ainda é o antigo. Suba primeiro a atualização do código (pacote “atualização de código”) e tente de novo');
+    }
+    const atual = await baixarConteudo();
+    if (atual.formato === 'json') { A.formato = 'json'; toast('O formato já estava atualizado (outro aparelho fez isso).'); }
+    else {
+      const r = await gh(`${repoPath()}/contents/${ARQ_JSON}`, { method: 'PUT', body: { message: 'Atualiza formato: cria dados/conteudo.json (conteudo.js mantido)', content: b64.para(escreverConteudo(atual.obj, 'json')), branch: A.cfg.branch } });
+      A.formato = 'json'; A.legado = { sha: atual.sha };
+      if (A.baseSha === atual.sha) A.baseSha = r.content.sha; // mesmo conteúdo, arquivo novo
+      A.remoto = { sha: r.content.sha, obj: clone(atual.obj), formato: 'json' };
+      if (A.baseSha !== r.content.sha) A.baseSha = null; // o rascunho partiu de outra versão: a próxima publicação junta
+      salvarRascunho();
+      toast('Formato atualizado: dados/conteudo.json criado. O conteudo.js antigo continua no repositório até você apagar em Configurações.');
+    }
+    const d = $('#dialogo'); if (d.open) d.close(); atualizarBarra(); rerender();
+  } catch (e) { toast('Não atualizei o formato: ' + (e.status != null && e.status !== -1 ? msgErro(e) : e.message), true); if (btn) { btn.disabled = false; btn.textContent = 'Tentar de novo'; } }
+}
+async function apagarLegado() {
+  if (!A.legado || A.formato !== 'json') return;
+  if (!confirm('Apagar o arquivo antigo conteudo.js do repositório?\n\nO site e o painel já usam dados/conteudo.json. O conteudo.js serve só de reserva enquanto o código novo não estava no ar.')) return;
+  try { await gh(`${repoPath()}/contents/${ARQ_JS}`, { method: 'DELETE', body: { message: 'Remove conteudo.js antigo (dados em dados/conteudo.json)', sha: A.legado.sha, branch: A.cfg.branch } }); A.legado = null; toast('conteudo.js apagado.'); rerender(); }
+  catch (e) { toast(msgErro(e, 'apagar o conteudo.js'), true); }
+}
+/* ---------------- demonstração ---------------- */
+function faixaDemo() {
+  if (!DEMO) return;
+  let f = $('#faixa-demo');
+  if (!f) { document.body.classList.add('demo'); document.body.insertAdjacentHTML('afterbegin', `<div class="faixa-demo" id="faixa-demo" role="status"><span class="fd-ponto" aria-hidden="true"></span><b>Modo demonstração<span class="fd-longo"> · nada é publicado</span></b><span class="fd-conta" id="fd-conta"></span><a href="./" class="fd-sair" aria-label="Sair da demonstração">Sair<span class="fd-longo">&nbsp;da demonstração</span></a></div>`); f = $('#faixa-demo'); }
+  const n = GHD.log.filter(x => x.arquivo !== 'index.html').length, c = $('#fd-conta'); if (c) c.textContent = n ? `${n} ${n === 1 ? 'publicação simulada' : 'publicações simuladas'}` : ''; // o bloco compartilhar do index acompanha a publicação: não conta à parte
+}
+async function iniciarDemo() {
+  faixaDemo();
+  A.cfg = { owner: 'demonstracao', repo: 'casa-18-anahi', branch: 'main' }; A.token = 'demonstracao';
+  A.cofreDados = Object.assign(novoCofre(), { privados: { wifi_rede: 'Casa18-Anahi', wifi_senha: 'exemplo-de-senha', wifi_tipo: 'WPA', portao: '0000 (exemplo)', chaves: 'na caixinha ao lado da porta (exemplo)' } });
+  $('#app').innerHTML = `<main class="entrada"><div class="entrada-card carregando"><div class="entrada-logo pequeno">${marca('simbolo', 'claro')}</div><p class="t2">Preparando a demonstração…</p></div></main>`;
+  let bruto = null, formato = 'json';
+  try {
+    await garantirContrato();
+    try { const r = await fetch('../' + ARQ_JSON, { cache: 'no-cache' }); if (!r.ok) throw new Error('HTTP ' + r.status); bruto = await r.json(); }
+    catch (e) { if (!window.CONTEUDO) await carregarScript('../' + ARQ_JS); bruto = window.CONTEUDO; formato = 'js'; }
+    if (!bruto || typeof bruto !== 'object') throw new Error('os dados do guia não vieram');
+  }
+  catch (e) { $('#app').innerHTML = moldura(`<span class="olho">Modo demonstração</span><h1 class="t1 entrada-tit">Não deu para abrir</h1><p class="entrada-lead">${esc(e.message)}. Recarregue a página ou volte à <a href="./">entrada</a>.</p>`); return; }
+  GHD.arquivos[arqDe(formato)] = b64.para(formato === 'js' ? 'window.CONTEUDO = ' + JSON.stringify(bruto, null, 2) + ';\n' : JSON.stringify(bruto, null, 2) + '\n'); GHD.shas[arqDe(formato)] = 'demo0';
+  GHD.arquivos['index.html'] = b64.para('<!doctype html><html><head>\n<!-- compartilhar:inicio -->\n<title>Casa 18 Anahi</title>\n<!-- compartilhar:fim -->\n<script src="assets/dados.js"></script></head><body></body></html>\n'); GHD.shas['index.html'] = 'demo0';
+  await carregar();
+  toast('Bem-vindo à demonstração: mexa à vontade, nada é publicado.');
+}
+function bloquear() {
+  if (sujo()) salvarRascunho();
+  ['admin:token', 'admin:token-exp', 'admin:fbchave', 'admin:cofre-chave'].forEach(k => ss.del(k));
+  A.token = null; A.tokenExp = null; A.cofreDados = null; A.remoto = A.draft = A.baseObj = null; A.fb.itens = null; A.fotos = null; A.cacheFotos = {}; A.estadia = { nome: '', chegada: '', saida: '', fone: '' };
+  if (DEMO) { location.href = './'; return; }
+  telaSenha(); toast('Painel bloqueado. Para voltar, digite a senha do anfitrião.');
 }
 function sair(silencioso) {
-  if (!silencioso && !confirm(sujo() ? 'Há alterações não publicadas. Se sair, elas serão apagadas deste aparelho. Sair mesmo assim?' : 'Sair do painel? O acesso guardado neste aparelho será apagado.')) return;
+  if (!silencioso && !confirm((sujo() ? 'Há alterações não publicadas. Se sair, elas serão apagadas deste aparelho.\n\n' : '') + 'Sair e apagar os dados deste aparelho? Token, chave do feedback, dados privados da casa (Wi-Fi, portão) e modelos de mensagem serão apagados e precisarão ser informados de novo.')) return;
   ['admin:token', 'admin:token-exp', 'admin:token-lembrado', 'admin:fbchave', 'admin:fb-local', 'admin:fb-resolvidos', 'admin:rascunho', 'guia:rascunho', 'admin:cofre', 'admin:cofre-chave'].forEach(apagar);
-  A.token = null; A.tokenExp = null; A.remoto = A.draft = A.baseObj = null; A.fb.itens = null; A.fotos = null; A.cacheFotos = {};
-  if (!silencioso) { telaEntrada(); toast('Você saiu. Token, chave do feedback, rascunho e comentários importados foram apagados deste aparelho.'); }
+  A.token = null; A.tokenExp = null; A.cofreDados = null; A.remoto = A.draft = A.baseObj = null; A.fb.itens = null; A.fotos = null; A.cacheFotos = {}; A.estadia = { nome: '', chegada: '', saida: '', fone: '' };
+  if (DEMO) { location.href = './'; return; }
+  if (!silencioso) { telaSenha(); toast('Você saiu. Token, chave do feedback, dados privados, rascunho e comentários importados foram apagados deste aparelho.'); }
 }
 
 /* ---------------- estrutura ---------------- */
 const NAV = [
-  ['visao', 'Visão geral', 'painel'], ['feedback', 'Feedback', 'feedback'], ['sep'],
-  ['casa', 'A casa', 'casa'], ['chegada', 'Chegada e saída', 'chave'], ['lugares', 'Lugares', 'pino'], ['roteiros', 'Roteiros', 'bussola'],
-  ['contatos', 'Contatos', 'fone'], ['beneficios', 'Benefícios', 'presente'], ['avaliacoes', 'Avaliações', 'estrela'], ['regiao', 'Região e sabores', 'ondas'], ['sep'],
-  ['fotos', 'Fotos', 'imagem'], ['qr', 'QR Code', 'qr'], ['config', 'Configurações', 'ajustes'], ['avancado', 'Avançado', 'codigo']
+  ['visao', 'Visão geral', 'painel'], ['feedback', 'Feedback', 'feedback'],
+  ['grupo', 'Hospedagem'], ['hospede', 'Receber hóspede', 'mala'], ['privados', 'Dados privados', 'cadeado'], ['impressos', 'Impressos', 'impressora'], ['virada', 'Virada da casa', 'lista'],
+  ['grupo', 'Conteúdo do guia'], ['casa', 'A casa', 'casa'], ['chegada', 'Chegada e saída', 'chave'], ['lugares', 'Lugares', 'pino'], ['roteiros', 'Roteiros', 'bussola'],
+  ['contatos', 'Contatos', 'fone'], ['beneficios', 'Benefícios', 'presente'], ['avaliacoes', 'Avaliações', 'estrela'], ['regiao', 'Região e sabores', 'ondas'],
+  ['grupo', 'Sistema'], ['fotos', 'Fotos', 'imagem'], ['qr', 'QR Code do guia', 'qr'], ['config', 'Configurações', 'ajustes'], ['avancado', 'Avançado', 'codigo']
 ];
+const SECOES = NAV.filter(n => n[0] !== 'grupo');
+const numSecao = (v) => { const i = SECOES.findIndex(n => n[0] === v); return i < 0 ? '' : String(i + 1).padStart(2, '0'); };
 function validadeToken() {
   if (!A.tokenExp) return '';
   const d = new Date(A.tokenExp), dias = Math.ceil((d - Date.now()) / 864e5);
@@ -606,8 +903,8 @@ function montar() {
       <a class="marca" href="${esc(url)}" target="_blank" rel="noopener" aria-label="Abrir o site publicado (nova aba)"><span class="marca-logo">${marca('horizontal', 'escuro')}</span><span class="marca-sub">Painel do anfitrião</span></a>
       <button type="button" class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="menu-secoes"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="menu-rot">Seções</span><span class="menu-atual" id="menu-atual"></span><span class="cont" data-cont="menu" hidden></span></button>
       <div class="menu-lista" id="menu-secoes">
-      ${NAV.map(n => n[0] === 'sep' ? '<div class="sep" role="presentation"></div>' : `<button type="button" class="nav-item" data-ir="${n[0]}">${ic(n[2])}<span>${n[1]}</span><span class="cont" data-cont="${n[0]}" hidden></span></button>`).join('')}
-      <div class="lado-rodape"><span>${esc(A.cfg.owner)}/${esc(A.cfg.repo)}</span>${A.tokenExp ? `<span class="peq">${validadeToken()}</span>` : ''}<button type="button" data-acao="sair">${ic('sair')}Sair</button></div>
+      ${NAV.map(n => n[0] === 'grupo' ? `<div class="nav-grupo" role="presentation">${esc(n[1])}</div>` : `<button type="button" class="nav-item" data-ir="${n[0]}">${ic(n[2])}<span>${n[1]}</span><span class="cont" data-cont="${n[0]}" hidden></span></button>`).join('')}
+      <div class="lado-rodape"><span class="repo-nome">${DEMO ? 'Demonstração' : `${esc(A.cfg.owner)}/${esc(A.cfg.repo)}`}</span>${A.tokenExp ? `<span class="peq">${validadeToken()}</span>` : ''}<div class="rodape-acoes"><button type="button" data-acao="bloquear" title="Fecha o painel neste aparelho; a senha abre de novo">${ic('cadeado')}Bloquear</button><button type="button" data-acao="sair" title="Apaga deste aparelho o token e os dados privados">${ic('sair')}Sair</button></div></div>
       </div>
     </nav>
     <div class="palco">
@@ -654,8 +951,12 @@ function menu(abrir, focar) {
 const rerender = () => { if (!A.draft || !$('#vista')) return; const y = window.scrollY; $('#vista').innerHTML = VISTAS[A.view](); if (VISTAS[A.view].depois) VISTAS[A.view].depois(); marcarErrosCampos(); window.scrollTo(0, y); };
 
 /* ---------------- campos ---------------- */
+/* Link de exportação do calendário (iCal): é secreto e nunca entra no conteúdo (vai só no Apps Script, ICAL_URL). */
+const ehIcal = (u) => /\/calendar\/ical\b|\.ics(?:[?#]|$)|^webcal:/i.test(String(u || '').trim());
+const ehAirbnb = (u) => { try { return /(^|\.)airbnb\.com(\.br)?$/i.test(new URL(String(u).trim()).hostname); } catch (e) { return false; } };
 const VALIDA = {
   https: (v) => !tem(v) || urlValida(v, true) ? '' : 'Use um endereço completo começando com https://',
+  reserva: (v) => !tem(v) ? '' : ehIcal(v) ? 'Este é o link secreto do calendário (iCal). Ele não vai aqui: cole-o só no Apps Script, em ICAL_URL (passo a passo abaixo).' : urlValida(v, true) ? '' : 'Use o endereço completo do anúncio, começando com https://',
   insta: (v) => !tem(v) || /^[A-Za-z0-9._]{1,30}$/.test(v) ? '' : 'Só o nome do perfil, sem @ e sem link (ex.: casa18.anahi)',
   whats: (v) => !tem(v) || (normalizarWhats(v) && !/[^\d\s()+.-]/.test(v)) ? '' : 'Não entendi este número. Digite com DDD, por exemplo: (82) 99999-0000',
   num: (v) => v == null || v === '' || isFinite(Number(String(v).replace(',', '.'))) ? '' : 'Digite um número'
@@ -730,7 +1031,7 @@ function galeria(p, rot) {
 
 /* ---------------- VISTAS ---------------- */
 const VISTAS = {};
-const cab = (olho, titulo, texto, acoes) => `<div class="cab"><div><span class="olho">${olho}</span><h1 class="t1">${titulo}</h1>${texto ? `<p>${texto}</p>` : ''}</div>${acoes ? `<div class="acoes">${acoes}</div>` : ''}</div>`;
+const cab = (olho, titulo, texto, acoes) => `<div class="cab"><div><span class="olho"><span class="num">${numSecao(A.view)}</span>${olho}</span><h1 class="t1">${titulo}</h1>${texto ? `<p>${texto}</p>` : ''}</div>${acoes ? `<div class="acoes">${acoes}</div>` : ''}</div>`;
 
 VISTAS.visao = () => {
   const it = verificar(), ok = it.filter(i => i.e === 'ok').length, pct = Math.round(ok / it.length * 100);
@@ -744,6 +1045,7 @@ VISTAS.visao = () => {
   ${dias != null && dias <= 7 ? `<div class="aviso erro" role="alert" style="margin-bottom:14px">${ic('alerta')}<span>${validadeToken()}. Gere um token novo no GitHub antes de vencer e entre de novo.</span></div>` : ''}
   ${A.correcoes.length ? `<div class="aviso" style="margin-bottom:14px">${ic('alerta')}<span><b>Corrigi ${A.correcoes.length} valor(es) em formato inválido</b> (por segurança, ficaram vazios): ${esc(A.correcoes.slice(0, 4).map(c => c.replace(/^([^:]+)/, (m) => ondeFica(m).nome)).join('; '))}${A.correcoes.length > 4 ? '…' : ''}. Publique para corrigir também no site.</span></div>` : ''}
   ${cartaoAntes()}
+  ${cartaoHospedagem()}
   <div class="card passos-card" style="margin-top:14px"><h2 class="t2">Como atualizar o guia</h2><ol class="passos">
     <li><span><b>Edite</b> uma seção do menu, como “A casa”.</span></li><li><span><b>Envie fotos</b> tocando nos quadrados de foto.</span></li><li><span><b>Pré-visualize</b> para ver como o hóspede vai ver.</span></li><li><span><b>Publique</b>: o site atualiza em até alguns minutos.</span></li><li><span><b>Acompanhe</b> o que os hóspedes dizem em Feedback.</span></li></ol></div>
   <div class="grade g4" style="margin-top:14px">
@@ -754,6 +1056,16 @@ VISTAS.visao = () => {
   </div>
   <div class="grade g2" style="margin-top:14px">${grupos.map(g => `<div class="card"><h2 class="t2" style="margin-bottom:6px">${esc(g)}</h2>${it.filter(i => i.grupo === g).sort((a, b) => ordem[a.e] - ordem[b.e]).map(i => `<div class="pend ${i.e}">${ic(i.e === 'ok' ? 'check' : 'alerta')}<span>${esc(i.txt)}</span>${i.e !== 'ok' && i.ir ? `<button type="button" class="btn btn-fant" data-ir="${esc(i.ir)}">Resolver</button>` : ''}</div>`).join('')}</div>`).join('')}</div>`;
 };
+function cartaoHospedagem() {
+  const p = privados(), v = virada(), cv = contaVirada(v), nPriv = ['wifi_rede', 'wifi_senha', 'portao', 'chaves'].filter(k => tem(p[k])).length;
+  const t = (ir, icone, tit, sub) => `<button type="button" class="atalho-h" data-ir="${ir}">${ic(icone)}<span><b>${tit}</b><small>${sub}</small></span></button>`;
+  return `<section class="hosp-atalhos" aria-label="Hospedagem">
+    ${t('hospede', 'mala', 'Receber hóspede', 'Link com o nome e 4 mensagens prontas')}
+    ${t('privados', 'cadeado', 'Dados privados', nPriv ? `${nPriv} de 4 preenchidos, só neste aparelho` : 'Wi-Fi e portão, só neste aparelho')}
+    ${t('impressos', 'impressora', 'Impressos A6', 'QR do guia, Wi-Fi e regras da casa')}
+    ${t('virada', 'lista', 'Virada da casa', cv.ok ? `${cv.ok} de ${cv.tot} itens marcados` : `${cv.tot} itens para preparar a casa`)}
+  </section>`;
+}
 VISTAS.visao.depois = () => { if (!A.fb.itens && !A.fb.carregando) carregarFeedback(true); };
 
 /* --- A casa --- */
@@ -767,9 +1079,10 @@ VISTAS.casa = () => `${cab('Conteúdo', 'A casa', 'Apresentação, fotos, comodi
   </div></div>
   <div class="card form"><h2 class="t2">Contato e links</h2><div class="campos">
     ${campo('casa.anfitriao', 'Nome do anfitrião', 'texto')}${campo('casa.whatsapp', 'WhatsApp do anfitrião', 'texto', { v: 'whats', ph: '(82) 99999-0000', tel: true, ajuda: 'Digite com DDD, do jeito que preferir. O painel acerta o formato sozinho.' })}
-    ${campo('casa.instagram', 'Instagram da casa', 'texto', { v: 'insta', ph: 'casa18.anahi', ajuda: 'Só o nome do perfil, sem @.' })}${campo('casa.link_reserva', 'Link para reservar (Airbnb, site…)', 'url', { ph: 'https://', ajuda: 'Opcional. Mostra o botão “Reservar”.' })}
+    ${campo('casa.instagram', 'Instagram da casa', 'texto', { v: 'insta', ph: 'casa18.anahi', ajuda: 'Só o nome do perfil, sem @.' })}
     ${campo('casa.video_url', 'Vídeo da casa (YouTube, Instagram…)', 'url', { largo: true, ph: 'https://', ajuda: 'Opcional. Mostra “Assista ao vídeo da casa” no topo.' })}
   </div></div>
+  ${cartaoReservas()}
   <div class="card form"><h2 class="t2">Horários e localização</h2><div class="campos">
     ${campo('casa.checkin', 'Check-in', 'texto', { ph: 'a partir das 14h' })}${campo('casa.checkout', 'Check-out', 'texto', { ph: 'até as 11h' })}
     ${campo('casa.endereco_publico', 'Endereço exibido', 'texto', { largo: true, ajuda: 'Evite o número da casa se não quiser expô-lo publicamente.' })}
@@ -1011,42 +1324,315 @@ function enderecoMudou() {
 }
 VISTAS.qr = () => { const url = urlPublica(); return `${cab('Divulgação', 'Cartão com QR Code', 'Imprima e deixe na entrada, na geladeira ou no quarto. O QR abre o guia publicado.')}
   ${enderecoMudou() ? `<div class="aviso erro" role="alert" style="margin-bottom:14px" id="aviso-reimprimir">${ic('alerta')}<span><b>Você mudou o endereço do site.</b> Os cartões com QR Code que já estão impressos continuam abrindo o endereço antigo. Depois de publicar, imprima cartões novos e troque os antigos na casa. Mantenha o endereço antigo funcionando até lá.</span></div>` : ''}
-  <div class="grade g2" style="align-items:start"><div class="cartao-qr"><div class="cartao-logo">${marca('vertical', 'claro')}</div><p class="assinatura">Seja bem-vindo!</p><div class="qr" id="qr"></div><b>Seu guia da casa está aqui.</b><span class="mudo peq">Aponte a câmera do celular. Wi-Fi e acessos são enviados pelo anfitrião por mensagem.</span><span class="peq mudo" style="word-break:break-all">${esc(url)}</span></div>
+  <div class="grade g2" style="align-items:start"><div class="cartao-qr"><div class="cartao-logo">${marca('vertical', 'claro')}</div><p class="assinatura">Seja bem-vindo!</p><div class="qr" id="qr"></div><b>Seu guia da casa está aqui.</b><span class="mudo peq">Aponte a câmera do celular. O guia abre na hora, sem instalar nada.</span><span class="peq mudo" style="word-break:break-all">${esc(url)}</span></div>
   <div class="card form"><div class="campos">${campo('config.url_publica', 'Endereço do site', 'url', { largo: true, ph: url, ajuda: 'Deixe vazio para usar o endereço do GitHub Pages. Preencha se tiver domínio próprio (começando com https://). Atenção: mudar o endereço exige reimprimir os cartões.' })}</div>
-    <div class="acoes"><button type="button" class="btn btn-prim" data-acao="imprimir-qr">Imprimir cartão</button><button type="button" class="btn btn-sec" data-acao="copiar-url">${ic('copiar')}Copiar link</button></div></div></div>`; };
+    <div class="acoes"><button type="button" class="btn btn-prim" data-acao="imprimir-qr">Imprimir cartão</button><button type="button" class="btn btn-sec" data-acao="copiar-url">${ic('copiar')}Copiar link</button></div>
+    <p class="peq mudo" style="margin:0">Quer o kit completo, com cartão do Wi-Fi e regras da casa no formato A6? Veja <button type="button" class="btn-link" data-ir="impressos">Impressos</button>.</p></div></div>`; };
 VISTAS.qr.depois = () => {
   const alvo = $('#qr'), url = urlPublica(); if (!alvo) return;
   try { if (!window.QR) throw new Error('gerador de QR não carregou'); if (!url) throw new Error('defina o endereço do site'); alvo.innerHTML = QR.svg(url, { cor: '#1F3D2F', fundo: '#FFFFFF', margem: 2, titulo: 'QR Code que abre ' + url }); alvo.dataset.texto = url; }
   catch (e) { alvo.innerHTML = `<span class="mudo peq">Não foi possível gerar o QR: ${esc(e.message)}</span>`; }
 };
 
+/* ================= HOSPEDAGEM: receber hóspede, dados privados, impressos, virada ================= */
+const H = window.Hospede;
+const privados = () => (A.cofreDados && A.cofreDados.privados) || {};
+const NOMES_FALTA = { checkin: ['horário de check-in', 'casa.checkin'], checkout: ['horário de check-out', 'casa.checkout'], rota: ['link da rota', 'casa.link_maps'], endereco: ['endereço', 'casa.endereco_publico'], anfitriao: ['seu nome', 'casa.anfitriao'], reserva: ['link da reserva', 'casa.link_reserva'], avisar_chegada: ['seu WhatsApp (botão “Cheguei”)', 'casa.whatsapp'], avisar_saida: ['seu WhatsApp (botão “Saímos”)', 'casa.whatsapp'],
+  wifi_rede: ['nome da rede Wi-Fi', 'privados'], wifi_senha: ['senha do Wi-Fi', 'privados'], portao: ['código do portão', 'privados'], chaves: ['chaves e acesso', 'privados'], avaliacao: ['endereço do site', 'qr'] };
+const modeloDe = (id) => A.modelosEdit[id] != null ? A.modelosEdit[id] : ((A.cofreDados && A.cofreDados.modelos && typeof A.cofreDados.modelos[id] === 'string') ? A.cofreDados.modelos[id] : H.MODELOS.find(m => m.id === id).texto);
+function dadosMensagem() {
+  const c = (A.draft && A.draft.casa) || {}, e = A.estadia, v = H.validarEstadia(e), p = privados(), base = urlPublica();
+  const ok = v.ok && !!base, link = ok ? H.linkEstadia(base, v.nome, e.chegada, e.saida) : '';
+  const wa = normalizarWhats(c.whatsapp) || '', n = H.noites(e.chegada, e.saida), nome = v.ok ? v.nome : '';
+  return { ok, v, link, d: {
+    nome: nome || '[nome]', link: link || '[link do guia]', chegada: H.dataLonga(e.chegada) || '[data de chegada]', saida: H.dataLonga(e.saida) || '[data de saída]', noites: n ? n + (n === 1 ? ' noite' : ' noites') : '',
+    checkin: c.checkin, checkout: c.checkout, casa: c.nome || 'Casa 18 Anahi', anfitriao: c.anfitriao, endereco: c.endereco_publico, rota: c.link_maps,
+    avaliacao: base ? base.replace(/#.*$/, '') + '#/feedback' : '', reserva: c.link_reserva,
+    avisar_chegada: H.linkAviso(wa, `Oi! ${nome ? nome + ' aqui: c' : 'C'}hegamos à ${c.nome || 'casa'}.`), avisar_saida: H.linkAviso(wa, `Oi! ${nome ? nome + ' aqui: s' : 'S'}aímos da ${c.nome || 'casa'}. Obrigado!`),
+    wifi_rede: p.wifi_rede, wifi_senha: p.wifi_tipo === 'nopass' ? '' : p.wifi_senha, portao: p.portao, chaves: p.chaves } };
+}
+function mensagem(id, M) { M = M || dadosMensagem(); return H.preencher(modeloDe(id), M.d); }
+const linkWhats = (txt) => { const f = normalizarWhats(A.estadia.fone); return `https://wa.me/${f && f.length >= 12 ? f : ''}?text=${encodeURIComponent(txt)}`; };
+function faltamHtml(faltam) {
+  const f = faltam.filter(k => NOMES_FALTA[k]); if (!f.length) return '';
+  return `<p class="faltam">${ic('alerta')}<span>Linha omitida por falta de: ${f.map(k => { const [rot, alvo] = NOMES_FALTA[k]; return alvo === 'privados' || alvo === 'qr' ? `<button type="button" class="btn-link" data-ir="${alvo}">${esc(rot)}</button>` : `<button type="button" class="btn-link" data-ir-campo="${alvo}">${esc(rot)}</button>`; }).join(', ')}.</span></p>`;
+}
+function blocoLink(M) {
+  M = M || dadosMensagem(); const e = A.estadia;
+  if (!M.ok) return `<span class="olho">Link personalizado</span><p class="link-vazio">${!urlPublica() ? 'Defina o endereço do site em “QR Code do guia” para gerar o link.' : 'Preencha o nome e as datas: o link do guia com o nome do hóspede aparece aqui.'}</p>`;
+  return `<span class="olho">Link personalizado</span>
+    <p class="estadia-resumo"><b>${esc(M.v.nome)}</b> · ${esc(H.dataLonga(e.chegada, false))} → ${esc(H.dataLonga(e.saida, false))} · <span class="num">${H.noites(e.chegada, e.saida)}</span> ${H.noites(e.chegada, e.saida) === 1 ? 'noite' : 'noites'}</p>
+    <p class="link-estadia" id="link-estadia">${esc(M.link)}</p>
+    <div class="acoes"><button type="button" class="btn btn-prim" data-copiar="link">${ic('copiar')}Copiar link</button><a class="btn btn-sec" href="${esc(M.link)}" target="_blank" rel="noopener noreferrer">${ic('olho')}Ver como o hóspede vê</a></div>
+    <p class="peq mudo" style="margin:10px 0 0">O nome e as datas vão depois do “#”: não saem do celular do hóspede (nem para o servidor, nem para a prévia do WhatsApp). Mande só para o hóspede; evite grupos e redes sociais.</p>`;
+}
+function cartaoMsg(m, i, M) {
+  const r = mensagem(m.id, M), ed = modeloDe(m.id) !== m.texto;
+  return `<article class="msg" data-msg="${m.id}" aria-labelledby="msg-t-${m.id}">
+    <header><span class="olho"><span class="num">${String(i + 1).padStart(2, '0')}</span>${esc(m.quando)}</span><h3 class="t3" id="msg-t-${m.id}">${esc(m.titulo)}${ed ? ' <span class="tag">modelo seu</span>' : ''}</h3></header>
+    <div class="bolha ${M.ok ? '' : 'previa'}" id="msg-${m.id}">${esc(r.texto)}</div>
+    <div class="msg-faltam" id="msg-f-${m.id}">${faltamHtml(r.faltam)}</div>
+    <div class="acoes"><button type="button" class="btn btn-sec" data-copiar-msg="${m.id}" ${M.ok ? '' : 'disabled'}>${ic('copiar')}Copiar</button><a class="btn btn-whats ${M.ok ? '' : 'inativo'}" data-wa="${m.id}" href="${M.ok ? esc(linkWhats(r.texto)) : '#'}" target="_blank" rel="noopener noreferrer" ${M.ok ? '' : 'aria-disabled="true" tabindex="-1"'}>${ic('enviar')}Abrir no WhatsApp</a></div>
+    <details class="modelo" data-modelo-det="${m.id}"><summary>Editar modelo</summary>
+      <div class="campo"><label for="mod-${m.id}">Modelo da mensagem “${esc(m.titulo)}”</label><textarea id="mod-${m.id}" data-modelo="${m.id}" rows="9">${esc(modeloDe(m.id))}</textarea>
+      <span class="ajuda">Toque num marcador para inserir. Linha com marcador vazio é omitida da mensagem.</span></div>
+      <div class="marcadores">${H.MARCADORES.map(([k, rot, priv]) => `<button type="button" class="marcador ${priv ? 'priv' : ''}" data-inserir="${k}" data-alvo="mod-${m.id}" title="${esc(rot)}${priv ? ' (do cofre deste aparelho)' : ''}">{${k}}</button>`).join('')}</div>
+      <div class="acoes"><button type="button" class="btn btn-prim" data-salvar-modelo="${m.id}">Salvar modelo</button><button type="button" class="btn btn-sec" data-restaurar-modelo="${m.id}">Restaurar o original</button></div></details>
+  </article>`;
+}
+function errosEstadia() { const e = A.estadia, v = H.validarEstadia(e); return { nome: tem(e.nome) ? v.erros.nome : '', chegada: tem(e.chegada) ? v.erros.chegada : '', saida: tem(e.saida) ? v.erros.saida : '' }; }
+const campoEst = (k, id, rot, tipo, extra) => { const er = errosEstadia()[k] || ''; return `<div class="campo ${er ? 'erro' : ''} ${extra && extra.largo ? 'largo' : ''}"><label for="${id}">${rot}</label><input type="${tipo}" id="${id}" data-est="${k}" value="${esc(A.estadia[k])}" autocomplete="off" ${extra && extra.attrs || ''} aria-invalid="${er ? 'true' : 'false'}" aria-describedby="${id}-e"><span class="erro-msg" id="${id}-e" ${er ? '' : 'hidden'}>${esc(er)}</span>${extra && extra.ajuda ? `<span class="ajuda">${extra.ajuda}</span>` : ''}</div>`; };
+VISTAS.hospede = () => { const M = dadosMensagem(); return `${cab('Hospedagem', 'Receber <em>hóspede</em>', 'O link do guia com o nome do hóspede e as mensagens de cada momento da estadia, prontas para o WhatsApp.')}
+  <div class="grade hosp-grade">
+    <section class="card form" aria-labelledby="h-est"><h2 class="t2" id="h-est">A estadia</h2>
+      <div class="campos">
+        ${campoEst('nome', 'h-nome', 'Primeiro nome do hóspede', 'text', { largo: true, attrs: 'maxlength="40" placeholder="Ex.: Mariana" autocapitalize="words" spellcheck="false"', ajuda: 'Aparece na saudação do guia (“Olá, Mariana”).' })}
+        ${campoEst('chegada', 'h-in', 'Chegada', 'date', {})}
+        ${campoEst('saida', 'h-out', 'Saída', 'date', {})}
+        ${campoEst('fone', 'h-fone', 'WhatsApp do hóspede <span class="opc">opcional</span>', 'text', { largo: true, attrs: 'inputmode="tel" placeholder="(11) 98888-0000"', ajuda: 'Com o número, “Abrir no WhatsApp” já abre a conversa com ele. Nada desta estadia é salvo: some ao fechar o painel.' })}
+      </div></section>
+    <section class="card link-card" aria-live="polite" id="h-saida">${blocoLink(M)}</section>
+  </div>
+  <div class="msgs-cab"><h2 class="t2">Mensagens prontas</h2><p class="mudo">Wi-Fi e portão vêm dos <button type="button" class="btn-link" data-ir="privados">dados privados</button> guardados só neste aparelho e só entram nestas mensagens. Depois da saída do hóspede, apague no WhatsApp a mensagem com o código do portão.</p></div>
+  <div class="msgs" id="h-msgs">${H.MODELOS.map((m, i) => cartaoMsg(m, i, M)).join('')}</div>`; };
+function atualizarHospede() {
+  const M = dadosMensagem(), s = $('#h-saida'); if (s) s.innerHTML = blocoLink(M);
+  const er = errosEstadia();
+  [['nome', 'h-nome'], ['chegada', 'h-in'], ['saida', 'h-out']].forEach(([k, id]) => { const el = document.getElementById(id); if (!el) return; const box = el.closest('.campo'), m = document.getElementById(id + '-e'); box.classList.toggle('erro', !!er[k]); el.setAttribute('aria-invalid', er[k] ? 'true' : 'false'); m.hidden = !er[k]; m.textContent = er[k] || ''; });
+  H.MODELOS.forEach(m => {
+    const r = mensagem(m.id, M), b = document.getElementById('msg-' + m.id); if (!b) return;
+    b.textContent = r.texto; b.classList.toggle('previa', !M.ok); document.getElementById('msg-f-' + m.id).innerHTML = faltamHtml(r.faltam);
+    const c = $(`[data-copiar-msg="${m.id}"]`); c.disabled = !M.ok;
+    const w = $(`[data-wa="${m.id}"]`); w.href = M.ok ? linkWhats(r.texto) : '#'; w.classList.toggle('inativo', !M.ok); if (M.ok) { w.removeAttribute('aria-disabled'); w.removeAttribute('tabindex'); } else { w.setAttribute('aria-disabled', 'true'); w.setAttribute('tabindex', '-1'); }
+  });
+}
+async function copiar(txt) {
+  try { await navigator.clipboard.writeText(txt); return true; } catch (e) {
+    try { const t = document.createElement('textarea'); t.value = txt; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;opacity:0;top:0;left:0'; document.body.appendChild(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return ok; } catch (x) { return false; }
+  }
+}
+
+/* --- dados privados (só no cofre do aparelho) --- */
+const campoPriv = (k, rot, tipo, extra) => { const v = privados()[k]; extra = extra || {};
+  if (tipo === 'senha') return `<div class="campo ${extra.largo ? 'largo' : ''}"><label for="p-${k}">${rot}</label><div class="senha-caixa"><input type="password" id="p-${k}" data-priv="${k}" value="${esc(v || '')}" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true"><button type="button" class="ver-senha" data-ver-senha="p-${k}" aria-label="Mostrar" aria-pressed="false">${ic('olho')}</button></div>${extra.ajuda ? `<span class="ajuda">${extra.ajuda}</span>` : ''}</div>`;
+  if (tipo === 'area') return `<div class="campo largo"><label for="p-${k}">${rot}</label><textarea id="p-${k}" data-priv="${k}" rows="3" autocomplete="off" spellcheck="false">${esc(v || '')}</textarea>${extra.ajuda ? `<span class="ajuda">${extra.ajuda}</span>` : ''}</div>`;
+  return `<div class="campo ${extra.largo ? 'largo' : ''}"><label for="p-${k}">${rot}</label><input type="text" id="p-${k}" data-priv="${k}" value="${esc(v || '')}" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" ${extra.ph ? `placeholder="${esc(extra.ph)}"` : ''}>${extra.ajuda ? `<span class="ajuda">${extra.ajuda}</span>` : ''}</div>`; };
+const estadoCofreTxt = () => DEMO ? 'Na demonstração, estes dados ficam só na memória desta aba.' : ARMAZ_BLOQUEADO ? 'O navegador está bloqueando o armazenamento: estes dados valem só enquanto a aba estiver aberta.' : 'Guardado e cifrado neste aparelho.';
+VISTAS.privados = () => { const p = privados(); return `${cab('Hospedagem', 'Dados privados <em>da casa</em>', '')}
+  <div class="cofre-aviso" role="note">${ic('cadeado')}<div><b>Ficam só neste aparelho, cifrados com a sua senha.</b> Nunca vão para o site, para o conteudo.js nem para o GitHub. São usados apenas nas mensagens de <button type="button" class="btn-link" data-ir="hospede">Receber hóspede</button> e no <button type="button" class="btn-link" data-ir="impressos">cartão do Wi-Fi</button>. Em outro celular ou computador, cadastre de novo: eles não são sincronizados.</div></div>
+  <div class="grade g2" style="align-items:start">
+    <section class="card form" aria-labelledby="pv-wifi"><h2 class="t2" id="pv-wifi">Wi-Fi</h2><div class="campos">
+      ${campoPriv('wifi_rede', 'Nome da rede (como aparece no celular)', 'texto', { largo: true, ph: 'Ex.: Casa18-Anahi' })}
+      ${p.wifi_tipo === 'nopass' ? '' : campoPriv('wifi_senha', 'Senha do Wi-Fi', 'senha', { largo: true })}
+      <div class="campo largo"><label for="p-wifi_tipo">Segurança da rede</label><select id="p-wifi_tipo" data-priv="wifi_tipo">${[['WPA', 'WPA, WPA2 ou WPA3 (a mais comum)'], ['WEP', 'WEP (roteador antigo)'], ['nopass', 'Rede aberta, sem senha']].map(([v, r]) => `<option value="${v}" ${(p.wifi_tipo || 'WPA') === v ? 'selected' : ''}>${r}</option>`).join('')}</select></div>
+      <label class="check"><input type="checkbox" data-priv="wifi_oculta" ${p.wifi_oculta ? 'checked' : ''}>Rede oculta (não aparece na lista)</label>
+    </div></section>
+    <section class="card form" aria-labelledby="pv-acesso"><h2 class="t2" id="pv-acesso">Acesso à casa</h2><div class="campos">
+      ${campoPriv('portao', 'Código do portão ou da portaria', 'senha', { largo: true })}
+      ${campoPriv('chaves', 'Chaves e acesso', 'area', { ajuda: 'Ex.: “na caixinha ao lado da porta, código 1234”. Entra na mensagem do dia da chegada.' })}
+      ${campoPriv('notas', 'Outras anotações privadas', 'area', { ajuda: 'Alarme, disjuntor, vizinho de confiança… Só você vê.' })}
+    </div></section>
+  </div>
+  <p class="estado-cofre" id="priv-estado" aria-live="polite">${ic('check')}<span>${estadoCofreTxt()}</span></p>`; };
+let privT = null;
+function privMudou(salvarJa) {
+  const st = $('#priv-estado span'); if (st) st.textContent = 'Salvando…';
+  clearTimeout(privT); privT = setTimeout(async () => { const ok = await salvarCofre(); const s = $('#priv-estado span'); if (s) s.textContent = ok ? `${estadoCofreTxt()} ${DEMO ? '' : 'Salvo às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '.'}` : 'Não consegui salvar no cofre deste aparelho. Bloqueie e entre de novo com a senha.'; }, salvarJa ? 0 : 350);
+}
+
+/* --- impressos (A6) --- */
+A.imp = { guia: true, wifi: true, regras: true, papel: 'a6', senha: true };
+const qrSvg = (txt, titulo) => { try { return window.QR && txt ? QR.svg(txt, { cor: '#1F3D2F', fundo: '#FFFFFF', margem: 2, titulo }) : ''; } catch (e) { return ''; } };
+const urlCurta = (u) => String(u || '').replace(/^https?:\/\//, '').replace(/\/$/, '');
+function cartaoGuia(tela) {
+  const url = urlPublica(); if (!url) return tela ? `<article class="a6 a6-vazio"><p>Defina o endereço do site em <button type="button" class="btn-link" data-ir="qr">QR Code do guia</button>.</p></article>` : '';
+  return `<article class="a6 a6-guia" data-cartao="guia"><div class="a6-moldura">
+    <div class="a6-logo">${marca('vertical', 'claro')}</div><p class="a6-script">Seja bem-vindo!</p>
+    <div class="a6-qr" data-qr-texto="${esc(url)}">${qrSvg(url, 'QR Code que abre o guia da casa')}</div>
+    <h3 class="a6-tit">Seu guia <em>da casa</em></h3>
+    <p class="a6-txt">Aponte a câmera do celular: maré, praias, onde comer e tudo sobre a casa.</p>
+    <p class="a6-url">${esc(urlCurta(url))}</p></div></article>`;
+}
+function cartaoWifi(tela) {
+  const p = privados(), txt = H.wifiTexto({ rede: p.wifi_rede, senha: p.wifi_senha, tipo: p.wifi_tipo, oculta: p.wifi_oculta });
+  if (!txt) return tela ? `<article class="a6 a6-vazio" data-cartao="wifi"><p>Cadastre o nome e a senha da rede em <button type="button" class="btn-link" data-ir="privados">Dados privados</button> para gerar o cartão do Wi-Fi.</p></article>` : '';
+  const comSenha = A.imp.senha && p.wifi_tipo !== 'nopass' && tem(p.wifi_senha);
+  return `<article class="a6 a6-wifi" data-cartao="wifi"><div class="a6-moldura">
+    <span class="a6-olho">Wi-Fi</span><h3 class="a6-tit"><em>Conecte-se</em></h3>
+    <div class="a6-qr" data-qr-wifi>${qrSvg(txt, 'QR Code que conecta ao Wi-Fi da casa')}</div>
+    <p class="a6-txt">Aponte a câmera do celular e toque em “Conectar”.</p>
+    <dl class="a6-dados"><div><dt>Rede</dt><dd>${esc(p.wifi_rede)}</dd></div>${comSenha ? `<div><dt>Senha</dt><dd class="a6-senha">${esc(p.wifi_senha)}</dd></div>` : ''}</dl>
+    <div class="a6-simbolo">${marca('simbolo', 'claro')}</div></div></article>`;
+}
+const textoRegra = (r) => typeof r === 'string' ? r : (r && (r.texto || r.titulo || r.nome)) || '';
+function cartaoRegras(tela) {
+  const c = (A.draft && A.draft.casa) || {}, rs = (Array.isArray(c.regras_casa) ? c.regras_casa : []).map(textoRegra).filter(tem);
+  if (!rs.length) return tela ? `<article class="a6 a6-vazio" data-cartao="regras"><p>As regras da casa ainda estão vazias. Escreva em <button type="button" class="btn-link" data-ir-campo="casa.regras_casa">A casa › Regras da casa</button>: elas vão para o site e para este cartão.</p></article>` : '';
+  return `<article class="a6 a6-regras ${rs.length > 9 ? 'muitas' : ''}" data-cartao="regras"><div class="a6-moldura">
+    <span class="a6-olho">Boa estadia</span><h3 class="a6-tit">Regras <em>da casa</em></h3>
+    <ol class="a6-lista">${rs.slice(0, 14).map(r => `<li>${esc(r)}</li>`).join('')}</ol>
+    ${tem(c.checkin) || tem(c.checkout) ? `<p class="a6-horas">${tem(c.checkin) ? `<span>Check-in<b>${esc(c.checkin)}</b></span>` : ''}${tem(c.checkout) ? `<span>Check-out<b>${esc(c.checkout)}</b></span>` : ''}</p>` : ''}
+    <div class="a6-rodape">${marca('horizontal', 'claro')}</div></div></article>`;
+}
+const CARTOES = { guia: ['QR do guia', cartaoGuia], wifi: ['Cartão do Wi-Fi', cartaoWifi], regras: ['Regras da casa', cartaoRegras] };
+VISTAS.impressos = () => `${cab('Hospedagem', 'Impressos <em>da casa</em>', 'Cartões no formato A6 (10,5 × 14,8 cm) com a marca da casa, para deixar na entrada, na geladeira ou no quarto.')}
+  <div class="card form imp-opcoes">
+    <div class="imp-linha"><fieldset><legend>Cartões</legend><div class="checks">${Object.keys(CARTOES).map(k => `<label class="check"><input type="checkbox" data-imp="${k}" ${A.imp[k] ? 'checked' : ''}>${CARTOES[k][0]}</label>`).join('')}</div></fieldset>
+    <fieldset><legend>Papel</legend><div class="checks"><label class="check"><input type="radio" name="papel" data-imp-papel="a6" ${A.imp.papel === 'a6' ? 'checked' : ''}>A6, um cartão por folha</label><label class="check"><input type="radio" name="papel" data-imp-papel="a4" ${A.imp.papel === 'a4' ? 'checked' : ''}>A4, quatro por folha com guias de corte</label></div></fieldset></div>
+    <label class="check"><input type="checkbox" data-imp="senha" ${A.imp.senha ? 'checked' : ''}>Escrever a senha do Wi-Fi no cartão, além do QR (para quem não usa câmera)</label>
+    <div class="acoes"><button type="button" class="btn btn-prim" data-acao="imprimir-kit">${ic('impressora')}Imprimir os selecionados</button><span class="peq mudo">Dica: na janela de impressão, escolha “Tamanho real” (100%). Se salvar em PDF, lembre que o arquivo do Wi-Fi contém a senha.</span></div>
+  </div>
+  <div class="kit-previa" id="kit-previa">${Object.keys(CARTOES).map(k => `<div class="kit-item ${A.imp[k] ? '' : 'desligado'}"><div class="kit-rot"><span class="olho">${esc(CARTOES[k][0])}</span>${CARTOES[k][1](false) ? `<button type="button" class="btn btn-sec btn-peq" data-imprimir-cartao="${k}">${ic('impressora')}Imprimir só este</button>` : ''}</div>${CARTOES[k][1](true)}</div>`).join('')}</div>`;
+function limparImpressao() { const r = $('#impressao'); if (r) r.remove(); const s = $('#pagina-impressao'); if (s) s.remove(); document.body.classList.remove('imprimindo'); }
+function prepararImpressao(html, pagina, classe, margem) {
+  limparImpressao();
+  const r = document.createElement('div'); r.id = 'impressao'; r.className = classe; r.innerHTML = html; document.body.appendChild(r);
+  const s = document.createElement('style'); s.id = 'pagina-impressao'; s.textContent = `@page{size:${pagina === 'A6' ? '105mm 148mm' : '210mm 297mm'};margin:${margem || 0}}`; document.head.appendChild(s); // tamanho em mm: o Chromium não reconhece a palavra A6
+  document.body.classList.add('imprimindo');
+}
+function imprimirCartoes(ids) {
+  const html = ids.map(k => CARTOES[k] ? CARTOES[k][1](false) : '').filter(Boolean);
+  if (!html.length) { toast('Nada para imprimir: preencha os dados dos cartões escolhidos.', true); return; }
+  if (A.imp.papel === 'a4') { const folhas = []; for (let i = 0; i < html.length; i += 4) folhas.push(`<div class="folha-a4">${html.slice(i, i + 4).join('')}</div>`); prepararImpressao(folhas.join(''), 'A4', 'papel-a4'); }
+  else prepararImpressao(html.join(''), 'A6', 'papel-a6');
+  window.print();
+}
+window.addEventListener('afterprint', () => { limparImpressao(); document.body.classList.remove('imprimir-qr'); });
+
+/* --- virada entre hóspedes (checklist salvo no aparelho; não é segredo) --- */
+function virada() { const v = ls.get('admin:virada', null) || {}; return { modelo: typeof v.modelo === 'string' && v.modelo.trim() ? v.modelo : H.CHECKLIST_PADRAO, marcados: v.marcados && typeof v.marcados === 'object' && !Array.isArray(v.marcados) ? v.marcados : {}, inicio: Number.isFinite(v.inicio) ? v.inicio : null }; }
+const salvarVirada = (v) => ls.set('admin:virada', v);
+function contaVirada(v) { const secs = H.lerChecklist(v.modelo); let tot = 0, ok = 0; secs.forEach(s => s.itens.forEach(it => { tot++; if (v.marcados[H.chaveItem(s.titulo, it)]) ok++; })); return { secs, tot, ok }; }
+VISTAS.virada = () => { const v = virada(), { secs, tot, ok } = contaVirada(v), pct = tot ? Math.round(ok / tot * 100) : 0;
+  return `${cab('Hospedagem', 'Virada <em>entre hóspedes</em>', 'Marque cada item enquanto prepara a casa. Fica salvo neste aparelho. Imprima para quem ajuda na limpeza.', `<button type="button" class="btn btn-sec" data-acao="imprimir-virada">${ic('impressora')}Imprimir</button><button type="button" class="btn btn-sec" data-acao="nova-virada">${ic('atualizar')}Nova virada</button>`)}
+  <div class="card virada-topo ${tot && ok === tot ? 'pronto' : ''}"><div class="virada-num"><b id="virada-ok">${ok}</b><span>de ${tot} itens</span></div>
+    <div class="virada-prog"><div class="barra-prog" role="progressbar" aria-valuenow="${ok}" aria-valuemin="0" aria-valuemax="${tot}" aria-valuetext="${ok} de ${tot} itens prontos" aria-label="Virada da casa"><span style="width:${pct}%"></span></div>
+    <p class="peq mudo">${tot && ok === tot ? 'Casa pronta para o próximo hóspede.' : v.inicio ? 'Começada ' + esc(new Date(v.inicio).toLocaleString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })) + '.' : 'Ainda não começada.'}</p></div></div>
+  <div class="virada-lista">${secs.map(s => { const n = s.itens.filter(it => v.marcados[H.chaveItem(s.titulo, it)]).length; return `<fieldset class="virada-sec ${n === s.itens.length ? 'feita' : ''}"><legend>${esc(s.titulo)}<span class="num">${n}/${s.itens.length}</span></legend>${s.itens.map(it => { const k = H.chaveItem(s.titulo, it); return `<label class="virada-item"><input type="checkbox" data-virada="${k}" ${v.marcados[k] ? 'checked' : ''}><span>${esc(it)}</span></label>`; }).join('')}</fieldset>`; }).join('')}</div>
+  <details class="card modelo-virada"><summary>Editar o modelo do checklist</summary>
+    <div class="campo" style="margin-top:12px"><label for="virada-modelo">Modelo (um item por linha; comece com # para criar uma seção)</label><textarea id="virada-modelo" rows="14" spellcheck="true">${esc(v.modelo)}</textarea></div>
+    <div class="acoes"><button type="button" class="btn btn-prim" data-acao="salvar-virada">Salvar modelo</button><button type="button" class="btn btn-sec" data-acao="restaurar-virada">Restaurar o original</button></div></details>`; };
+function imprimirVirada() {
+  const v = virada(), secs = H.lerChecklist(v.modelo), casa = (A.draft && A.draft.casa && A.draft.casa.nome) || 'Casa 18 Anahi';
+  prepararImpressao(`<section class="folha-virada"><header><div class="fv-logo">${marca('horizontal', 'claro')}</div><div><span class="a6-olho">Virada entre hóspedes</span><h1>${esc(casa)}</h1></div></header>
+    <p class="fv-linhas"><span>Data: ____/____/______</span><span>Responsável: ______________________</span><span>Próximo hóspede chega: ____/____ às ____h</span></p>
+    <div class="fv-secoes">${secs.map(s => `<div class="fv-sec"><h2>${esc(s.titulo)}</h2><ul>${s.itens.map(it => `<li><span class="caixa" aria-hidden="true"></span>${esc(it)}</li>`).join('')}</ul></div>`).join('')}</div>
+    <h2 class="fv-obs-tit">Observações e consertos</h2><div class="fv-obs" aria-hidden="true"></div></section>`, 'A4', 'papel-virada', '13mm 14mm');
+  window.print();
+}
+
+/* --- Reservas e disponibilidade (botão do hero + agenda espelhada do Airbnb) ---
+   O painel NUNCA pede nem guarda o link iCal: ele vai só nas Propriedades do script (ICAL_URL). */
+function avisoReserva(v) {
+  v = String(v == null ? (A.draft.casa || {}).link_reserva || '' : v).trim();
+  if (!tem(v)) return 'Sem link, o site não mostra botão de reserva.';
+  if (ehIcal(v) || !urlValida(v, true)) return '';
+  return ehAirbnb(v) ? 'No site, o botão aparece como “Reservar no Airbnb” e abre o anúncio numa nova aba.' : '<b>Atenção:</b> este link não é do Airbnb (airbnb.com ou airbnb.com.br). O botão aparece só como “Reservar”. Confira se é mesmo o endereço do anúncio.';
+}
+function cartaoReservas() {
+  const cfg = A.draft.config || {}, ep = tem(cfg.feedback_endpoint);
+  return `<section class="card form" id="card-reservas" aria-labelledby="rd-tit"><h2 class="t2" id="rd-tit">Reservas e disponibilidade</h2>
+    <p class="mudo" style="margin:0">O botão de reserva aparece na capa do site, no topo e no rodapé. A agenda mostra quais dias estão livres, espelhando o calendário do Airbnb (atualiza sozinha a cada hora).</p>
+    <div class="campos">
+      ${campo('casa.link_reserva', 'Link do anúncio para reservar', 'url', { largo: true, v: 'reserva', ph: 'https://www.airbnb.com.br/rooms/…', ajuda: 'O endereço do anúncio, como aparece no navegador ao abrir a página da casa no Airbnb. Nunca o link do calendário.' })}
+      <p class="ajuda largo aviso-reserva" id="reserva-aviso" aria-live="polite">${avisoReserva()}</p>
+      ${campo('config.agenda_visivel', 'Mostrar a agenda de disponibilidade no site', 'check', { largo: true })}
+    </div>
+    ${!ep ? `<div class="aviso">${ic('alerta')}<span>A agenda usa o mesmo Apps Script do feedback. Primeiro cole o endereço dele em <button type="button" class="btn-link" data-ir="config">Configurações › Feedback</button>. Enquanto isso, mesmo ligada, a agenda não aparece no site.</span></div>` : ''}
+    <details class="passo-agenda"${cfg.agenda_visivel ? '' : ' open'}><summary>Como ligar a agenda ao calendário do Airbnb (uma vez só)</summary>
+      <ol class="passos">
+        <li><span>No <b>Airbnb</b> (de preferência no computador), abra <b>Calendário</b>, escolha o anúncio e toque em <b>Disponibilidade</b>.</span></li>
+        <li><span>Em <b>Conectar calendários</b>, toque em <b>Exportar calendário</b> e <b>copie o link</b> (ele termina em <code>.ics</code>).</span></li>
+        <li><span>Abra o projeto do <b>Apps Script</b> (o mesmo do feedback). Vá em <b>Configurações do projeto</b> (engrenagem) › <b>Propriedades do script</b> › <b>Adicionar propriedade</b>.</span></li>
+        <li><span>Em Propriedade, escreva <code>ICAL_URL</code>. Em Valor, cole o link copiado. Salve.</span></li>
+        <li><span><b>Implantar</b> › <b>Gerenciar implantações</b> › lápis (editar) › Versão: <b>Nova versão</b> › <b>Implantar</b>. O endereço que termina em /exec continua o mesmo.</span></li>
+        <li><span>Volte aqui, toque em <b>Testar agenda</b>, marque “Mostrar a agenda” e <b>publique</b>.</span></li>
+      </ol>
+      <div class="aviso aviso-leve">${ic('cadeado')}<span>O link do calendário é <b>secreto</b>: quem tem ele vê suas reservas. Ele fica só no Apps Script. O painel nunca pede nem guarda esse link, e o site recebe apenas os dias ocupados, sem nomes nem códigos.</span></div>
+    </details>
+    <div class="acoes"><button type="button" class="btn btn-sec" data-acao="testar-agenda">${ic('calendario')}Testar agenda</button></div>
+    <div id="agenda-previa" class="agenda-previa" aria-live="polite"></div>
+  </section>`;
+}
+function agendaDemo() {
+  const h = new Date(), d = (n) => { const x = new Date(h.getTime() + n * 864e5); return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Maceio' }).format(x); };
+  return { ok: true, ocupado: [[d(3), d(7)], [d(12), d(15)], [d(22), d(29)], [d(38), d(41)]], de: d(0), ate: d(400), atualizado: new Date().toISOString(), parcial: false };
+}
+const ERROS_AGENDA = {
+  'agenda não configurada': 'Falta a propriedade ICAL_URL no Apps Script (passos 3 e 4). Depois, reimplante como nova versão (passo 5).',
+  'não foi possível ler o calendário': 'O Apps Script não conseguiu ler o calendário do Airbnb. Confira se o link em ICAL_URL está completo (termina em .ics) e se a exportação continua ativa no Airbnb.',
+  'use POST': 'O Apps Script publicado ainda é a versão antiga, sem a agenda. Cole o código novo de integracoes/feedback-apps-script.gs e reimplante como nova versão (passo 5).'
+};
+async function testarAgenda(b) {
+  const box = $('#agenda-previa'); if (!box) return;
+  const ep = String((A.draft.config || {}).feedback_endpoint || '').trim();
+  const erro = (m) => { box.innerHTML = `<div class="aviso erro" role="alert">${ic('alerta')}<span>${m}</span></div>`; };
+  try { if (!window.GuiaAgenda) await carregarScript('../assets/agenda.js'); } catch (x) { erro('O arquivo assets/agenda.js não carregou. Suba o pacote de código novo.'); return; }
+  let bruto;
+  if (DEMO) bruto = agendaDemo();
+  else {
+    if (!tem(ep)) { erro('Primeiro cole o endereço do Apps Script em <button type="button" class="btn-link" data-ir="config">Configurações › Feedback</button>.'); return; }
+    if (!urlValida(ep, true)) { erro('O endereço do Apps Script precisa começar com https://.'); return; }
+    b.disabled = true; box.innerHTML = '<p class="mudo" role="status">Consultando o Apps Script…</p>';
+    try {
+      const u = new URL(ep); u.searchParams.set('acao', 'agenda');
+      const r = await fetch(u.href, { cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer' });
+      bruto = await r.json().catch(() => { throw new Error('A resposta não veio no formato esperado. Confira se o endereço termina em /exec, se a implantação está como “Qualquer pessoa” e se você reimplantou como nova versão.'); });
+      if (bruto && bruto.ok === false) throw new Error(ERROS_AGENDA[bruto.erro] || ('O Apps Script respondeu: ' + esc(String(bruto.erro || 'erro desconhecido'))));
+    } catch (x) { erro(x instanceof TypeError ? 'Não conectou: confira a internet e o endereço do Apps Script.' : x.message); return; }
+    finally { b.disabled = false; }
+  }
+  const d = GuiaAgenda.validar(bruto);
+  if (!d) { erro('A resposta veio num formato inesperado. Reimplante o Apps Script como nova versão.'); return; }
+  const h = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Maceio' });
+  const vis = (A.draft.config || {}).agenda_visivel === true;
+  box.innerHTML = `<div class="aviso ${DEMO ? '' : 'ok'}" role="status">${ic(DEMO ? 'lampada' : 'check')}<span>${DEMO ? '<b>Demonstração:</b> calendário simulado, com datas fictícias. No painel de verdade, o teste chama o seu Apps Script.' : `<b>Agenda conectada.</b> ${d.ocupado.length} período(s) ocupado(s) nos próximos meses${d.atualizado ? ', lido(s) às ' + h.format(new Date(d.atualizado)) : ''}.${d.parcial ? ' Parte dos calendários não pôde ser lida agora.' : ''}`} ${vis ? 'Assim ela aparece no site.' : 'Marque “Mostrar a agenda” e publique para ela aparecer no site.'}</span></div><div class="agenda-cal-admin" id="agenda-cal-admin"></div>`;
+  GuiaAgenda.montar($('#agenda-cal-admin'), d, { id: 'ag-previa' });
+}
+
 /* --- configurações --- */
 VISTAS.config = () => `${cab('Sistema', 'Configurações', '')}
+  <section class="card form" id="card-senha" aria-labelledby="cs-tit"><h2 class="t2" id="cs-tit">Senha do anfitrião</h2>
+    <p class="mudo" style="margin:0">A senha protege este aparelho: ela abre o token e os dados privados guardados aqui. Ao trocar, o painel tranca tudo de novo com a senha nova e publica no GitHub só o código embaralhado (hash) em <code>admin/acesso.json</code>. Nos outros aparelhos, a senha nova vale em alguns minutos; lá, a anterior é pedida uma última vez para abrir o que estava guardado.</p>
+    ${!DEMO && A.primeiraEntrada ? `<div class="aviso aviso-leve">${ic('lampada')}<span>Quer trocar a senha original por uma frase só sua? O código da senha fica num arquivo público do repositório, então uma frase longa e pessoal protege melhor este aparelho.</span></div>` : ''}
+    <div class="campos">
+      ${DEMO ? `<p class="peq mudo largo" style="margin:0">Na demonstração a senha atual não é pedida e a troca é simulada: nada é publicado.</p>` : caixaSenha('ts-atual', 'Senha atual', 'current-password').replace('class="campo"', 'class="campo largo"')}
+      ${caixaSenha('ts-nova', 'Nova senha', 'new-password', 'minlength="8"')}
+      ${caixaSenha('ts-rep', 'Repita a nova senha', 'new-password')}
+      <span class="ajuda largo">Pelo menos 8 caracteres. Uma frase curta é fácil de lembrar e difícil de adivinhar, como “coqueiro torto na varanda”.</span>
+    </div>
+    <div id="ts-msg" aria-live="polite"></div>
+    <div class="acoes"><button type="button" class="btn btn-prim" data-acao="trocar-senha">${ic('cadeado')}Trocar a senha</button></div>
+  </section>
   <div class="card form"><h2 class="t2">Feedback dos hóspedes</h2>
     <p class="mudo" style="margin:0">Para o formulário do site alimentar este painel, publique o script <code>integracoes/feedback-apps-script.gs</code> no Google Apps Script (o passo a passo está no começo do arquivo) e cole o endereço abaixo.</p>
     <div class="campos">${campo('config.feedback_endpoint', 'Endereço do Apps Script (termina em /exec)', 'url', { largo: true, ph: 'https://script.google.com/macros/s/…/exec', ajuda: 'Fica público no site: só permite enviar feedback, não ler.' })}
-    <div class="campo largo"><label for="fb-chave">Chave de leitura</label><input type="password" id="fb-chave" value="${esc(fbChave())}" autocomplete="off"><span class="ajuda">É a CHAVE_LEITURA definida no script. ${Cofre.existe() ? 'Fica guardada criptografada com a sua senha local.' : 'Fica só nesta sessão do navegador.'}</span></div></div>
+    <div class="campo largo"><label for="fb-chave">Chave de leitura</label><input type="password" id="fb-chave" value="${esc(fbChave())}" autocomplete="off"><span class="ajuda">É a CHAVE_LEITURA definida no script (24 caracteres ou mais). Fica guardada neste aparelho, cifrada com a sua senha.</span></div></div>
     <div class="acoes"><button type="button" class="btn btn-sec" data-acao="salvar-chave">Salvar chave</button><button type="button" class="btn btn-sec" data-acao="testar-feedback">Testar conexão</button></div></div>
-  <div class="card form"><h2 class="t2">Compartilhamento</h2>${campoFoto('config.og_imagem', 'Imagem ao compartilhar o link', { largo: true })}<span class="ajuda">Use uma foto horizontal da casa. Ela aparece quando alguém envia o link pelo WhatsApp ou redes sociais.</span></div>
+  <div class="card form"><h2 class="t2">Compartilhamento</h2>${campoFoto('config.og_imagem', 'Imagem ao compartilhar o link', { largo: true })}<span class="ajuda">Use uma foto horizontal da casa. Ao publicar, o painel gera dela a imagem <code>compartilhar.jpg</code> (1200 × 630), que aparece quando alguém envia o link pelo WhatsApp ou redes sociais.</span></div>
+  <div class="card form" id="card-formato"><h2 class="t2">Formato dos dados</h2>${A.formato === 'js'
+    ? `<p class="mudo" style="margin:0">Seu guia ainda usa o arquivo antigo <code>conteudo.js</code>. Tudo funciona, e o painel continua gravando nele. Depois de subir o código novo do site, atualize para <code>dados/conteudo.json</code>: conteúdo e código passam a ser independentes.</p><div class="acoes"><button type="button" class="btn btn-prim" data-acao="atualizar-formato">${ic('atualizar')}Atualizar formato</button></div>`
+    : `<p class="mudo" style="margin:0">Os dados ficam em <code>dados/conteudo.json</code> (esquema ${esc(String((A.draft && A.draft.esquema) || ''))}), separados do código do site.${A.legado ? ' O arquivo antigo <code>conteudo.js</code> ainda está no repositório, como reserva.' : ''}</p>${A.legado ? `<div class="acoes"><button type="button" class="btn btn-sec" data-acao="apagar-legado">Apagar o conteudo.js antigo</button></div>` : ''}`}</div>
   <div class="card form"><h2 class="t2">Cópia de segurança</h2><p class="mudo" style="margin:0">Baixe todo o conteúdo como arquivo, ou restaure uma cópia anterior (ela entra no rascunho; nada é publicado sozinho).</p>
     <div class="acoes"><button type="button" class="btn btn-sec" data-acao="baixar-backup">Baixar cópia (.json)</button><label class="btn btn-sec" for="restaurar" tabindex="0">Restaurar cópia</label><input type="file" id="restaurar" accept=".json,application/json" class="sr-only" tabindex="-1"></div></div>
-  <div class="card form"><h2 class="t2">Acesso</h2><p class="mudo" style="margin:0">Repositório <b>${esc(A.cfg.owner)}/${esc(A.cfg.repo)}</b>, branch <b>${esc(A.cfg.branch)}</b>. ${Cofre.existe() ? 'O acesso está guardado neste aparelho, criptografado com a sua senha local (por até 30 dias).' : 'O acesso vale só enquanto esta aba estiver aberta.'} ${validadeToken() ? validadeToken() + '.' : 'O GitHub não informou a validade do token.'}</p>
-    <div class="acoes"><button type="button" class="btn btn-perigo" data-acao="sair">${ic('sair')}Sair e apagar dados deste aparelho</button><button type="button" class="btn btn-sec" data-acao="descartar">Descartar alterações não publicadas</button></div></div>`;
+  <div class="card form"><h2 class="t2">Acesso ao GitHub</h2><p class="mudo" style="margin:0">Repositório <b>${esc(A.cfg.owner)}/${esc(A.cfg.repo)}</b>, branch <b>${esc(A.cfg.branch)}</b>. ${DEMO ? 'Na demonstração não há token: o GitHub é simulado.' : A.cofreDados && A.cofreDados.token ? `O token está guardado neste aparelho, cifrado com a sua senha${A.cofreDados.tokenAte ? ', até ' + esc(new Date(A.cofreDados.tokenAte).toLocaleDateString('pt-BR', { timeZone: 'America/Maceio' })) : ''}.` : 'O token vale só enquanto esta aba estiver aberta (aparelho compartilhado).'} ${DEMO ? '' : validadeToken() ? validadeToken() + '.' : 'O GitHub não informou a validade do token.'}</p>
+    <div class="acoes"><button type="button" class="btn btn-sec" data-acao="bloquear">${ic('cadeado')}Bloquear o painel</button>${DEMO ? '' : `<button type="button" class="btn btn-sec" data-acao="trocar-token">Trocar o token</button>`}<button type="button" class="btn btn-sec" data-acao="descartar">Descartar alterações não publicadas</button><button type="button" class="btn btn-perigo" data-acao="sair">${ic('sair')}Sair e apagar dados deste aparelho</button></div>
+    <p class="peq mudo" style="margin:0"><b>Bloquear</b> fecha o painel e mantém o acesso guardado (a senha abre de novo). <b>Sair e apagar</b> remove deste aparelho o token, a chave do feedback, os dados privados da casa e os modelos de mensagem.</p></div>`;
 VISTAS.config.depois = () => {
   $('#restaurar').addEventListener('change', async (e) => {
     const f = e.target.files[0]; e.target.value = ''; if (!f) return;
     try {
       const o = JSON.parse(await f.text()); if (!o || !o.casa || !Array.isArray(o.lugares)) throw new Error('não parece uma cópia do guia (faltam "casa" ou "lugares")');
-      const fix = sanear(o);
+      const { obj, fix } = preparar_(o);
       if (!confirm(`Substituir o rascunho atual por esta cópia?${fix.length ? `\n\n${fix.length} valor(es) em formato inválido serão deixados vazios.` : ''}`)) return;
-      A.draft = o; A.correcoes = fix; mudou(); toast('Cópia restaurada no rascunho. Revise e publique.'); rerender();
+      A.draft = obj; A.correcoes = fix; mudou(); toast('Cópia restaurada no rascunho. Revise e publique.'); rerender();
     } catch (x) { toast('Não consegui usar este arquivo: ' + (x instanceof SyntaxError ? 'o JSON está com erro de formatação.' : x.message), true); }
   });
 };
 
 /* --- avançado --- */
 VISTAS.avancado = () => `${cab('Sistema', 'Editor avançado', 'Todo o conteúdo em JSON. Use com cuidado: um erro de sintaxe impede aplicar.')}
-  <div class="card form"><div class="campo"><label for="json">conteudo.js</label><textarea class="json" id="json" spellcheck="false">${esc(JSON.stringify(A.draft, null, 2))}</textarea><span class="ajuda" id="json-msg" aria-live="polite"></span></div>
+  <div class="card form"><div class="campo"><label for="json">dados/conteudo.json</label><textarea class="json" id="json" spellcheck="false">${esc(JSON.stringify(A.draft, null, 2))}</textarea><span class="ajuda" id="json-msg" aria-live="polite"></span></div>
   <div class="acoes"><button type="button" class="btn btn-prim" data-acao="aplicar-json">Aplicar ao rascunho</button></div></div>`;
 
 /* ---------------- FEEDBACK ---------------- */
@@ -1290,7 +1876,7 @@ function resolverConflito(escolha) {
   A.remoto = c.atual; A.baseSha = c.atual.sha; A.baseObj = clone(c.atual.obj);
   if (escolha === 'descartar') A.draft = clone(c.atual.obj);
   else A.draft = mesclar(c.base, c.rasc, c.atual.obj, escolha === 'deles' ? 'deles' : 'minha').obj;
-  sanear(A.draft); mostrarConflitos.atual = null; $('#dialogo').close(); salvarRascunho(); atualizarBarra(); rerender();
+  A.draft = preparar_(A.draft).obj; mostrarConflitos.atual = null; $('#dialogo').close(); salvarRascunho(); atualizarBarra(); rerender();
   toast(escolha === 'descartar' ? 'Rascunho descartado. Você está vendo a versão do site.' : 'Versões juntas. Revise e toque em Publicar.');
 }
 async function confirmarPublicar() {
@@ -1306,35 +1892,86 @@ async function confirmarPublicar() {
       o = m.obj; juntou = true;
     }
     o.atualizado_em = hoje();
+    o = preparar_(o).obj; // grava sempre no esquema atual
     const msg = ($('#msg-commit') && $('#msg-commit').value.trim()) || 'Atualiza guia';
-    const r = await gh(`${repoPath()}/contents/conteudo.js`, { method: 'PUT', body: { message: msg.slice(0, 120), content: b64.para(escreverConteudo(o)), sha: atual.sha, branch: A.cfg.branch } });
-    A.remoto = { sha: r.content.sha, obj: clone(o) }; A.baseSha = r.content.sha; A.baseObj = clone(o); A.draft = clone(o); A.correcoes = [];
+    // Grava no formato que existe no repositório (conteudo.js até o anfitrião atualizar o formato).
+    const r = await gh(`${repoPath()}/contents/${arqDe(atual.formato)}`, { method: 'PUT', body: { message: msg.slice(0, 120), content: b64.para(escreverConteudo(o, atual.formato)), sha: atual.sha, branch: A.cfg.branch } });
+    A.formato = atual.formato;
+    A.remoto = { sha: r.content.sha, obj: clone(o), formato: atual.formato }; A.baseSha = r.content.sha; A.baseObj = clone(o); A.draft = clone(o); A.correcoes = [];
     ls.del('admin:rascunho'); ls.del('guia:rascunho'); $('#dialogo').close(); atualizarBarra(); rerender();
-    toast(juntou ? 'Publicado! Juntei com alterações feitas em outro aparelho. O site atualiza em até alguns minutos.' : 'Publicado! O site atualiza em até alguns minutos.');
+    toast(DEMO ? 'Publicação simulada: na demonstração nada é enviado ao GitHub.' : juntou ? 'Publicado! Juntei com alterações feitas em outro aparelho. O site atualiza em até alguns minutos.' : 'Publicado! O site atualiza em até alguns minutos.');
     try { await atualizarIndex(o); }
-    catch (x) { toast('Conteúdo publicado, mas o título e a imagem de compartilhamento (WhatsApp) não foram atualizados: ' + (x.status != null ? msgErro(x) : x.message), true); }
+    catch (x) { toast((x.semMarcadores ? 'Conteúdo publicado. Aviso: ' : 'Conteúdo publicado, mas o título e a imagem de compartilhamento (WhatsApp) não foram atualizados: ') + (x.status != null ? msgErro(x) : x.message), true); }
   } catch (e) {
     toast(e.status === -1 ? e.message : msgErro(e, 'publicar'), true);
     restaurar();
   }
 }
 /* Metadados de compartilhamento precisam estar no HTML: o WhatsApp não executa JavaScript.
-   Todas as substituições usam função (o texto do usuário nunca vira padrão $&, $1, $`). */
+   O painel NUNCA reescreve o código do index.html: só troca o conteúdo entre <!-- compartilhar:inicio --> e
+   <!-- compartilhar:fim -->. Sem os dois marcadores (index antigo ou editado à mão), não toca no arquivo e avisa.
+   A imagem é um arquivo fixo, compartilhar.jpg (1200×630, JPEG: o formato que todo WhatsApp mostra), gerado da
+   foto escolhida só quando ela muda; o ?v= no endereço força o WhatsApp a buscar a imagem nova. */
+const MARCA_INI = '<!-- compartilhar:inicio -->', MARCA_FIM = '<!-- compartilhar:fim -->';
+const OG_DESC = 'Tudo para sua estadia e o melhor da Rota dos Milagres, a poucos toques.';
+const hashCurto = (t) => { let h = 2166136261; for (const c of String(t)) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
+function blocoCompartilhar(o, base, img, descAtual) {
+  const nome = String((o.casa && o.casa.nome) || '').trim() || 'Casa 18 Anahi';
+  const titulo = `${nome} · Guia do hóspede`, alt = (o.config && o.config.og_imagem && o.config.og_imagem.alt) || (img ? 'Casa 18 Anahi' : '');
+  const linhas = [MARCA_INI, '<!-- Bloco gerado pelo painel ao publicar (título e prévia no WhatsApp). O painel só reescreve o que fica entre estes dois marcadores. -->',
+    `<title>${esc(titulo)}</title>`, `<meta property="og:title" content="${esc(titulo)}">`, `<meta property="og:description" content="${esc(descAtual || OG_DESC)}">`,
+    `<meta property="og:image" content="${esc(img)}">`, `<meta property="og:image:alt" content="${esc(img ? alt : '')}">`];
+  if (img) linhas.push('<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">');
+  linhas.push(`<meta property="og:url" content="${esc(base)}">`, `<meta name="twitter:card" content="${img ? 'summary_large_image' : 'summary'}">`, MARCA_FIM);
+  return linhas.join('\n');
+}
+/* Gera o JPEG 1200×630 (recorte central) a partir da foto escolhida. */
+function gerarImagemCompartilhar(src) {
+  return new Promise((ok, falha) => {
+    const img = new Image(); img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const W = 1200, H = 630, k = Math.max(W / img.naturalWidth, H / img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k;
+      const cv = document.createElement('canvas'); cv.width = W; cv.height = H; const g = cv.getContext('2d');
+      g.fillStyle = '#F4EFE6'; g.fillRect(0, 0, W, H); g.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+      try { cv.toBlob(b => b ? ok(b) : falha(new Error('não consegui gerar a imagem')), 'image/jpeg', 0.86); } catch (e) { falha(e); }
+    };
+    img.onerror = () => falha(new Error('não consegui abrir a foto escolhida'));
+    img.src = /^https:/.test(src) ? src : (A.cacheFotos[src.replace(/^\.\//, '')] || rawUrl(src));
+  });
+}
 async function atualizarIndex(o) {
   const j = await gh(`${repoPath()}/contents/index.html?ref=${encodeURIComponent(A.cfg.branch)}`);
   const html = b64.de(j.content), base = urlPublica();
-  const nome = String((o.casa && o.casa.nome) || '').trim() || 'Casa 18 Anahi';
-  const titulo = `${nome} · Guia do hóspede`;
+  const ini = html.indexOf(MARCA_INI), fim = html.indexOf(MARCA_FIM);
+  if (ini < 0 || fim < 0 || fim < ini || html.indexOf(MARCA_INI, ini + 1) >= 0 || html.indexOf(MARCA_FIM, fim + 1) >= 0) {
+    const x = new Error('o index.html publicado não tem os marcadores <!-- compartilhar:inicio --> e <!-- compartilhar:fim --> (código antigo ou editado à mão). Não alterei o arquivo; suba o código novo do site para o painel cuidar do título e da imagem'); x.semMarcadores = true; throw x;
+  }
+  const blocoAtual = html.slice(ini, fim + MARCA_FIM.length);
+  const descAtual = ((blocoAtual.match(/<meta property="og:description" content="([^"]*)"/) || [])[1] || '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  const foto = o.config && o.config.og_imagem && o.config.og_imagem.src;
   let img = '';
-  if (o.config && o.config.og_imagem && o.config.og_imagem.src) { try { img = new URL(o.config.og_imagem.src, base).href; } catch (e) { throw new Error('o endereço do site em “QR Code” é inválido; use https://'); } }
-  const meta = (h, prop, v) => h.replace(new RegExp('(<meta property="' + prop + '" content=")[^"]*(")'), (_, a, b) => a + esc(v) + b);
-  let n = html.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(titulo)}</title>`);
-  n = meta(meta(n, 'og:title', titulo), 'og:image', img);
-  if (!/property="og:url"/.test(n)) n = n.replace(/(<meta property="og:image"[^>]*>)/, (m) => m + `\n<meta property="og:url" content="${esc(base)}">`);
-  else n = meta(n, 'og:url', base);
-  if (n === html) return;
+  if (foto) {
+    if (!/^https:\/\//.test(base)) throw new Error('o endereço do site em “QR Code” é inválido; use https://');
+    const v = hashCurto(foto), atualImg = (blocoAtual.match(/<meta property="og:image" content="([^"]*)"/) || [])[1] || '';
+    img = new URL('compartilhar.jpg?v=' + v, base).href;
+    if (DEMO) img = /^https:/.test(foto) ? foto : new URL(foto.replace(/^\.\//, ''), base).href; // demonstração: nada é gerado
+    else if (!atualImg.includes('compartilhar.jpg?v=' + v)) { // foto nova: gera e grava compartilhar.jpg
+      try {
+        const blob = await gerarImagemCompartilhar(foto);
+        let sha; try { sha = (await gh(`${repoPath()}/contents/compartilhar.jpg?ref=${encodeURIComponent(A.cfg.branch)}`)).sha; } catch (e) { if (e.status !== 404) throw e; }
+        await gh(`${repoPath()}/contents/compartilhar.jpg`, { method: 'PUT', body: Object.assign({ message: 'Imagem de compartilhamento', content: await blobB64(blob), branch: A.cfg.branch }, sha ? { sha } : {}) });
+      } catch (e) { // reserva: aponta direto para a foto escolhida
+        if (e.status != null) throw e;
+        img = /^https:/.test(foto) ? foto : new URL(foto.replace(/^\.\//, ''), base).href;
+      }
+    }
+  }
+  const novoBloco = blocoCompartilhar(o, base, img, descAtual);
+  if (novoBloco === blocoAtual) return;
+  const n = html.slice(0, ini) + novoBloco + html.slice(fim + MARCA_FIM.length);
+  // Integridade: fora do bloco, nenhum byte muda; o documento continua com um doctype, um <title> e um </html>.
   const conta = (re) => (n.match(re) || []).length;
-  if (conta(/<!doctype/gi) !== 1 || conta(/<title>/gi) !== 1 || conta(/<\/html>/gi) !== 1 || n.length > html.length + 2000) throw new Error('a verificação de integridade do index.html falhou; nada foi alterado nele');
+  if (n.slice(0, ini) !== html.slice(0, ini) || !n.endsWith(html.slice(fim + MARCA_FIM.length)) || conta(/<!doctype/gi) !== 1 || conta(/<title>/gi) !== 1 || conta(/<\/html>/gi) !== 1 || novoBloco.length > 4000) throw new Error('a verificação de integridade do index.html falhou; nada foi alterado nele');
   await gh(`${repoPath()}/contents/index.html`, { method: 'PUT', body: { message: 'Atualiza metadados de compartilhamento', content: b64.para(n), sha: j.sha, branch: A.cfg.branch } });
 }
 /* A11: fotos enviadas nesta sessão ainda podem não estar no GitHub Pages (leva alguns minutos).
@@ -1347,8 +1984,9 @@ function objPrevia() {
 const URL_PREVIA = '../index.html?rascunho=1#/inicio';
 function previa() {
   const o = objPrevia();
-  if (!LS) { toast('A pré-visualização precisa do armazenamento do navegador, que está bloqueado.', true); return; }
-  try { localStorage.setItem('guia:rascunho', JSON.stringify(o)); } catch (e) { toast('Não foi possível preparar a pré-visualização (sem espaço no navegador).', true); return; }
+  const LP = LS || abrirArmaz('localStorage'); // na demonstração o painel não usa o armazenamento, mas a prévia precisa dele
+  if (!LP) { toast('A pré-visualização precisa do armazenamento do navegador, que está bloqueado.', true); return; }
+  try { LP.setItem('guia:rascunho', JSON.stringify(o)); } catch (e) { toast('Não foi possível preparar a pré-visualização (sem espaço no navegador).', true); return; }
   // A09: sem "noopener" (com ele o navegador sempre devolve null e não dá para saber se abriu). Cortamos o vínculo logo depois.
   let w = null; try { w = window.open(URL_PREVIA, '_blank'); } catch (e) { w = null; }
   if (w) { try { w.opener = null; } catch (e) {} toast('Pré-visualização aberta em outra aba. Nada foi publicado.'); return; }
@@ -1374,6 +2012,9 @@ function irParaAchado(campo) {
 /* ---------------- eventos ---------------- */
 document.addEventListener('input', (e) => {
   const el = e.target;
+  if (el.dataset && el.dataset.est) { A.estadia[el.dataset.est] = el.value; atualizarHospede(); return; }
+  if (el.dataset && el.dataset.priv && A.cofreDados) { A.cofreDados.privados[el.dataset.priv] = el.type === 'checkbox' ? el.checked : el.value; privMudou(); return; }
+  if (el.dataset && el.dataset.modelo) { A.modelosEdit[el.dataset.modelo] = el.value; atualizarHospede(); return; }
   if (el.id === 'filtro-itens') { A.busca = el.value; const pos = el.selectionStart; rerender(); const n = $('#filtro-itens'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } return; }
   if (!el.dataset || !el.dataset.k || !A.draft) return;
   const t = el.dataset.t; let v;
@@ -1383,6 +2024,7 @@ document.addEventListener('input', (e) => {
   else v = el.value;
   if (el.dataset.k === 'casa.instagram') v = String(v).trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/^@/, '').replace(/\/.*$/, '');
   if (el.dataset.v === 'whats' && tem(v)) { const n = normalizarWhats(v); if (n && !/[^\d\s()+.-]/.test(v)) v = n; }
+  if (el.dataset.k === 'casa.link_reserva') { if (ehIcal(v)) { v = ''; } const av = $('#reserva-aviso'); if (av) av.innerHTML = avisoReserva(el.value); }
   if (/\.coordenadas\.(lat|lng)$/.test(el.dataset.k) && !caminho(A.draft, 'casa.coordenadas')) A.draft.casa.coordenadas = { lat: null, lng: null };
   definir(A.draft, el.dataset.k, v);
   marcarErro(el);
@@ -1392,6 +2034,11 @@ document.addEventListener('input', (e) => {
 });
 document.addEventListener('change', (e) => {
   const el = e.target;
+  if (el.dataset && el.dataset.priv && A.cofreDados) { A.cofreDados.privados[el.dataset.priv] = el.type === 'checkbox' ? el.checked : el.value; privMudou(true); if (el.dataset.priv === 'wifi_tipo') rerender(); return; }
+  if (el.dataset && el.dataset.est) { if (el.dataset.est === 'fone' && tem(el.value)) { const n = normalizarWhats(el.value); if (n) { el.value = n; A.estadia.fone = n; } } atualizarHospede(); return; }
+  if (el.dataset && el.dataset.imp) { A.imp[el.dataset.imp] = el.checked; rerender(); return; }
+  if (el.dataset && el.dataset.impPapel) { A.imp.papel = el.dataset.impPapel; return; }
+  if (el.dataset && el.dataset.virada) { const v = virada(); if (el.checked) v.marcados[el.dataset.virada] = Date.now(); else delete v.marcados[el.dataset.virada]; if (!v.inicio) v.inicio = Date.now(); salvarVirada(v); const k = el.dataset.virada; rerender(); const n = $(`[data-virada="${k}"]`); if (n) n.focus({ preventScroll: true }); return; }
   if (el.classList && el.classList.contains('ok-conf')) { const b = $('[data-acao="confirmar-publicar"]'); if (b) b.disabled = $$('#dialogo .ok-conf').some(c => !c.checked || c.disabled); return; }
   if (el.dataset.tag) { const arr = caminho(A.draft, el.dataset.tag + '.tags'); const s = new Set(Array.isArray(arr) ? arr : []); el.checked ? s.add(el.value) : s.delete(el.value); definir(A.draft, el.dataset.tag + '.tags', [...s]); mudou(); return; }
   if (el.dataset.destaque !== undefined && edicao) { const x = A.draft.lugares[edicao.i]; if (!x.id) x.id = slugUnico(x.nome); const s = new Set(A.draft.destaques || []); el.checked ? s.add(x.id) : s.delete(x.id); A.draft.destaques = [...s]; mudou(); return; }
@@ -1406,8 +2053,18 @@ $('#dialogo').addEventListener('cancel', (e) => { if (mostrarConflitos.atual) e.
 document.addEventListener('click', async (e) => {
   const b = e.target.closest('button, a, label'); if (!b) return;
   const d = b.dataset;
-  if (d.acao === 'esquecer-cofre') { if (confirm('Apagar o acesso guardado neste aparelho e entrar com um token novo?')) { Cofre.apagar(); telaEntrada(); } return; }
+  if (d.verSenha) { const i = document.getElementById(d.verSenha); if (i) { const ver = i.type === 'password'; i.type = ver ? 'text' : 'password'; b.setAttribute('aria-pressed', ver ? 'true' : 'false'); b.setAttribute('aria-label', ver ? 'Esconder a senha' : 'Mostrar a senha'); i.focus(); } return; }
+  if (d.acao === 'voltar-senha') { telaSenha(); return; }
+  if (d.acao === 'recomecar-cofre') { if (confirm('Apagar o que está guardado neste aparelho (token, dados privados da casa e modelos de mensagem) e informar o token de novo?')) { const nova = telaSenhaAnterior.nova; Cofre.apagar(); A.senhaPendente = nova; A.cofreDados = novoCofre(); telaEntrada(); } return; }
   if (!A.draft) return;
+  if (d.copiar === 'link') { const M = dadosMensagem(); if (M.ok) toast(await copiar(M.link) ? 'Link copiado. Mande só para o hóspede.' : 'Não consegui copiar. Toque e segure o link para copiar.', false); return; }
+  if (d.copiarMsg) { const M = dadosMensagem(); if (!M.ok) return; toast(await copiar(mensagem(d.copiarMsg, M).texto) ? 'Mensagem copiada. Cole no WhatsApp do hóspede.' : 'Não consegui copiar. Use “Abrir no WhatsApp”.'); return; }
+  if (d.wa && b.classList.contains('inativo')) { e.preventDefault(); toast('Preencha o nome e as datas da estadia primeiro.', true); return; }
+  if (d.inserir) { const t = document.getElementById(d.alvo); if (t) { const a = t.selectionStart ?? t.value.length, z = t.selectionEnd ?? a, ins = '{' + d.inserir + '}'; t.value = t.value.slice(0, a) + ins + t.value.slice(z); t.focus(); t.setSelectionRange(a + ins.length, a + ins.length); t.dispatchEvent(new Event('input', { bubbles: true })); } return; }
+  if (d.salvarModelo) { const t = document.getElementById('mod-' + d.salvarModelo); if (!t || !A.cofreDados) return; A.cofreDados.modelos[d.salvarModelo] = t.value; delete A.modelosEdit[d.salvarModelo]; const ok = await salvarCofre(); toast(ok ? (DEMO ? 'Modelo salvo (na demonstração, só nesta aba).' : 'Modelo salvo neste aparelho, cifrado com a sua senha.') : 'Não consegui salvar o modelo.', !ok); rerender(); return; }
+  if (d.restaurarModelo) { if (!A.cofreDados) return; delete A.cofreDados.modelos[d.restaurarModelo]; delete A.modelosEdit[d.restaurarModelo]; await salvarCofre(); toast('Modelo original restaurado.'); rerender(); return; }
+  if (d.imprimirCartao) { imprimirCartoes([d.imprimirCartao]); return; }
+  if (d.copiarTexto) { const t = document.getElementById(d.copiarTexto); if (t) toast(await copiar(t.value) ? 'Conteúdo copiado.' : 'Não consegui copiar: selecione o texto e copie.'); return; }
   if (b.id === 'menu-btn') { menu(b.getAttribute('aria-expanded') !== 'true'); return; }
   if (d.ir) { e.preventDefault(); A.busca = ''; if ($('#dialogo').open && !mostrarConflitos.atual) $('#dialogo').close(); ir(d.ir); return; }
   if (d.irAchado) { irParaAchado(d.irAchado); return; }
@@ -1471,9 +2128,18 @@ document.addEventListener('click', async (e) => {
     case 'limpar-importados': if (confirm('Apagar os comentários importados neste aparelho?')) { ls.del('admin:fb-local'); $('#dialogo').close(); A.fb.itens = null; carregarFeedback(); } break;
     case 'salvar-chave': {
       const k = $('#fb-chave').value.trim(); ss.set('admin:fbchave', k);
-      const noCofre = Cofre.existe() ? await Cofre.atualizar(segredosAtuais()).catch(() => false) : false;
-      toast(k ? (noCofre ? 'Chave salva, criptografada com a sua senha local.' : 'Chave salva para esta sessão.') : 'Chave apagada.'); A.fb.itens = null; break;
+      const noCofre = await salvarCofre();
+      toast(k ? (noCofre && !DEMO ? 'Chave salva neste aparelho, cifrada com a sua senha.' : 'Chave salva para esta sessão.') + (k.length < 24 ? ' Atenção: use uma chave de 24 caracteres ou mais (o script recusa chaves curtas).' : '') : 'Chave apagada.', k && k.length < 24); A.fb.itens = null; break;
     }
+    case 'bloquear': bloquear(); break;
+    case 'trocar-token': if (confirm('Esquecer o token guardado e colar um novo? Os dados privados e os modelos continuam guardados.')) { esquecerToken(); A.draft = null; telaEntrada(); } break;
+    case 'trocar-senha': trocarSenha(b); break;
+    case 'imprimir-kit': { const ids = Object.keys(CARTOES).filter(k => A.imp[k]); if (!ids.length) { toast('Escolha ao menos um cartão.', true); break; } imprimirCartoes(ids); break; }
+    case 'imprimir-virada': imprimirVirada(); break;
+    case 'nova-virada': if (confirm('Começar uma nova virada? Todos os itens serão desmarcados.')) { const v = virada(); v.marcados = {}; v.inicio = null; salvarVirada(v); rerender(); toast('Nova virada: todos os itens desmarcados.'); } break;
+    case 'salvar-virada': { const t = $('#virada-modelo'); if (!t) break; const secs = H.lerChecklist(t.value); if (!secs.length) { toast('O modelo ficou sem itens. Escreva ao menos um item por linha.', true); break; } const v = virada(); v.modelo = t.value; salvarVirada(v); toast('Modelo do checklist salvo neste aparelho.'); rerender(); break; }
+    case 'restaurar-virada': if (confirm('Voltar ao checklist original? O seu modelo será substituído.')) { const v = virada(); v.modelo = H.CHECKLIST_PADRAO; salvarVirada(v); rerender(); toast('Checklist original restaurado.'); } break;
+    case 'testar-agenda': testarAgenda(b); break;
     case 'testar-feedback': {
       const ep = A.draft.config.feedback_endpoint, k = $('#fb-chave').value.trim();
       if (!tem(ep) || !tem(k)) { toast('Preencha o endereço do Apps Script e a chave de leitura.', true); break; }
@@ -1481,11 +2147,13 @@ document.addEventListener('click', async (e) => {
       b.disabled = true; try { const itens = await lerFeedbackRemoto(ep, k); toast(`Conectado: ${itens.length} feedback(s) na planilha.`); } catch (x) { toast('Não conectou: ' + (x instanceof TypeError ? 'confira o endereço e a internet.' : x.message), true); } finally { b.disabled = false; }
       break;
     }
+    case 'atualizar-formato': atualizarFormato(); break;
+    case 'apagar-legado': apagarLegado(); break;
     case 'baixar-backup': { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(A.draft, null, 2)], { type: 'application/json' })); a.download = `guia-backup-${hoje()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); break; }
     case 'descartar': if (!sujo()) { toast('Não há alterações para descartar.'); break; } if (confirm('Descartar todas as alterações não publicadas?')) { A.draft = clone(A.remoto.obj); sanear(A.draft); A.correcoes = []; ls.del('admin:rascunho'); atualizarBarra(); rerender(); toast('Alterações descartadas.'); } break;
     case 'aplicar-json': {
       const msg = $('#json-msg');
-      try { const o = JSON.parse($('#json').value); const fix = sanear(o); A.draft = o; A.correcoes = fix; mudou(); msg.textContent = 'Aplicado ao rascunho.' + (fix.length ? ` ${fix.length} valor(es) em formato inválido ficaram vazios.` : ''); msg.style.color = 'var(--ok)'; toast('JSON aplicado ao rascunho. Publique para valer no site.'); }
+      try { const { obj: o, fix } = preparar_(JSON.parse($('#json').value)); A.draft = o; A.correcoes = fix; mudou(); msg.textContent = 'Aplicado ao rascunho.' + (fix.length ? ` ${fix.length} valor(es) em formato inválido ficaram vazios.` : ''); msg.style.color = 'var(--ok)'; toast('JSON aplicado ao rascunho. Publique para valer no site.'); }
       catch (x) { msg.textContent = 'Erro: ' + (x instanceof SyntaxError ? 'JSON com erro de formatação (' + x.message + ')' : x.message); msg.style.color = 'var(--alerta)'; }
       break;
     }
@@ -1499,10 +2167,61 @@ document.addEventListener('focusin', (e) => { const b = $('#menu-btn'); if (b &&
 document.addEventListener('pointerdown', (e) => { const b = $('#menu-btn'); if (b && b.getAttribute('aria-expanded') === 'true' && !e.target.closest('.lado')) menu(false); });
 window.addEventListener('hashchange', () => { if (A.draft) ir(location.hash.replace('#', '')); });
 
+/* ---------------- troca de senha ---------------- */
+async function publicarAcesso(novo) {
+  const cam = `${repoPath()}/contents/admin/acesso.json`;
+  let sha = null; try { sha = (await gh(`${cam}?ref=${encodeURIComponent(A.cfg.branch)}`)).sha; } catch (e) { if (e.status !== 404) throw e; }
+  const corpo = JSON.stringify({ v: novo.v, alg: novo.alg, iter: novo.iter, sal: novo.sal, hash: novo.hash, atualizado_em: novo.atualizado_em, obs: OBS_ACESSO }, null, 2) + '\n';
+  await gh(cam, { method: 'PUT', body: Object.assign({ message: 'Atualiza a senha do painel (só o hash)', content: b64.para(corpo), branch: A.cfg.branch }, sha ? { sha } : {}) });
+  return corpo;
+}
+async function trocarSenha(btn) {
+  const msg = (m, ok) => { const el = $('#ts-msg'); if (el) el.innerHTML = `<div class="aviso ${ok ? 'ok' : 'erro'}" role="${ok ? 'status' : 'alert'}">${ic(ok ? 'check' : 'alerta')}<span>${esc(m)}</span></div>`; };
+  const atual = $('#ts-atual') ? $('#ts-atual').value : '', nova = $('#ts-nova').value, rep = $('#ts-rep').value;
+  if (!DEMO && Tentativas.espera()) { msg(`Muitas tentativas. Aguarde ${mmss(Tentativas.espera())}.`); return; }
+  if (!DEMO && !atual) { msg('Digite a senha atual.'); $('#ts-atual').focus(); return; }
+  if (nova.length < 8) { msg('A nova senha precisa ter pelo menos 8 caracteres.'); $('#ts-nova').focus(); return; }
+  if (nova !== rep) { msg('As duas novas senhas não são iguais.'); $('#ts-rep').focus(); return; }
+  if (!DEMO && nova === atual) { msg('A nova senha é igual à atual.'); $('#ts-nova').focus(); return; }
+  btn.disabled = true; const rot = btn.innerHTML; btn.textContent = 'Conferindo…';
+  try {
+    if (!DEMO) {
+      if (!await conferirSenha(atual, await carregarAcesso())) { const t = Tentativas.falhou(); msg('A senha atual não confere.' + (t.espera ? ` Aguarde ${mmss(t.espera)} para tentar de novo.` : '')); return; }
+      Tentativas.zerar();
+    }
+    btn.textContent = 'Trancando de novo…';
+    const novo = await gerarAcesso(nova);
+    if (!DEMO) { await Cofre.criar(nova, A.cofreDados || novoCofre()); ls.set('admin:acesso', Object.assign({}, novo, { trocadaAqui: Date.now() })); }
+    else A.acessoDemo = novo;
+    ['ts-atual', 'ts-nova', 'ts-rep'].forEach(id => { const i = document.getElementById(id); if (i) i.value = ''; });
+    btn.textContent = 'Publicando o hash…';
+    let corpo = null, falha = null; try { corpo = await publicarAcesso(novo); } catch (e) { falha = e; }
+    A.primeiraEntrada = false;
+    if (!falha) { msg(DEMO ? 'Senha trocada na demonstração (nada foi publicado).' : 'Senha trocada. Neste aparelho ela já vale. Nos outros, passa a valer em alguns minutos (lá, a senha anterior é pedida uma última vez).', true); toast('Senha trocada.'); return; }
+    const json = JSON.stringify({ v: novo.v, alg: novo.alg, iter: novo.iter, sal: novo.sal, hash: novo.hash, atualizado_em: novo.atualizado_em, obs: OBS_ACESSO }, null, 2);
+    msg('A senha já vale neste aparelho, mas não consegui gravar o admin/acesso.json no GitHub (' + (falha.status != null ? msgErro(falha) : falha.message) + '). Nos outros aparelhos ela ainda não vale.');
+    const d = $('#dialogo'); if (d.open) d.close();
+    d.innerHTML = `<div class="ed-cab"><h2 class="t2" id="dlg-titulo">Gravar a senha nova no GitHub</h2><button type="button" class="btn btn-sec btn-ic" data-fechar-dialogo aria-label="Fechar">${ic('x')}</button></div>
+      <div class="ed-corpo form"><p style="margin:0">Para a senha nova valer nos outros aparelhos, o arquivo <code>admin/acesso.json</code> do repositório precisa ter o conteúdo abaixo. Ele não contém a senha, só o código embaralhado dela.</p>
+      <ol class="passos-token"><li>No GitHub, abra o repositório <b>${esc(A.cfg.owner)}/${esc(A.cfg.repo)}</b> e entre na pasta <b>admin</b>.</li><li>Abra <b>acesso.json</b> e toque no lápis (<span class="en">Edit this file</span>). Se o arquivo não existir, use <span class="en">Add file › Create new file</span> com o nome <b>acesso.json</b>.</li><li>Apague tudo, cole o conteúdo copiado e toque em <span class="en">Commit changes</span>.</li></ol>
+      <div class="campo"><label for="acesso-json">Conteúdo de admin/acesso.json</label><textarea class="json" id="acesso-json" readonly style="min-height:220px">${esc(json)}</textarea></div>
+      <div class="acoes"><button type="button" class="btn btn-prim" data-copiar-texto="acesso-json">${ic('copiar')}Copiar o conteúdo</button></div></div>`;
+    d.setAttribute('aria-labelledby', 'dlg-titulo'); d.showModal();
+  } catch (e) { msg('Não consegui trocar a senha: ' + e.message); }
+  finally { btn.disabled = false; btn.innerHTML = rot; }
+}
+
 /* ---------------- início ---------------- */
-if (A.token && A.cfg.owner && A.cfg.repo) carregar();
-else if (Cofre.existe() && A.cfg.owner && A.cfg.repo) telaDesbloqueio();
-else telaEntrada();
+(async function iniciar() {
+  garantirContrato().catch(() => {}); // carrega o contrato dos dados cedo; carregar() espera por ele de novo
+  if (DEMO) { iniciarDemo(); return; }
+  if (A.token && tem(A.cfg.owner) && tem(A.cfg.repo) && temChaveSessao() && Cofre.existe()) {
+    const d = await Cofre.abrirSessao();
+    if (d) { usarCofre(d); if (A.token) { carregar(); return; } }
+  }
+  ['admin:token', 'admin:token-exp', 'admin:cofre-chave'].forEach(k => ss.del(k)); A.token = null;
+  telaSenha();
+})();
 // Só em testes locais (localhost + ?teste): expõe o estado e funções puras para os testes automatizados.
-if (/[?&]teste\b/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__admin = Object.assign(A, { _t: { deduzirRepo, normalizarWhats, notasEditoriais, problemasLugares, fotosSemDescricao, antesDoHospede, procurarSegredos, sanear, mesclar, dataISO, notaValida, urlValida, linksInvalidos, Cofre, parseCsv, preparar } });
+if (/[?&]teste\b/.test(location.search) && /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__admin = Object.assign(A, { _t: { deduzirRepo, normalizarWhats, notasEditoriais, problemasLugares, fotosSemDescricao, antesDoHospede, procurarSegredos, sanear, preparar_, escreverConteudo, lerConteudo, blocoCompartilhar, mesclar, dataISO, notaValida, urlValida, linksInvalidos, Cofre, parseCsv, preparar, conferirSenha, gerarAcesso, carregarAcesso, Tentativas, GHD, dadosMensagem, mensagem, Hospede: window.Hospede } });
 })();

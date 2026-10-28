@@ -1,0 +1,7 @@
+Fontes hospedadas junto com o guia (subconjunto latino, formato WOFF), para funcionar sem sinal e sem chamar servidores de terceiros.
+
+Instrument Serif (regular e itálico) — Copyright 2022 The Instrument Serif Project Authors (https://github.com/Instrument/instrument-serif)
+Inter 4.0 (pesos 300, 400, 500, 600) — Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)
+
+Ambas licenciadas sob a SIL Open Font License, Versão 1.1: https://openfontlicense.org
+Os arquivos foram reduzidos (subset) para os caracteres do português; a licença permite isso e a redistribuição junto com o site.

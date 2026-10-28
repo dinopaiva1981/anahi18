@@ -9,14 +9,14 @@
    tema: 'claro' = para fundo claro (tinta verde) · 'escuro' = para fundo escuro (tinta areia).
    compacto: true = versão para 16–32 px (traço mais grosso, menos raios). Por padrão, só o favicon usa.
    cor: uma cor só (carimbo, gravação, bordado). titulo: '' = decorativo (aria-hidden).
-   Letreiro com textLength: a largura não depende da fonte instalada (Manrope 300 quando houver). */
+   Letreiro com textLength: a largura não depende da fonte instalada (Inter 300 no site, servida em assets/fontes; Manrope ou sistema no painel). */
 (function () {
   'use strict';
   const TEMAS = {
     claro:  { sol: '#B8693A', mar: '#1F3D2F', texto: '#1F3D2F', sub: '#4F5E54' },
     escuro: { sol: '#F0C394', mar: '#FFFDF9', texto: '#FFFDF9', sub: '#E9E1D2' }
   };
-  const FONTE = "Manrope, 'Avenir Next', 'Helvetica Neue', Arial, sans-serif";
+  const FONTE = "Inter, Manrope, 'Avenir Next', 'Helvetica Neue', Arial, sans-serif";
   const n = (v) => +v.toFixed(2);
   const escAttr = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 

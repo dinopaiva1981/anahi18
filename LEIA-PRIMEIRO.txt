@@ -1,0 +1,38 @@
+CASA 18 ANAHI · GUIA DO HÓSPEDE · como subir esta versão
+=========================================================
+
+Há dois pacotes. Use só UM deles.
+
+1) casa18-atualizacao-codigo.zip  ← PARA QUEM JÁ TEM O SITE NO AR
+   Traz só o código. NÃO traz conteudo.js, dados/, fotos/ nem admin/acesso.json,
+   então nada do seu conteúdo, das suas fotos ou da sua senha é apagado.
+   No GitHub, abra o repositório do guia › Add file › Upload files, arraste
+   TODO o conteúdo do zip (as pastas assets, admin, docs, marca, integracoes e os
+   arquivos da raiz) e confirme (Commit changes). Os arquivos com o mesmo nome
+   são substituídos; os seus dados ficam como estão.
+   - O site novo continua lendo o seu conteudo.js. Nada para fazer na hora.
+   - Abra o painel (/admin/). Ele oferece "Atualizar formato": toque quando quiser.
+     O painel cria dados/conteudo.json com o seu conteúdo atual. O conteudo.js
+     antigo só é apagado se você mandar, em Configurações › Formato dos dados.
+   - Na próxima publicação o painel preenche o título e a imagem de compartilhamento
+     do index.html novo (o zip traz o index com os valores padrão).
+
+2) casa18-completo.zip  ← PARA UMA INSTALAÇÃO NOVA (repositório vazio)
+   Traz tudo, inclusive dados/conteudo.json com o conteúdo atual do guia e
+   admin/acesso.json com a senha inicial. Não use este pacote por cima de um
+   site que já está no ar: ele substituiria o seu conteúdo e a sua senha.
+
+NESTA VERSÃO (28/10/2026): botão "Reservar no Airbnb" e agenda de disponibilidade
+   - Ambos são opcionais e ficam escondidos até você configurar.
+   - Botão: painel › A casa › Reservas e disponibilidade › cole o link do anúncio.
+   - Apps Script (feedback e agenda): cole o código novo de integracoes/feedback-apps-script.gs
+     e REIMPLANTE COMO NOVA VERSÃO (Implantar › Gerenciar implantações › editar ›
+     Nova versão › Implantar). Rode de novo "instalarLimpezaMensal" uma vez.
+   - Agenda: no Airbnb, Calendário › Disponibilidade › Conectar calendários › Exportar
+     calendário › copie o link. No Apps Script, Configurações do projeto › Propriedades
+     do script › crie ICAL_URL com esse link (é secreto: nunca no painel nem no site)
+     e reimplante como nova versão. No painel: Testar agenda › marque "Mostrar a agenda".
+   Detalhes: docs/3-feedback-e-planilha.md (Parte G).
+
+Depois de subir: o GitHub Pages leva alguns minutos para atualizar. Se o celular
+mostrar a versão antiga, feche e abra o guia de novo.
