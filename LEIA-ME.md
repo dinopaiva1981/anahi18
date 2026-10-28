@@ -10,7 +10,7 @@ Você, anfitrião, cuida de tudo por um **painel** no navegador. Não precisa sa
 
 - No guia, desça até o fim da página e toque em **Área do anfitrião**, no rodapé.
 - Ou abra o endereço do guia terminado em `/admin/`.
-- A senha inicial é **casaalagoas**. Troque por uma frase sua em **Configurações** (guia 2, Parte G).
+- A senha inicial é **casapraia**. Troque por uma frase sua em **Configurações** (guia 2, Parte G).
 - Na primeira vez em cada aparelho, o painel pede também o **token** do GitHub, uma vez só (guia 2, Parte C).
 - Para conhecer sem medo: **Conhecer em modo demonstração**, na tela de entrada. Nada é publicado.
 

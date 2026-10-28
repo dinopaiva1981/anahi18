@@ -734,22 +734,19 @@ P.inicio = () => {
         <span class="hero-traco" aria-hidden="true"></span>
         <span class="hero-local"><span>Praia do Marceneiro</span><span class="sep" aria-hidden="true"> · </span><span>Rota dos Milagres · AL</span></span>
         ${tem(casa.frase) ? `<p class="hero-frase">${semViuva(casa.frase)}</p>` : ''}
-        <div class="hero-acoes${linkReserva() ? ' com-reserva' : ''}">
-          ${linkReserva() ? `<a class="btn btn-reserva" href="${esc(linkReserva())}" target="_blank" rel="noopener" data-reserva-hero>${esc(rotuloReserva())}${ic('seta', 'ic-sm')}<span class="sr-only"> (abre em nova aba)</span></a>` : ''}
-          <a class="btn ${linkReserva() ? 'btn-vidro' : 'btn-claro'}" href="#/explorar">${ic('bussola')}Explorar a região</a>
-          ${waAnfitriao() ? `<a class="btn btn-vidro" href="${esc(waAnfitriao())}" target="_blank" rel="noopener">${ic('msg')}Falar com o anfitrião</a>` : `<a class="btn btn-vidro" href="#/casa">${ic('casa')}Conhecer a casa</a>`}
-          ${urlSegura(casa.video_url) ? `<a class="btn-video" href="${esc(urlSegura(casa.video_url))}" target="_blank" rel="noopener"><span class="play">${ic('play')}</span>Assista ao vídeo da casa</a>` : ''}
+        <div class="hero-acoes${linkReserva() || RASCUNHO ? ' com-reserva' : ''}">
+          ${linkReserva() ? `<a class="btn btn-reserva" href="${esc(linkReserva())}" target="_blank" rel="noopener" data-reserva-hero>${esc(rotuloReserva())}${ic('seta', 'ic-sm')}<span class="sr-only"> (abre em nova aba)</span></a>` : RASCUNHO ? `<span class="btn-reserva-falta" data-reserva-falta>${ic('alerta', 'ic-sm')}Botão “Reservar”: configure o link no painel (A casa)</span>` : ''}
+          ${waAnfitriao() ? `<a class="btn btn-vidro" href="${esc(waAnfitriao())}" target="_blank" rel="noopener">${ic('msg')}Falar com o anfitrião</a>` : `<a class="btn ${linkReserva() ? 'btn-vidro' : 'btn-claro'}" href="#/explorar">${ic('bussola')}Explorar a região</a>`}
         </div>
       </div>
     </div>
   </section>`)}
+  ${S('início: rápido', () => rapido())}
   <section aria-label="Hoje" class="dia" id="seu-dia">${S('início: hoje', () => painelDia())}</section>
   ${S('início: estadia', () => cartaoEstadia())}
-  ${S('início: a casa em resumo', () => faixaCasa())}
   ${S('início: agenda', () => estadia() ? '' : blocoAgenda())}
-
   ${S('início: atalhos', () => `<section class="sec" aria-labelledby="h-atalhos">
-    <div class="sec-cab"><div>${olhoN('Guia da estadia', 'mar')}<h2 id="h-atalhos" class="h2">Tudo <em>à mão</em>.</h2></div></div>
+    <div class="sec-cab"><div><h2 id="h-atalhos" class="h2">Tudo <em>à mão</em>.</h2></div></div>
     <nav class="atalhos" aria-label="Atalhos">
       <a class="atalho" href="#/casa"><span class="bola b-verde">${ic('casa')}</span><span>A casa<small>Comodidades e regras</small></span></a>
       <a class="atalho" href="#/chegada"><span class="bola b-verde">${ic('chave')}</span><span>Chegada e saída<small>${tem(casa.checkin) ? 'Check-in ' + esc(casa.checkin) : 'Horários e acesso'}</small></span></a>
@@ -758,38 +755,32 @@ P.inicio = () => {
       <a class="atalho" href="#/comer"><span class="bola b-terra">${ic('garfo')}</span><span>Onde comer<small>E o que provar</small></span></a>
       <a class="atalho" href="#/ajuda"><span class="bola b-terra">${ic('fone')}</span><span>Ajuda<small>Contatos e emergência</small></span></a>
     </nav>
-    <p class="fonte" style="margin:var(--e4) 4px 0">Também aqui: <a href="#/meu-roteiro">monte o seu roteiro dia a dia</a> e <a href="#/planejar?ir=levar">a lista do que levar para a praia</a>.</p>
-  </section>`)}
-
+      </section>`)}
+  <details class="mais-inicio"><summary><span>Mais da casa e da região<small>Sobre a casa, localização, roteiros, sabores e avaliações</small></span></summary>
+  ${S('início: a casa em resumo', () => faixaCasa())}
   ${S('início: sobre', () => blocoSobre())}
   ${S('início: localização', () => blocoLocal())}
   ${S('início: agenda', () => estadia() ? blocoAgenda() : '')}
-
   ${S('início: roteiros', () => ROTEIROS.length ? `<section class="sec" aria-labelledby="h-rot">
     <div class="sec-cab"><div>${olhoN('Roteiros do anfitrião')}<h2 id="h-rot" class="h2">Dias prontos para <em>viver</em>.</h2><p>Sequências pensadas para a maré, a luz e o ritmo da região.</p></div><a class="link-seta" href="#/explorar">Ver tudo ${ic('seta')}</a></div>
     <div class="roteiros">${ROTEIROS.slice(0, 4).map(cardRoteiro).join('')}</div>
   </section>` : '')}
-
   ${S('início: destaques', () => dest.length ? `<section class="sec" aria-labelledby="h-dest">
     <div class="sec-cab"><div>${olhoN('Rota dos Milagres', 'mar')}<h2 id="h-dest" class="h2">O melhor do litoral, <em>no seu ritmo</em>.</h2></div><a class="link-seta" href="#/explorar">Guia completo ${ic('seta')}</a></div>
     <div class="trilho">${dest.map(cardLugar).join('')}</div>
   </section>` : '')}
-
   ${S('início: o que provar', () => `<section class="sec" aria-labelledby="h-prov">
     <div class="sec-cab"><div>${olhoN('Sabores da terra')}<h2 id="h-prov" class="h2">O que <em>provar</em> por aqui.</h2></div><a class="link-seta" href="#/comer">Onde comer ${ic('seta')}</a></div>
     <div class="provar">${(C.provar || []).slice(0, 6).map(p => `<div class="prato"><strong>${esc(p.nome)}</strong><span>${esc(p.descricao)}</span></div>`).join('')}</div>
   </section>`)}
-
   ${S('início: benefícios', () => ben.length ? `<section class="sec" aria-labelledby="h-ben">
     <div class="sec-cab"><div>${olhoN('Só para hóspedes')}<h2 id="h-ben" class="h2">Benefícios <em>exclusivos</em>.</h2></div><a class="link-seta" href="#/beneficios">Ver todos ${ic('seta')}</a></div>
     <div class="cards">${ben.slice(0, 3).map(cardBeneficio).join('')}</div>
   </section>` : '')}
-
   ${S('início: avaliações', () => aval.length ? `<section class="sec" aria-labelledby="h-aval">
     <div class="sec-cab"><div>${olhoN('Quem já esteve aqui', 'mudo')}<h2 id="h-aval" class="h2">Palavras de <em>hóspedes</em>.</h2></div><a class="link-seta" href="#/avaliacoes">Ver todas ${ic('seta')}</a></div>
     <div class="cards">${aval.slice(0, 3).map(cardAvaliacao).join('')}</div>
   </section>` : '')}
-
   ${S('início: frase', () => tem(casa.frase) ? `<section class="sec sec-orn" aria-label="Frase da casa">${orn()}<p class="citacao" style="margin:var(--e5) auto 0;text-align:center">${semViuva(casa.frase)}</p></section>` : '')}
   <section class="sec">
     <div class="painel cta-salvia">
@@ -798,9 +789,20 @@ P.inicio = () => {
       <p class="p0" style="color:var(--texto);max-width:36rem">Conte para o anfitrião, em particular. Elogios, sugestões e qualquer problema chegam para quem cuida da casa.</p>
       <a class="btn btn-prim" href="#/feedback" style="justify-self:start">${ic('estrela')}Deixar feedback</a>
     </div>
-  </section>`;
+  </section>
+  </details>`;
 };
 
+/* Três atalhos práticos logo abaixo da capa: Wi-Fi, horários e contato. */
+function rapido() {
+  const wa = waAnfitriao(), ci = tem(casa.checkin) ? casa.checkin : '', co = tem(casa.checkout) ? casa.checkout : '';
+  const it = [
+    ['#/casa', 'wifi', 'Wi-Fi', 'Senha na mensagem do anfitrião', ''],
+    ['#/chegada', 'chave', ci ? 'Check-in ' + ci : 'Chegada e saída', co ? 'Checkout ' + co : 'Horários e acesso', ''],
+    wa ? [wa, 'whatsapp', 'Anfitrião', 'Falar no WhatsApp', ' target="_blank" rel="noopener"'] : ['#/ajuda', 'fone', 'Ajuda', 'Contatos e emergência', '']
+  ];
+  return `<ul class="rapido" aria-label="Atalhos rápidos">${it.map(([h, i, t, sub, x]) => `<li><a href="${esc(h)}"${x}>${ic(i)}<div><strong>${esc(t)}</strong><span>${esc(sub)}</span></div></a></li>`).join('')}</ul>`;
+}
 function painelDia() {
   return `
     <a class="dia-item" href="#/planejar" id="dia-tempo"><span class="rot">${ic('sol')}Agora</span><strong><span class="skeleton"></span></strong><span class="sub">Carregando previsão…</span></a>
@@ -892,7 +894,7 @@ P.roteiro = (id) => {
         <div class="painel"><dl class="dados"><div><dt>Quando</dt><dd>${ou(r.quando)}</dd></div><div><dt>Ideal para</dt><dd>${ou(r.ideal)}</dd></div></dl></div>
         ${precisaMare ? `<div class="aviso mar">${ic('ondas')}<span>Este roteiro depende da maré baixa. <a href="#/planejar">Veja a estimativa de hoje</a> e confirme na tábua oficial.</span></div>` : ''}
         <div class="painel no-print" style="display:grid;gap:var(--e3)"><span class="olho" style="margin:0">Para não esquecer</span>
-          <div class="campo"><label for="rot-data">Em que dia você vai?</label><input type="date" id="rot-data" value="${esc(dataPadraoRoteiro())}" min="${esc(hojeISO())}"></div>
+          <div class="campo"><label for="rot-data">Em que dia você vai?</label><input type="text" data-cal="unico" id="rot-data" value="${esc(dataPadraoRoteiro())}" data-cal-min="${esc(hojeISO())}" placeholder="AAAA-MM-DD"></div>
           <button type="button" class="btn btn-sec btn-peq" data-ics-roteiro="${esc(r.id)}">${ic('calendario', 'ic-sm')}Adicionar ao calendário</button>
           ${seletorDia('r:' + r.id)}</div>
         ${botaoWa('Pedir ajuda para organizar', `Olá! Quero fazer o roteiro "${r.titulo}". Pode me ajudar?`, 'btn-sec', true)}
@@ -1243,7 +1245,7 @@ P['meu-roteiro'] = () => {
   ${recebido ? `<section class="sec" style="padding-top:var(--e5)"><div class="aviso mar">${ic('link')}<span>Roteiro recebido por link${recebido.ini ? ', a partir de ' + esc(dataLonga(recebido.ini)) : ''}. ${total} ${total === 1 ? 'item' : 'itens'}.</span></div><div class="acoes" style="margin-top:var(--e4)"><button type="button" class="btn btn-prim" data-mr="salvar-recebido">${ic('check')}Guardar no meu aparelho</button><button type="button" class="btn btn-sec" data-mr="descartar">Ver o meu roteiro</button></div></section>` : `
   <section class="sec no-print" style="padding-top:var(--e5)"><div class="painel mr-config">
     ${e ? `<p class="p0" style="flex:1 1 260px">Os dias seguem a sua estadia: ${esc(dataLonga(e.in))} a ${esc(dataLonga(e.out))}.</p>`
-      : `<div class="campo"><label for="mr-ini">Primeiro dia (opcional)</label><input type="date" id="mr-ini" value="${esc(r.ini)}"></div>
+      : `<div class="campo"><label for="mr-ini">Primeiro dia (opcional)</label><input type="text" data-cal="unico" id="mr-ini" value="${esc(r.ini)}" placeholder="AAAA-MM-DD"></div>
          <div class="acoes"><button type="button" class="btn btn-sec btn-peq" data-mr="mais-dia"${r.dias.length >= 14 ? ' disabled' : ''}>${ic('mais', 'ic-sm')}Mais um dia</button><button type="button" class="btn btn-sec btn-peq" data-mr="menos-dia"${r.dias.length <= 1 ? ' disabled' : ''}>Menos um dia</button></div>`}
   </div></section>`}
   <section class="sec" style="padding-top:var(--e5)"><div class="mr-dias">${dias}</div></section>

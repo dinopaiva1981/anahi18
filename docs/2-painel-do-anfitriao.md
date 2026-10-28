@@ -20,7 +20,7 @@ Guarde o endereço nos favoritos do celular e do computador.
 
 1. Abra o painel. Aparece a tela **Área do anfitrião**.
 2. Em **Senha do anfitrião**, digite a senha.
-   - A senha inicial é **casaalagoas**.
+   - A senha inicial é **casapraia**.
    - Toque no olho para ver o que digitou.
 3. Toque em **Entrar**.
 
@@ -32,7 +32,7 @@ A tela diz: “A senha protege este aparelho; o token do GitHub é informado uma
 - **A senha** tranca o que fica guardado neste aparelho: o token, a chave do feedback, os dados privados (Wi-Fi, portão) e os seus modelos de mensagem.
 - **O token** é o que deixa o painel publicar no GitHub (Parte C).
 
-**Recomendado: troque a senha** por uma frase só sua (Parte G). A senha `casaalagoas` está escrita neste guia e é fácil de adivinhar. Na primeira entrada, a tela **Configurações** sugere essa troca.
+**Recomendado: troque a senha** por uma frase só sua (Parte G). A senha `casapraia` está escrita neste guia e é fácil de adivinhar. Na primeira entrada, a tela **Configurações** sugere essa troca.
 
 ---
 
@@ -94,15 +94,15 @@ Fechar a aba também tranca o painel: ao abrir de novo, ele pede a senha.
 
 ## Parte E · Esqueci a senha
 
-A senha não fica escrita em lugar nenhum. O repositório guarda só um código embaralhado dela, no arquivo `admin/acesso.json`. Para voltar à senha inicial `casaalagoas`:
+A senha não fica escrita em lugar nenhum. O repositório guarda só um código embaralhado dela, no arquivo `admin/acesso.json`. Para voltar à senha inicial `casapraia`:
 
 1. No computador, entre no **github.com** com a conta dona do guia.
 2. Abra o repositório do guia e entre na pasta **admin**.
 3. Toque no arquivo **acesso.json**.
 4. Toque nos três pontinhos (**…**), no alto à direita do arquivo, e em **Delete file** (apagar arquivo).
 5. Toque em **Commit changes** e confirme.
-6. Espere alguns minutos. A senha `casaalagoas` volta a valer.
-7. No painel, digite `casaalagoas`. Como o que estava guardado no aparelho foi trancado com a senha esquecida, aparece **Só mais um passo**.
+6. Espere alguns minutos. A senha `casapraia` volta a valer.
+7. No painel, digite `casapraia`. Como o que estava guardado no aparelho foi trancado com a senha esquecida, aparece **Só mais um passo**.
 8. Toque em **Informar o token de novo** e confirme. Os dados privados e os modelos daquele aparelho são apagados.
 9. Cole um token (Parte C) e entre.
 10. Troque a senha de novo (Parte G).
@@ -286,3 +286,13 @@ Em **Configurações → Cópia de segurança**:
 ## Se o navegador bloquear o armazenamento
 
 Aparece: “O navegador está bloqueando o armazenamento deste site.” Dá para editar e publicar, mas o rascunho, o token e os dados privados somem ao fechar a aba. Permita cookies e dados de sites para o endereço do painel. Janelas anônimas costumam bloquear.
+
+## Mudança da senha padrão (28/10/2026)
+
+A senha padrão do painel passou a ser **casapraia** (antes era a senha usada até 27/10). Guias que já estavam no ar continuam com o arquivo `admin/acesso.json` antigo, porque o pacote de atualização não traz esse arquivo. Nesse caso:
+
+1. Entre no painel com a senha anterior (ou já com `casapraia`: as duas são aceitas enquanto o arquivo antigo estiver publicado).
+2. Logo depois de entrar, o painel mostra **Atualize a senha do painel**. Toque em **Trocar para casapraia** (ou **Escolher outra senha**, que abre Configurações › Trocar a senha).
+3. O painel tranca de novo o token guardado neste aparelho com a senha nova e publica o novo `admin/acesso.json`. Nos outros aparelhos, a senha anterior é pedida uma última vez para abrir o que estava guardado lá.
+
+Se você já tinha trocado a senha por uma sua, nada muda: ela continua valendo.

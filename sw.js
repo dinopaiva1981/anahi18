@@ -6,10 +6,10 @@
    Tiles do mapa: cache próprio, só respostas CORS (não opacas), com teto de 200 tiles (sai o mais antigo).
    Agenda de disponibilidade (?acao=agenda no Apps Script): sempre da rede, nunca guardada aqui. A cópia de até
    30 min fica só no sessionStorage da aba (assets/site.js), então nada da agenda passa de 1 h no aparelho. */
-const VERSAO = 'guia-v8';
+const VERSAO = 'guia-v9';
 const TILES = 'guia-tiles-v1';
 const MAX_TILES = 200;
-const ESSENCIAIS = ['./', './index.html', './dados/conteudo.json', './assets/dados.js', './assets/agenda.js', './assets/site.css', './assets/site.js', './assets/ilustracoes.js', './assets/marca.js',
+const ESSENCIAIS = ['./', './index.html', './dados/conteudo.json', './assets/dados.js', './assets/agenda.js', './assets/calendario.js', './assets/calendario.css', './assets/site.css', './assets/site.js', './assets/ilustracoes.js', './assets/marca.js',
   './assets/fontes/inter-300.woff', './assets/fontes/inter-400.woff', './assets/fontes/inter-600.woff',
   './assets/fontes/instrument-serif-400.woff', './assets/fontes/instrument-serif-400i.woff',
   './manifest.webmanifest', './icone-192.png'];

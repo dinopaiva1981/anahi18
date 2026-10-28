@@ -2,8 +2,8 @@
   "v": 1,
   "alg": "PBKDF2-SHA256",
   "iter": 600000,
-  "sal": "KEvuMCnxy5EM2eBod8LJbA==",
-  "hash": "wc3x6MxD3zD6nobLXCrlJmgfE4zci1iBrRvtJrqJ94o=",
-  "atualizado_em": "2026-10-24T18:00:00.000Z",
+  "sal": "CEC/uR/hJubbI1xNzFCd2A==",
+  "hash": "jyhymBU8LGwVlk4kwLOIA6uG5LMf8vKKDZeypmUNKLw=",
+  "atualizado_em": "2026-10-28T12:00:00.000Z",
   "obs": "Só o hash da senha do painel (PBKDF2-SHA256). A senha em si nunca fica no repositório. Apagar este arquivo faz o painel voltar à senha original."
 }

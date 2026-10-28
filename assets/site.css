@@ -224,7 +224,7 @@ input,select,textarea{font:inherit}
 .hero-conteudo .btn{text-shadow:none}
 .hero-titulo{font-family:var(--serif);font-weight:400;font-size:clamp(2.75rem,9.5vw,5.5rem);line-height:.98;margin:0;max-width:12ch}
 .hero-sub{font-size:var(--t-base);line-height:1.55;margin:0;max-width:30rem;color:rgba(255,253,249,.92)}
-.hero-rot{align-self:flex-end;margin:14px 14px auto;font-size:.65625rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;background:rgba(255,253,249,.88);color:var(--mudo);border-radius:999px;padding:5px 11px;line-height:1.4;text-shadow:none}
+.hero-rot{align-self:flex-end;margin:14px 14px auto;font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;background:rgba(255,253,249,.88);color:var(--mudo);border-radius:999px;padding:5px 11px;line-height:1.4;text-shadow:none}
 @media (max-width:479px){.hero-rot-mais{display:none}}
 /* Celular baixo (ex.: 320 × 568): a frase-assinatura sai da capa (ela fecha a página inicial) para a reserva caber sem rolar. */
 @media (max-height:680px) and (max-aspect-ratio:1/1){.hero-frase{display:none}.hero-traco{margin:4px 0 0}}
@@ -785,22 +785,22 @@ html.modo-sol .nav-base{background:#fff;border-color:#8F8473}
 .ag-mes:nth-child(2){display:none}
 @container (min-width:540px){.ag-meses{grid-template-columns:repeat(2,minmax(0,1fr))}.ag-mes:nth-child(2){display:table}}
 .ag-mes{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed}
-.ag-mes caption{height:44px;line-height:44px;font-family:var(--serif);font-size:1.5rem;color:var(--tinta);padding:0 48px;margin-bottom:6px;white-space:nowrap}
+.ag-mes caption{height:44px;line-height:44px;font-family:var(--sans);font-weight:600;font-size:1.0625rem;color:var(--tinta);padding:0 48px;margin-bottom:6px;white-space:nowrap}
 .ag-mes caption::first-letter{text-transform:uppercase}
 .ag-mes th{font-size:.6875rem;letter-spacing:.12em;font-weight:600;color:var(--mudo);padding:4px 0 6px;text-align:center}
 .ag-d{padding:0;text-align:center;height:clamp(34px,11cqw,46px)}
 @container (min-width:540px){.ag-d{height:clamp(34px,5.6cqw,46px)}}
-.ag-n{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:8px;font-size:.9375rem;font-variant-numeric:tabular-nums;line-height:1}
-.ag-livre .ag-n{background:var(--papel);box-shadow:inset 0 0 0 1px var(--fio-2);color:var(--tinta);font-weight:600}
-.ag-ocupado .ag-n,.ag-amostra.ag-ocupado{background:repeating-linear-gradient(135deg,rgba(92,84,75,.28) 0 1px,transparent 1px 6px),var(--linho);color:var(--mudo)}
+.ag-n{display:flex;align-items:center;justify-content:center;width:100%;max-width:44px;margin:0 auto;aspect-ratio:1;height:auto;border-radius:50%;font-size:.9375rem;font-variant-numeric:tabular-nums;line-height:1}
+.ag-livre .ag-n{background:transparent;color:var(--tinta);font-weight:600}
+.ag-ocupado .ag-n,.ag-amostra.ag-ocupado{background:repeating-linear-gradient(135deg,rgba(92,84,75,.14) 0 1px,transparent 1px 6px);color:#8E857A}
 .ag-ocupado .ag-n{text-decoration:line-through;text-decoration-color:rgba(92,84,75,.7);font-weight:400}
 .ag-passado .ag-n{color:var(--mudo);opacity:.45}
-.ag-semdados .ag-n{color:var(--mudo);opacity:.5;box-shadow:inset 0 0 0 1px var(--fio);background:none}
-.ag-hoje .ag-n{box-shadow:inset 0 0 0 2px var(--terracota);opacity:1;position:relative}
+.ag-semdados .ag-n{color:var(--mudo);opacity:.5;background:none}
+.ag-hoje .ag-n{box-shadow:inset 0 0 0 1.5px var(--tinta);opacity:1;position:relative}
 .ag-hoje .ag-n::after{content:"";position:absolute;left:50%;bottom:5px;width:4px;height:4px;border-radius:50%;background:var(--terracota);transform:translateX(-50%)}
 .ag-leg{list-style:none;margin:var(--e4) 0 0;padding:var(--e4) 3px 0;border-top:1px solid var(--fio);display:flex;flex-wrap:wrap;gap:8px 22px;font-size:var(--t-xs);color:var(--mudo)}
 .ag-leg li{display:inline-flex;align-items:center;gap:8px}
-.ag-amostra{width:18px;height:18px;border-radius:5px;display:inline-block}
+.ag-amostra{width:18px;height:18px;border-radius:50%;display:inline-block}
 .ag-amostra.ag-livre{background:var(--papel);box-shadow:inset 0 0 0 1px var(--fio-2)}
 .ag-amostra.ag-ocupado{box-shadow:inset 0 0 0 1px var(--fio)}
 .ag-amostra.ag-hoje-amostra{box-shadow:inset 0 0 0 2px var(--terracota)}
@@ -808,3 +808,54 @@ html.modo-sol .nav-base{background:#fff;border-color:#8F8473}
 .agenda-falha .olho{margin-bottom:6px}
 .agenda-falha p{color:var(--texto);max-width:34rem}
 @media print{.agenda-btn,.ag-nav,.agenda-falha{display:none!important}}
+
+/* ---------- v4 · leitura mais fácil (28/10) ----------
+   Corpo 17–18 px com entrelinha 1,55; títulos menos extremos; menos caixa alta espaçada (mínimo 13 px). */
+:root{--t-rot:.8125rem;--t-xs:.875rem;--t-h1:clamp(2.25rem,1.9rem + 1.6vw,3.5rem);--t-h2:clamp(1.75rem,1.5rem + 1.1vw,2.5rem);--t-h3:clamp(1.375rem,1.3rem + .4vw,1.625rem);--t-lead:clamp(1.1875rem,1.12rem + .3vw,1.375rem);--medida:64ch}
+body{line-height:1.55}
+p,li,dd{max-width:var(--medida)}
+.olho{letter-spacing:.08em;font-size:var(--t-rot)}
+.olho .n{display:none}
+.btn{font-size:1rem;letter-spacing:0;text-transform:none;font-weight:600}
+.link-seta{font-size:1rem;letter-spacing:0;text-transform:none}
+.nav-topo{font-size:.9375rem;letter-spacing:0;text-transform:none}
+.btn-wa,.btn-reservar:not([hidden]){font-size:.9375rem!important;letter-spacing:0!important;text-transform:none!important}
+.dia-item .rot{font-size:.8125rem;letter-spacing:.04em}
+.dia-item .sub{font-size:.9375rem;color:var(--mudo)}
+.nav-base a{font-size:.8125rem}
+.sec-cab p,.mudo,.fonte{color:var(--mudo)}
+.sec{padding-top:var(--e7)}
+@media (min-width:960px){.sec{padding-top:var(--e8)}}
+.hero-ola,.hero-local{letter-spacing:.12em;font-size:.8125rem}
+.hero-marca .hm-1{font-size:clamp(2.5rem,11vw,4.75rem)}
+.hero-marca .hm-2{font-size:clamp(1rem,4vw,1.75rem);letter-spacing:.5em}
+.hero-frase{font-size:clamp(1.5rem,5.6vw,2.25rem)}
+.hero-palco{min-height:min(70vh,580px)}
+.atalho small{font-size:.9375rem;color:var(--mudo)}
+/* CTA de reserva: cor de destaque, ≥ 52 px, sempre o primeiro da capa */
+.btn-reserva{min-height:56px!important;padding:12px 28px!important;font-size:1.0625rem!important;font-weight:700;background:#F0C394;color:#17301F;order:-1}
+.btn-reserva-falta{display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:12px 22px;border-radius:999px;border:2px dashed #F0C394;color:#FFFDF9;background:rgba(15,30,22,.55);font-weight:600;text-shadow:none;order:-1}
+@media (max-width:599px){.hero-acoes .btn-reserva,.hero-acoes .btn-reserva-falta{flex-basis:100%}}
+/* Atalhos rápidos (Wi-Fi, check-in, contato) logo abaixo da capa */
+.rapido{list-style:none;margin:var(--e4) 10px 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+@media (min-width:960px){.rapido{margin:var(--e5) 24px 0;gap:12px}}
+.rapido a{display:flex;flex-direction:column;gap:2px;min-height:76px;padding:12px;border-radius:var(--r-lg);background:var(--papel);border:1px solid var(--fio);text-decoration:none;color:var(--tinta);hyphens:manual}
+.rapido a:hover{border-color:var(--palha-3);color:var(--tinta)}
+.rapido .ic{color:var(--coqueiro);width:22px;height:22px}
+.rapido strong{font-size:1rem;font-weight:600;line-height:1.25}
+.rapido span{font-size:.875rem;color:var(--mudo);line-height:1.35}
+@media (max-width:359px){.rapido{grid-template-columns:1fr}.rapido a{flex-direction:row;align-items:center;gap:10px;min-height:56px}.rapido a>div{display:flex;flex-direction:column}}
+/* "Mais da casa e da região": tudo continua no guia, recolhido */
+.mais-inicio{margin:var(--e7) 16px 0;border-top:1px solid var(--fio)}
+@media (min-width:960px){.mais-inicio{margin:var(--e8) 24px 0}}
+.mais-inicio>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:16px 4px;font-family:var(--serif);font-size:var(--t-h3);color:var(--coqueiro)}
+.mais-inicio>summary::-webkit-details-marker{display:none}
+.mais-inicio>summary::after{content:"+";font-family:var(--sans);font-size:1.5rem;line-height:1;color:var(--terracota)}
+.mais-inicio[open]>summary::after{content:"–"}
+.mais-inicio>summary small{display:block;font-family:var(--sans);font-size:.9375rem;color:var(--mudo)}
+.mais-inicio>.sec:first-of-type{padding-top:var(--e4)}
+.mr-config .cal-campo{max-width:280px}
+.rapido a>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+@media (max-width:599px){.hero-palco{min-height:0}.hero-conteudo{padding:20px 20px 24px;gap:10px}.hero-frase{font-size:1.375rem}.hero-traco{display:none}}
+@media (max-height:500px) and (min-aspect-ratio:1/1){.hero-palco{min-height:0}.hero-conteudo{padding:16px 24px 18px;gap:8px}.hero-frase,.hero-traco,.hero-local{display:none}.hero-marca .hm-1{font-size:2.25rem}}
+@media (min-width:960px){.hero-palco{min-height:min(62vh,540px)}}

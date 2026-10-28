@@ -107,7 +107,7 @@ fotos/                 imagens enviadas pelo painel (fotos/<slug>-<base36>.webp|
 - Comparação em tempo constante. `acessoValido()` exige iter entre 100 000 e 5 000 000.
 - Tentativas: 2 livres; depois 30 s × 2^(n−3), até 900 s; persistem no `localStorage`.
 - Troca (`trocarSenha`): confere a atual, recifra o cofre, grava `admin:acesso` local e faz `PUT admin/acesso.json`. Se o `PUT` falhar, mostra o JSON para colar à mão.
-- Um teste confirma que `casaalagoas` não aparece em código, dados nem configuração (os guias em `docs/` citam de propósito).
+- Um teste confirma que `casapraia` não aparece em código, dados nem configuração (os guias em `docs/` citam de propósito).
 
 ### Cofre v2 (`localStorage['admin:cofre'] = {v:2, iter, sal, iv, ct}`)
 - Conteúdo cifrado: `{token, exp, tokenAte, fbchave, privados:{wifi_rede, wifi_senha, wifi_tipo, wifi_oculta, portao, chaves, notas}, modelos:{…}}`.

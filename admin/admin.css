@@ -615,3 +615,42 @@ p.mudo,.campo .ajuda,.card>p{max-width:75ch}
 .ag-amostra.ag-hoje-amostra{box-shadow:inset 0 0 0 2px var(--terra)}
 .card{min-width:0}
 .card .acoes .btn{white-space:normal;max-width:100%;text-align:center;padding-block:8px;line-height:1.25}
+/* v4 · prévia do botão de reserva (A casa) */
+#card-reservas{border:2px solid var(--mar);}
+.reserva-previa{display:grid;gap:6px}
+.reserva-previa .rot{font-size:13px;font-weight:600;color:var(--mudo)}
+.rp-palco{background:#1F3D2F;border-radius:14px;padding:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.rp-btn{display:inline-flex;align-items:center;min-height:52px;padding:12px 26px;border-radius:999px;background:#F0C394;color:#17301F;font-weight:700;font-size:16px;text-decoration:none}
+.rp-falta{display:inline-flex;align-items:center;min-height:52px;padding:10px 18px;border-radius:999px;border:2px dashed #F0C394;color:#FFFDF9;font-weight:600;font-size:15px}
+/* v4 · uploads em grade: cartões com miniatura proporcional, nome, descrição e ações alinhadas (1 a 4 colunas) */
+.galeria-campo{display:block;container-type:inline-size}
+#lista-fotos,#picker-lista{container-type:inline-size}
+.up-grade{display:grid;grid-template-columns:1fr;gap:14px;align-items:stretch}
+@container (min-width:420px){.up-grade{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container (min-width:640px){.up-grade{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@container (min-width:880px){.up-grade{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.up-card{display:flex!important;flex-direction:column;gap:0;width:auto!important;background:var(--sup-2);border:1px solid var(--linha-2);border-radius:14px;overflow:hidden;position:relative}
+.up-card .up-mini,.galeria-campo .g .foto{width:100%!important;height:auto!important;aspect-ratio:4/3!important;border-radius:0;border:0;display:block}
+.up-mini img{width:100%;height:100%;object-fit:cover}
+.up-capa{position:absolute!important;left:10px!important;top:10px!important;right:auto!important;bottom:auto!important;background:#1F3D2F!important;color:#fff;border-radius:999px;padding:4px 10px!important;font-size:12px!important}
+.up-info{display:flex;flex-direction:column;gap:8px;padding:12px;flex:1}
+.up-nome{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tinta)}
+.up-rot{font-size:13px;font-weight:600;color:var(--mudo)}
+.up-info input[type=text]{width:100%!important;font-size:15px!important;padding:9px 10px!important;border:1px solid var(--linha-2);border-radius:8px;background:#fff;min-height:44px;margin:0!important}
+.up-acoes{display:flex!important;flex-wrap:wrap;align-items:center;gap:6px;min-height:44px;margin-top:auto!important;justify-content:flex-start}
+.up-acoes .btn-peq{width:auto!important;white-space:nowrap}
+.up-acoes .x{position:static!important;margin-left:auto;width:44px!important;height:44px!important;border-radius:10px!important;background:transparent!important}
+.up-acoes .peq.mudo{margin-right:auto}
+.up-uso{color:var(--verde)}
+.up-soltar,.galeria-campo .add-foto{width:auto!important;height:auto!important;min-height:220px;border:2px dashed var(--linha-2);border-radius:14px;background:var(--sup);display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;text-align:center;padding:18px;color:var(--mudo);cursor:pointer;font-size:14px}
+.up-soltar b{color:var(--tinta);font-size:15px}
+.up-soltar .ic{width:28px;height:28px;color:var(--mar)}
+.up-soltar:hover,.up-soltar.ativa,[data-soltar-foto].ativa{border-color:var(--mar);background:var(--mar-claro)}
+/* campo de foto único: cartão horizontal no computador, empilhado no celular */
+.foto-campo.up-card{flex-direction:row!important;align-items:stretch}
+.foto-campo.up-card>.up-mini{width:200px!important;flex:none}
+.foto-campo.up-vazio>.up-mini{border:2px dashed var(--linha-2);background:var(--sup);margin:10px;border-radius:12px;width:180px!important}
+.foto-vazia b{font-size:13.5px;color:var(--tinta)}
+@media (max-width:560px){.foto-campo.up-card{flex-direction:column!important}.foto-campo.up-card>.up-mini{width:100%!important}.foto-campo.up-vazio>.up-mini{width:auto!important}}
+.fotos.up-grade .up-mini span{display:none}
+.up-acoes .x{color:var(--alerta,#8A2A1A)!important;border:1px solid var(--linha-2)!important}

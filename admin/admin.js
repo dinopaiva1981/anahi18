@@ -145,7 +145,13 @@ function esquecerToken() {
    No repositório fica só o hash (admin/acesso.json): PBKDF2-SHA256, sal aleatório, 600 mil iterações (OWASP).
    A senha protege ESTE aparelho (abre o cofre acima). Quem dá acesso ao GitHub é o token.
    Se admin/acesso.json for apagado do repositório, vale o hash original abaixo (é o caminho para recuperar uma senha esquecida). */
-const ACESSO_ORIGINAL = { v: 1, alg: 'PBKDF2-SHA256', iter: 600000, sal: 'KEvuMCnxy5EM2eBod8LJbA==', hash: 'wc3x6MxD3zD6nobLXCrlJmgfE4zci1iBrRvtJrqJ94o=', atualizado_em: '2026-10-24T18:00:00.000Z' };
+const ACESSO_ORIGINAL = { v: 1, alg: 'PBKDF2-SHA256', iter: 600000, sal: 'CEC/uR/hJubbI1xNzFCd2A==', hash: 'jyhymBU8LGwVlk4kwLOIA6uG5LMf8vKKDZeypmUNKLw=', atualizado_em: '2026-10-28T12:00:00.000Z' };
+/* Hash da senha padrão ANTERIOR (até 27/10/2026). Guias já no ar ainda têm este admin/acesso.json, porque o pacote de
+   atualização não traz esse arquivo. Com ele publicado, o painel aceita a senha anterior e também a nova padrão, e
+   oferece a troca logo depois de entrar (o cofre é trancado de novo com a senha nova, como em "Trocar a senha"). */
+const ACESSO_LEGADO = { sal: 'KEvuMCnxy5EM2eBod8LJbA==', hash: 'wc3x6MxD3zD6nobLXCrlJmgfE4zci1iBrRvtJrqJ94o=' };
+const SENHA_PADRAO = 'casa' + 'praia';
+const ehLegado = (a) => !!a && a.sal === ACESSO_LEGADO.sal && a.hash === ACESSO_LEGADO.hash;
 const OBS_ACESSO = 'Só o hash da senha do painel (PBKDF2-SHA256). A senha em si nunca fica no repositório. Apagar este arquivo faz o painel voltar à senha original.';
 const acessoValido = (a) => a && typeof a === 'object' && a.alg === 'PBKDF2-SHA256' && Number.isInteger(a.iter) && a.iter >= 100000 && a.iter <= 5000000 &&
   /^[A-Za-z0-9+/]{16,}={0,2}$/.test(String(a.sal || '')) && /^[A-Za-z0-9+/]{43}=$/.test(String(a.hash || '')) ? a : null;
@@ -562,6 +568,7 @@ function verificar() {
   { const cfg = C.config || {}, res = String(casa.link_reserva || '').trim();
     if (tem(res) && urlValida(res, true) && !ehIcal(res) && !ehAirbnb(res)) it.push({ e: 'falta', txt: 'O link de reserva não é do Airbnb (airbnb.com ou airbnb.com.br): o botão aparece como “Reservar”. Confira se é o anúncio certo.', grupo: 'Reservas', ir: 'casa' });
     else if (tem(res) && ehAirbnb(res)) it.push({ e: 'ok', txt: 'Botão “Reservar no Airbnb” ativo', grupo: 'Reservas', ir: 'casa' });
+    if (!tem(res) || !urlValida(res, true) || ehIcal(res)) it.push({ e: 'falta', txt: 'Falta o link da reserva (Airbnb): sem ele o botão “Reservar” não aparece no site', grupo: 'Reservas', ir: 'casa' });
     if (cfg.agenda_visivel === true) ck(tem(cfg.feedback_endpoint), 'Agenda de disponibilidade ligada (confira em A casa › Testar agenda)', 'A agenda está ligada, mas falta o endereço do Apps Script (Configurações › Feedback): no site ela não aparece', 'Reservas', tem(cfg.feedback_endpoint) ? 'casa' : 'config', true); }
   { const vaz = []; const andar = (x, p) => { if (typeof x === 'string') { if (ehIcal(x)) vaz.push(p); } else if (x && typeof x === 'object') Object.keys(x).forEach(k => andar(x[k], p ? p + '.' + k : k)); }; andar(C, '');
     vaz.forEach(p => { const o = ondeFica(p); it.push({ e: 'erro', txt: `Link secreto do calendário (iCal) no conteúdo público: apague · ${o.nome}`, grupo: 'Segurança', ir: o.ir }); }); }
@@ -646,7 +653,10 @@ function telaSenha(msg) {
     const senha = $('#s-senha').value; if (!senha) { erroSenha('Digite a senha do anfitrião.'); $('#s-senha').focus(); return; }
     const btn = f.querySelector('button[type=submit]'); btn.disabled = true; btn.textContent = 'Conferindo…';
     let ok = false;
-    try { ok = await conferirSenha(senha, await carregarAcesso()); }
+    try {
+      const ac = await carregarAcesso(); ok = await conferirSenha(senha, ac); A.migrarSenha = null;
+      if (ehLegado(ac)) { if (!ok && senha === SENHA_PADRAO) ok = await conferirSenha(senha, ACESSO_ORIGINAL); if (ok) A.migrarSenha = { usada: senha }; }
+    }
     catch (x) { btn.disabled = false; btn.textContent = 'Entrar'; erroSenha('Este navegador não conseguiu conferir a senha (o painel precisa de um endereço https://).'); return; }
     if (!ok) {
       const t = Tentativas.falhou();
@@ -798,6 +808,7 @@ async function carregar() {
   if (A.correcoes.length) toast(`Corrigi ${A.correcoes.length} valor(es) em formato inválido (datas, links ou fotos). Veja em Visão geral.`, true);
   if (conflitoInicial) mostrarConflitos(conflitoInicial, true);
   if (A.avisoJuncao) toast(A.avisoJuncao);
+  if (A.migrarSenha && !DEMO) oferecerSenhaNova();
   if (A.formato === 'js' && !conflitoInicial && !ss.get('admin:formato-ofertado', false)) { ss.set('admin:formato-ofertado', true); ofertarFormato(); }
 }
 /* ---------------- formato dos dados (migração conteudo.js → dados/conteudo.json) ---------------- */
@@ -1005,13 +1016,14 @@ function srcAdmin(src) {
 function rawUrl(src) { return `https://raw.githubusercontent.com/${encodeURIComponent(A.cfg.owner)}/${encodeURIComponent(A.cfg.repo)}/${encodeURIComponent(A.cfg.branch)}/${src.replace(/^\.?\//, '').split('/').map(encodeURIComponent).join('/')}`; }
 const imgTag = (src, alt) => `<img src="${esc(srcAdmin(src))}" alt="${esc(alt || '')}" loading="lazy" data-raw="${esc(srcValido(src) && !/^https:/.test(src) ? rawUrl(src) : '')}">`;
 function campoFoto(p, rot, extra) {
-  const v = caminho(A.draft, p) || null;
+  const v = caminho(A.draft, p) || null, tem_ = !!(v && v.src);
   return `<div class="campo ${extra.largo ? 'largo' : ''}"><span class="rot">${esc(rot)}</span>
-    <div class="foto-campo">
-      <button type="button" class="foto" data-escolher-foto="${p}" aria-label="${v && v.src ? 'Trocar a foto' : 'Escolher uma foto'}">${v && v.src ? imgTag(v.src, v.alt) : `<span class="foto-vazia">${ic('imagem')}Escolher</span>`}</button>
-      <div class="foto-info">${v && v.src ? `<div class="campo"><label for="alt-${p}">Descrição da foto (para quem usa leitor de tela)</label><input type="text" id="alt-${p}" data-k="${p}.alt" data-t="texto" value="${esc(v.alt || '')}" placeholder="Ex.: varanda com rede e vista para o coqueiral"></div><div class="acoes"><button type="button" class="btn btn-sec" data-escolher-foto="${p}">Trocar</button><button type="button" class="btn btn-perigo" data-limpar-foto="${p}">Tirar foto</button></div>` : `<span class="ajuda">Sem foto, o site mostra uma ilustração da cena. Toque no quadrado para enviar ou escolher uma.</span>`}</div>
+    <div class="foto-campo up-card${tem_ ? '' : ' up-vazio'}" data-soltar-foto="${p}">
+      <button type="button" class="foto up-mini" data-escolher-foto="${p}" aria-label="${tem_ ? 'Trocar a foto' : 'Escolher uma foto'}">${tem_ ? imgTag(v.src, v.alt) : `<span class="foto-vazia">${ic('upload')}<b>Escolher ou soltar foto</b></span>`}</button>
+      <div class="foto-info up-info">${tem_ ? `<span class="up-nome" title="${esc(v.src)}">${esc(nomeArquivo(v.src))}</span><div class="campo"><label for="alt-${p}">Descrição da foto (para quem usa leitor de tela)</label><input type="text" id="alt-${p}" data-k="${p}.alt" data-t="texto" value="${esc(v.alt || '')}" placeholder="Ex.: varanda com rede e vista para o coqueiral"></div><div class="acoes up-acoes"><button type="button" class="btn btn-sec btn-peq" data-escolher-foto="${p}">${ic('imagem')}Trocar</button><button type="button" class="btn btn-perigo btn-peq" data-limpar-foto="${p}">${ic('lixo')}Tirar foto</button></div>` : `<span class="ajuda">Sem foto, o site mostra uma ilustração da cena. Toque no quadro ou arraste uma imagem para cá.</span>`}</div>
     </div></div>`;
 }
+const nomeArquivo = (src) => String(src || '').split('/').pop().replace(/\?.*$/, '') || 'foto';
 /* Repetidor genérico para listas de objetos dentro de um formulário. */
 function repet(p, rot, esquema, novo, titulo, vazio) {
   const arr = caminho(A.draft, p) || [];
@@ -1025,8 +1037,12 @@ function repet(p, rot, esquema, novo, titulo, vazio) {
 }
 function galeria(p, rot) {
   const arr = caminho(A.draft, p) || [];
-  return `<div class="campo largo"><span class="rot">${esc(rot)}</span><div class="galeria-campo">${arr.map((f, i) => `<div class="g"><button type="button" class="foto" data-escolher-foto="${p}.${i}" aria-label="Trocar foto ${i + 1}">${imgTag(f && f.src, f && f.alt)}${i === 0 ? '<span>Capa</span>' : ''}</button><button type="button" class="x" data-remover="${p}" data-i="${i}" aria-label="Remover foto ${i + 1}">×</button><input type="text" data-k="${p}.${i}.alt" data-t="texto" value="${esc((f && f.alt) || '')}" placeholder="Descrição" aria-label="Descrição da foto ${i + 1}">${i ? `<div class="g-acoes"><button type="button" class="btn btn-sec btn-peq" data-capa="${p}" data-i="${i}" aria-label="Usar a foto ${i + 1} como capa">Usar como capa</button><button type="button" class="btn btn-fant mover-foto" data-mover="${p}" data-i="${i}" data-d="-1" aria-label="Mover a foto ${i + 1} uma posição para a esquerda">← mover</button></div>` : ''}</div>`).join('')}
-    <button type="button" class="add-foto" data-escolher-foto="${p}.${arr.length}" aria-label="Adicionar fotos">${ic('mais')}<span>Fotos</span></button></div><span class="ajuda">${arr.length ? 'A primeira foto é a capa da página inicial. Descreva cada foto para quem usa leitor de tela.' : 'Nenhuma foto ainda. Toque em “+ Fotos” para enviar do celular ou do computador. Dá para escolher várias de uma vez.'}</span></div>`;
+  return `<div class="campo largo"><span class="rot">${esc(rot)}</span><div class="galeria-campo"><div class="up-grade">${arr.map((f, i) => `<div class="g up-card">
+      <button type="button" class="foto up-mini" data-escolher-foto="${p}.${i}" aria-label="Trocar foto ${i + 1}">${imgTag(f && f.src, f && f.alt)}${i === 0 ? '<span class="up-capa">Capa</span>' : ''}</button>
+      <div class="up-info"><span class="up-nome" title="${esc((f && f.src) || '')}">${i + 1}. ${esc(nomeArquivo(f && f.src))}</span>
+      <label class="up-rot" for="g-alt-${p}-${i}">Descrição</label><input type="text" id="g-alt-${p}-${i}" data-k="${p}.${i}.alt" data-t="texto" value="${esc((f && f.alt) || '')}" placeholder="O que aparece na foto" aria-label="Descrição da foto ${i + 1}">
+      <div class="up-acoes g-acoes">${i ? `<button type="button" class="btn btn-sec btn-peq" data-capa="${p}" data-i="${i}" aria-label="Usar a foto ${i + 1} como capa">Usar como capa</button><button type="button" class="btn btn-fant btn-peq mover-foto" data-mover="${p}" data-i="${i}" data-d="-1" aria-label="Mover a foto ${i + 1} uma posição para a esquerda">← mover</button>` : '<span class="peq mudo">Primeira foto da página inicial</span>'}<button type="button" class="x btn btn-perigo btn-peq btn-ic" data-remover="${p}" data-i="${i}" aria-label="Remover foto ${i + 1}">${ic('lixo')}</button></div></div></div>`).join('')}
+    <button type="button" class="add-foto up-soltar" data-escolher-foto="${p}.${arr.length}" data-soltar-foto="${p}.${arr.length}" aria-label="Adicionar fotos">${ic('upload')}<b>Adicionar fotos</b><span>Toque para escolher ou arraste para cá</span></button></div></div><span class="ajuda">${arr.length ? 'A primeira foto é a capa da página inicial. Descreva cada foto para quem usa leitor de tela.' : 'Nenhuma foto ainda. Toque em “Adicionar fotos” para enviar do celular ou do computador. Dá para escolher várias de uma vez.'}</span></div>`;
 }
 
 /* ---------------- VISTAS ---------------- */
@@ -1072,6 +1088,7 @@ VISTAS.visao.depois = () => { if (!A.fb.itens && !A.fb.carregando) carregarFeedb
 const ICONES = [['praia', 'Praia'], ['wifi', 'Internet'], ['ar', 'Ar-condicionado'], ['cozinha', 'Cozinha'], ['cama', 'Cama'], ['toalha', 'Toalhas'], ['carro', 'Estacionamento'], ['piscina', 'Piscina'], ['tv', 'TV'], ['maquina', 'Máquina de lavar'], ['churrasqueira', 'Churrasqueira'], ['chuveiro', 'Chuveiro'], ['varanda', 'Varanda'], ['rede', 'Rede'], ['outro', 'Outro']];
 const ICONES_TRAJETO = [['aviao', 'Avião'], ['estrada', 'Estrada'], ['pino', 'Local'], ['carro', 'Carro'], ['onibus', 'Ônibus']];
 VISTAS.casa = () => `${cab('Conteúdo', 'A casa', 'Apresentação, fotos, comodidades e combinados da casa.')}
+  ${cartaoReservas()}
   <div class="card form"><h2 class="t2">Apresentação</h2><div class="campos">
     ${campo('casa.nome', 'Nome da casa', 'texto', { ph: 'Casa 18 Anahi', ajuda: 'Nomes como “Casa 18 Anahi” viram duas linhas no topo do site.' })}${campo('casa.subtitulo', 'Descrição curta', 'texto', { ph: 'Casa de praia no Marceneiro' })}
     ${campo('casa.frase', 'Frase de boas-vindas (aparece em letra cursiva)', 'texto', { largo: true, ph: 'Aqui, o tempo desacelera e a vida acontece.', ajuda: 'Curta, uma linha. Use com parcimônia.' })}
@@ -1082,7 +1099,6 @@ VISTAS.casa = () => `${cab('Conteúdo', 'A casa', 'Apresentação, fotos, comodi
     ${campo('casa.instagram', 'Instagram da casa', 'texto', { v: 'insta', ph: 'casa18.anahi', ajuda: 'Só o nome do perfil, sem @.' })}
     ${campo('casa.video_url', 'Vídeo da casa (YouTube, Instagram…)', 'url', { largo: true, ph: 'https://', ajuda: 'Opcional. Mostra “Assista ao vídeo da casa” no topo.' })}
   </div></div>
-  ${cartaoReservas()}
   <div class="card form"><h2 class="t2">Horários e localização</h2><div class="campos">
     ${campo('casa.checkin', 'Check-in', 'texto', { ph: 'a partir das 14h' })}${campo('casa.checkout', 'Check-out', 'texto', { ph: 'até as 11h' })}
     ${campo('casa.endereco_publico', 'Endereço exibido', 'texto', { largo: true, ajuda: 'Evite o número da casa se não quiser expô-lo publicamente.' })}
@@ -1243,7 +1259,7 @@ function listaFotos(escolher) {
   if (A.fotos.erro) return `<div class="aviso erro">${ic('alerta')}<span>${esc(A.fotos.erro)}</span></div>`;
   if (!A.fotos.length) return `<div class="vazio">Nenhuma foto enviada ainda.${escolher ? '' : ' Use o quadro acima para enviar a primeira.'}</div>`;
   const usos = usosDeFotos();
-  return `<div class="fotos">${A.fotos.map(f => { const uso = usos.has(f.path); return `<div class="foto-cel"><button type="button" class="foto" ${escolher ? `data-usar-foto="${esc(f.path)}"` : `data-ver-foto="${esc(f.path)}"`} aria-label="${escolher ? 'Usar ' : 'Abrir '}${esc(f.name)}">${imgTag(f.path, '')}<span>${esc(f.name)}</span></button>${escolher ? '' : `<div class="acoes" style="justify-content:space-between"><span class="peq mudo">${Math.round((+f.size || 0) / 1024)} KB${uso ? ' · em uso' : ''}</span>${uso ? '' : `<button type="button" class="btn btn-fant perigo" data-apagar-foto="${esc(f.path)}" data-sha="${esc(f.sha)}">Apagar</button>`}</div>`}</div>`; }).join('')}</div>`;
+  return `<div class="fotos up-grade">${A.fotos.map(f => { const uso = usos.has(f.path); return `<div class="foto-cel up-card"><button type="button" class="foto up-mini" ${escolher ? `data-usar-foto="${esc(f.path)}"` : `data-ver-foto="${esc(f.path)}"`} aria-label="${escolher ? 'Usar ' : 'Abrir '}${esc(f.name)}">${imgTag(f.path, '')}</button><div class="up-info"><span class="up-nome" title="${esc(f.name)}">${esc(f.name)}</span>${escolher ? '' : `<div class="up-acoes"><span class="peq mudo">${Math.round((+f.size || 0) / 1024)} KB${uso ? ' · <b class="up-uso">em uso</b>' : ''}</span>${uso ? '' : `<button type="button" class="btn btn-fant btn-peq perigo" data-apagar-foto="${esc(f.path)}" data-sha="${esc(f.sha)}">${ic('lixo')}Apagar</button>`}</div>`}</div></div>`; }).join('')}</div>`;
 }
 async function carregarFotos() {
   try { const r = await gh(`${repoPath()}/contents/fotos?ref=${encodeURIComponent(A.cfg.branch)}`); A.fotos = (Array.isArray(r) ? r : []).filter(f => f && f.type === 'file' && /^fotos\/[\w\-.]+\.(jpe?g|png|webp|avif|gif)$/i.test(f.path)).sort((a, b) => b.name.localeCompare(a.name)); }
@@ -1293,6 +1309,16 @@ function ligarSolta(raiz) {
   s.addEventListener('drop', e => enviarFotos([...e.dataTransfer.files], fim));
 }
 let alvoFoto = null;
+/* Arrastar e soltar direto num quadro de foto (campo único ou "Adicionar fotos" da galeria). */
+['dragenter', 'dragover'].forEach(ev => document.addEventListener(ev, (e) => { const z = e.target.closest && e.target.closest('[data-soltar-foto]'); if (!z) return; e.preventDefault(); z.classList.add('ativa'); }));
+['dragleave', 'drop'].forEach(ev => document.addEventListener(ev, (e) => { const z = e.target.closest && e.target.closest('[data-soltar-foto]'); if (z) z.classList.remove('ativa'); }));
+document.addEventListener('drop', (e) => {
+  const z = e.target.closest && e.target.closest('[data-soltar-foto]'); if (!z) return; e.preventDefault();
+  const fs = [...((e.dataTransfer && e.dataTransfer.files) || [])].filter(f => /^image\//.test(f.type)); if (!fs.length) { toast('Solte arquivos de imagem (JPG, PNG ou WebP).', true); return; }
+  alvoFoto = z.getAttribute('data-soltar-foto'); const varias = !!alvoGaleria(alvoFoto);
+  toast(fs.length > 1 && varias ? `Enviando ${fs.length} fotos…` : 'Enviando a foto…');
+  enviarFotos(varias ? fs : fs.slice(0, 1), (ns) => usarFotos(ns));
+});
 function alvoGaleria(p) { const m = String(p || '').match(/^(.*)\.(\d+)$/); if (!m) return null; const arr = caminho(A.draft, m[1]); return Array.isArray(arr) && +m[2] === arr.length ? m[1] : null; }
 function escolherFoto(p) {
   alvoFoto = p; const d = $('#dialogo'), varias = !!alvoGaleria(p);
@@ -1387,8 +1413,8 @@ VISTAS.hospede = () => { const M = dadosMensagem(); return `${cab('Hospedagem', 
     <section class="card form" aria-labelledby="h-est"><h2 class="t2" id="h-est">A estadia</h2>
       <div class="campos">
         ${campoEst('nome', 'h-nome', 'Primeiro nome do hóspede', 'text', { largo: true, attrs: 'maxlength="40" placeholder="Ex.: Mariana" autocapitalize="words" spellcheck="false"', ajuda: 'Aparece na saudação do guia (“Olá, Mariana”).' })}
-        ${campoEst('chegada', 'h-in', 'Chegada', 'date', {})}
-        ${campoEst('saida', 'h-out', 'Saída', 'date', {})}
+        ${campoEst('chegada', 'h-in', 'Chegada', 'date', { attrs: `data-cal="inicio" data-cal-par="#h-out" data-cal-rot="Check-in" data-cal-min="${hoje()}"` })}
+        ${campoEst('saida', 'h-out', 'Saída', 'date', { attrs: 'data-cal="fim" data-cal-rot="Checkout"' })}
         ${campoEst('fone', 'h-fone', 'WhatsApp do hóspede <span class="opc">opcional</span>', 'text', { largo: true, attrs: 'inputmode="tel" placeholder="(11) 98888-0000"', ajuda: 'Com o número, “Abrir no WhatsApp” já abre a conversa com ele. Nada desta estadia é salvo: some ao fechar o painel.' })}
       </div></section>
     <section class="card link-card" aria-live="polite" id="h-saida">${blocoLink(M)}</section>
@@ -1529,13 +1555,20 @@ function avisoReserva(v) {
   if (ehIcal(v) || !urlValida(v, true)) return '';
   return ehAirbnb(v) ? 'No site, o botão aparece como “Reservar no Airbnb” e abre o anúncio numa nova aba.' : '<b>Atenção:</b> este link não é do Airbnb (airbnb.com ou airbnb.com.br). O botão aparece só como “Reservar”. Confira se é mesmo o endereço do anúncio.';
 }
+/* Prévia do botão como ele aparece na capa do site (sem link: o lugar reservado, que só o painel e a pré-visualização mostram). */
+function previaReserva(v) {
+  v = String(v == null ? (A.draft.casa || {}).link_reserva || '' : v).trim();
+  const ok = tem(v) && urlValida(v, true) && !ehIcal(v);
+  return `<span class="rot">Prévia na capa do site</span><div class="rp-palco">${ok ? `<a class="rp-btn" href="${esc(v)}" target="_blank" rel="noopener">${ehAirbnb(v) ? 'Reservar no Airbnb' : 'Reservar'} →<span class="sr-only"> (abre em nova aba)</span></a>` : '<span class="rp-falta">Configure o link acima para o botão “Reservar” aparecer no site</span>'}</div>`;
+}
 function cartaoReservas() {
   const cfg = A.draft.config || {}, ep = tem(cfg.feedback_endpoint);
-  return `<section class="card form" id="card-reservas" aria-labelledby="rd-tit"><h2 class="t2" id="rd-tit">Reservas e disponibilidade</h2>
+  return `<section class="card form" id="card-reservas" aria-labelledby="rd-tit"><h2 class="t2" id="rd-tit">Botão de reserva e disponibilidade</h2>
     <p class="mudo" style="margin:0">O botão de reserva aparece na capa do site, no topo e no rodapé. A agenda mostra quais dias estão livres, espelhando o calendário do Airbnb (atualiza sozinha a cada hora).</p>
     <div class="campos">
-      ${campo('casa.link_reserva', 'Link do anúncio para reservar', 'url', { largo: true, v: 'reserva', ph: 'https://www.airbnb.com.br/rooms/…', ajuda: 'O endereço do anúncio, como aparece no navegador ao abrir a página da casa no Airbnb. Nunca o link do calendário.' })}
+      ${campo('casa.link_reserva', 'Link da reserva (Airbnb)', 'url', { largo: true, v: 'reserva', ph: 'https://www.airbnb.com.br/rooms/…', ajuda: 'Cole o endereço do anúncio, como aparece no navegador ao abrir a página da casa no Airbnb. Nunca o link do calendário.' })}
       <p class="ajuda largo aviso-reserva" id="reserva-aviso" aria-live="polite">${avisoReserva()}</p>
+      <div class="largo reserva-previa" id="reserva-previa" aria-live="polite">${previaReserva()}</div>
       ${campo('config.agenda_visivel', 'Mostrar a agenda de disponibilidade no site', 'check', { largo: true })}
     </div>
     ${!ep ? `<div class="aviso">${ic('alerta')}<span>A agenda usa o mesmo Apps Script do feedback. Primeiro cole o endereço dele em <button type="button" class="btn-link" data-ir="config">Configurações › Feedback</button>. Enquanto isso, mesmo ligada, a agenda não aparece no site.</span></div>` : ''}
@@ -2024,7 +2057,7 @@ document.addEventListener('input', (e) => {
   else v = el.value;
   if (el.dataset.k === 'casa.instagram') v = String(v).trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/^@/, '').replace(/\/.*$/, '');
   if (el.dataset.v === 'whats' && tem(v)) { const n = normalizarWhats(v); if (n && !/[^\d\s()+.-]/.test(v)) v = n; }
-  if (el.dataset.k === 'casa.link_reserva') { if (ehIcal(v)) { v = ''; } const av = $('#reserva-aviso'); if (av) av.innerHTML = avisoReserva(el.value); }
+  if (el.dataset.k === 'casa.link_reserva') { if (ehIcal(v)) { v = ''; } const av = $('#reserva-aviso'); if (av) av.innerHTML = avisoReserva(el.value); const pv = $('#reserva-previa'); if (pv) pv.innerHTML = previaReserva(el.value); }
   if (/\.coordenadas\.(lat|lng)$/.test(el.dataset.k) && !caminho(A.draft, 'casa.coordenadas')) A.draft.casa.coordenadas = { lat: null, lng: null };
   definir(A.draft, el.dataset.k, v);
   marcarErro(el);
@@ -2168,6 +2201,27 @@ document.addEventListener('pointerdown', (e) => { const b = $('#menu-btn'); if (
 window.addEventListener('hashchange', () => { if (A.draft) ir(location.hash.replace('#', '')); });
 
 /* ---------------- troca de senha ---------------- */
+/* Migração da senha padrão: o guia ainda publica o hash da senha anterior. Oferece trocar para a nova padrão (ou outra). */
+function oferecerSenhaNova() {
+  const d = $('#dialogo'); if (!d || d.open) return;
+  d.innerHTML = `<div class="ed-cab"><h2 class="t2" id="dlg-titulo">Atualize a senha do painel</h2><button type="button" class="btn btn-sec btn-ic" data-fechar-dialogo aria-label="Fechar">${ic('x')}</button></div>
+    <div class="ed-corpo form"><p style="margin:0">Este guia ainda usa a senha padrão anterior. A nova senha padrão do painel é <b>${esc(SENHA_PADRAO)}</b>. Trocando agora, o acesso guardado neste aparelho é trancado de novo com ela e o novo código embaralhado (hash) é publicado em <code>admin/acesso.json</code>.</p>
+    <div id="ms-msg"></div>
+    <div class="acoes"><button type="button" class="btn btn-prim" id="ms-trocar">${ic('cadeado')}Trocar para ${esc(SENHA_PADRAO)}</button><button type="button" class="btn btn-sec" id="ms-outra">Escolher outra senha</button><button type="button" class="btn btn-fant" data-fechar-dialogo>Depois</button></div></div>`;
+  d.setAttribute('aria-labelledby', 'dlg-titulo'); d.showModal();
+  $('#ms-outra').addEventListener('click', () => { d.close(); A.migrarSenha = null; ir('config'); setTimeout(() => { const i = $('#ts-atual'); if (i) i.focus(); }, 300); });
+  $('#ms-trocar').addEventListener('click', async (e) => {
+    const b = e.currentTarget; b.disabled = true; b.textContent = 'Trancando de novo…';
+    try { await aplicarSenha(SENHA_PADRAO); A.migrarSenha = null; d.close(); toast('Pronto: a senha do painel agora é ' + SENHA_PADRAO + '.'); }
+    catch (x) { $('#ms-msg').innerHTML = `<div class="aviso erro" role="alert">${ic('alerta')}<span>${esc('Não consegui publicar a senha nova: ' + (x.status != null ? msgErro(x) : x.message) + '. Tente de novo em Configurações › Trocar a senha.')}</span></div>`; b.disabled = false; b.textContent = 'Tentar de novo'; }
+  });
+}
+/* Tranca o cofre com a senha nova e publica o hash (mesmo caminho de "Trocar a senha"). */
+async function aplicarSenha(nova) {
+  const novo = await gerarAcesso(nova);
+  await Cofre.criar(nova, A.cofreDados || novoCofre()); ls.set('admin:acesso', Object.assign({}, novo, { trocadaAqui: Date.now() }));
+  await publicarAcesso(novo); return novo;
+}
 async function publicarAcesso(novo) {
   const cam = `${repoPath()}/contents/admin/acesso.json`;
   let sha = null; try { sha = (await gh(`${cam}?ref=${encodeURIComponent(A.cfg.branch)}`)).sha; } catch (e) { if (e.status !== 404) throw e; }

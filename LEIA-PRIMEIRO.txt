@@ -22,9 +22,30 @@ Há dois pacotes. Use só UM deles.
    admin/acesso.json com a senha inicial. Não use este pacote por cima de um
    site que já está no ar: ele substituiria o seu conteúdo e a sua senha.
 
-NESTA VERSÃO (28/10/2026): botão "Reservar no Airbnb" e agenda de disponibilidade
+NESTA VERSÃO (v4 · 28/10/2026): mais fácil de ler, senha nova, botão de reserva e calendário
+   SENHA DO PAINEL: a senha padrão agora é  casapraia  (antes: casaalagoas).
+   - Instalação nova (casa18-completo.zip): entre com casapraia.
+   - Site JÁ NO AR (casa18-atualizacao-codigo.zip): o pacote NÃO traz admin/acesso.json,
+     então o seu repositório continua com o código da senha anterior. Faça assim, uma vez:
+       1. Suba o pacote de atualização e espere alguns minutos.
+       2. Abra o painel e entre com casaalagoas (ou já com casapraia: as duas valem
+          enquanto o arquivo antigo estiver publicado).
+       3. Aparece "Atualize a senha do painel": toque em "Trocar para casapraia"
+          (ou "Escolher outra senha"). O painel tranca de novo o token guardado no
+          aparelho com a senha nova e publica o novo admin/acesso.json sozinho.
+       4. Em outro aparelho, a senha anterior é pedida uma última vez.
+     Se você já tinha trocado a senha por uma sua, nada muda: ela continua valendo.
+     Token, repositório, branch e publicação continuam exatamente como antes.
+   BOTÃO "RESERVAR": painel › A casa › primeiro cartão "Link da reserva (Airbnb)".
+     Cole o link do anúncio (https://www.airbnb.com.br/rooms/...), veja a prévia e publique.
+     Sem link o botão não aparece no site (a pré-visualização mostra um aviso no lugar).
+   O resto: página inicial mais curta (o que era extra fica em "Mais da casa e da região"),
+     letras maiores, fotos do painel em grade com arrastar e soltar, e calendário de datas
+     no estilo Airbnb (Receber hóspede, Meu roteiro, datas de lugares e benefícios).
+
+ANTERIOR (27/10/2026): botão "Reservar no Airbnb" e agenda de disponibilidade
    - Ambos são opcionais e ficam escondidos até você configurar.
-   - Botão: painel › A casa › Reservas e disponibilidade › cole o link do anúncio.
+   - Botão: veja acima (A casa › Link da reserva).
    - Apps Script (feedback e agenda): cole o código novo de integracoes/feedback-apps-script.gs
      e REIMPLANTE COMO NOVA VERSÃO (Implantar › Gerenciar implantações › editar ›
      Nova versão › Implantar). Rode de novo "instalarLimpezaMensal" uma vez.

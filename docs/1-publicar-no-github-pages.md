@@ -74,7 +74,7 @@ Exemplo: usuário `casa18anahi` e repositório `guia` ficam `https://casa18anahi
 
 Exceção: se o repositório se chamar exatamente `SEU-USUARIO.github.io`, o guia fica direto em `https://SEU-USUARIO.github.io/`.
 
-**Primeira entrada no painel:** senha inicial `casaalagoas` e, só na primeira vez em cada aparelho, o token (guia 2, Partes B e C). Depois, troque a senha (guia 2, Parte G).
+**Primeira entrada no painel:** senha inicial `casapraia` e, só na primeira vez em cada aparelho, o token (guia 2, Partes B e C). Depois, troque a senha (guia 2, Parte G).
 
 ## Passo 6 (opcional) · Domínio próprio
 
