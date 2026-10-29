@@ -1,6 +1,7 @@
 /* Ilustrações autorais do litoral alagoano, em SVG.
    Usadas enquanto não houver fotografia real de um lugar.
    arte(tipo, {momento}) -> string SVG (viewBox 400x300, preenche o espaço).
+   v6: capa animada (capa(momento)), tons diurnos por cena (TOM_CENA).
    v5: sempre a paleta diurna suave, qualquer que seja a hora (a noturna deixava tudo azul-marinho e igual).
    As outras paletas ficam disponíveis só quando pedidas explicitamente em {momento}. */
 (function () {
@@ -10,6 +11,10 @@
     madrugada: { ceu: '#E9D9C6', ceu2: '#F2E6D6', astro: '#E6A57E', horiz: '#B9D9D3', mar1: '#3A8792', mar2: '#22607A', areia: '#EADCC4', verde: '#24473A', verde2: '#3D6450', brilho: '#F7E5D3' },
     dia:       { ceu: '#ECE3D3', ceu2: '#F6F0E6', astro: '#E2A877', horiz: '#BCDAD3', mar1: '#4B8D95', mar2: '#2F6E80', areia: '#E8DCC6', verde: '#2C4A3B', verde2: '#4B6A56', brilho: '#FFF7EC' },
     tarde:     { ceu: '#EFCDAF', ceu2: '#F5DFC8', astro: '#D7774A', horiz: '#E2B79A', mar1: '#2F6F7E', mar2: '#1E4E66', areia: '#E2C9A6', verde: '#1D3A2D', verde2: '#38563F', brilho: '#FAD9BC' },
+    // v6: tons diurnos por categoria, todos suaves (mesma família da paleta "dia").
+    agua:      { ceu: '#DCEBE5', ceu2: '#EEF5F1', astro: '#E8B183', horiz: '#B3DAD2', mar1: '#5FA7A6', mar2: '#2F7C84', areia: '#EFE3CC', verde: '#24473A', verde2: '#4E7A63', brilho: '#FFFBF3' },
+    mangue:    { ceu: '#E3E8D8', ceu2: '#F1F1E6', astro: '#DDA06C', horiz: '#BFD6C4', mar1: '#55897F', mar2: '#2E5E58', areia: '#E6DABF', verde: '#22432F', verde2: '#4F7255', brilho: '#FBF6E8' },
+    terra:     { ceu: '#F1DFCB', ceu2: '#F8EEE1', astro: '#D98A5A', horiz: '#D8D3C0', mar1: '#5E9496', mar2: '#356C77', areia: '#ECD8BA', verde: '#2F4A39', verde2: '#6B7F5E', brilho: '#FFF6EA' },
     noite:     { ceu: '#22364A', ceu2: '#2C4459', astro: '#ECE4D2', horiz: '#3B6670', mar1: '#1F5464', mar2: '#153B4C', areia: '#7E7461', verde: '#11261C', verde2: '#20392B', brilho: '#ECE4D2' }
   };
 
@@ -147,15 +152,61 @@
   const ALIAS = { praia: 'praia', natureza: 'tunel', passeio: 'jangada', cultura: 'capela', compras: 'vila', restaurante: 'comida', cafe: 'comida', mercado: 'vila', delivery: 'comida', farmacia: 'casa', saude: 'casa', servico: 'casa' };
   const NOMES = { praia: 'praia com coqueiro e mar em camadas', piscina: 'piscinas naturais entre recifes vistas do alto', jangada: 'jangada a vela no mar calmo', peixeboi: 'peixe-boi nadando no rio entre o mangue', capela: 'capelinha branca na areia', farol: 'farol no alto do morro sobre o mar', vila: 'casinhas coloridas da vila', comida: 'prato de peixe com acompanhamentos', tunel: 'estrada sob um túnel de árvores', barra: 'encontro do rio com o mar ao entardecer', casa: 'casa de praia entre coqueiros' };
 
+  // Tom padrão de cada cena (v6): a mesma paleta diurna, com um acento por tema, para os cartões não ficarem iguais.
+  const TOM_CENA = { piscina: 'agua', peixeboi: 'mangue', tunel: 'mangue', capela: 'terra', vila: 'terra', comida: 'terra', barra: 'tarde', jangada: 'agua', farol: 'dia', praia: 'dia', casa: 'dia' };
   function arte(tipo, opt) {
     opt = opt || {};
     const t = CENAS[tipo] ? tipo : (ALIAS[tipo] || 'praia');
-    const P = Object.assign({ id: 'a' + (++seq), heroi: !!opt.heroi }, PALETAS[opt.momento || 'dia'] || PALETAS.dia);
+    const P = Object.assign({ id: 'a' + (++seq), heroi: !!opt.heroi }, PALETAS[opt.momento || opt.tom || TOM_CENA[t] || 'dia'] || PALETAS.dia);
     let extra = '';
     if (opt.momento === 'noite' && ['praia', 'jangada', 'capela', 'farol', 'barra', 'casa', 'vila'].includes(t))
       // No hero, o lado esquerdo fica livre de estrelas para não competir com o letreiro.
       extra = `<g fill="${P.brilho}" opacity=".7">${opt.heroi ? '' : '<circle cx="40" cy="30" r="1.2"/><circle cx="120" cy="50" r="1"/><circle cx="210" cy="24" r="1.3"/>'}<circle cx="360" cy="40" r="1"/><circle cx="${opt.heroi ? 390 : 250}" cy="70" r="1"/></g>`;
     return base(P, extra + CENAS[t](P), 'Ilustração: ' + (NOMES[t] || 'paisagem do litoral'), opt.vb);
+  }
+
+  /* ---------- Capa (v6) ----------
+     Retrato 4:5 (viewBox 400 x 500), recortado com "slice": no celular vira faixa larga e mostra o miolo (sol + horizonte).
+     O sol nasce pela metade sobre o horizonte, com os raios finos do símbolo da marca. Ondas em 3 camadas
+     (classes h-onda1..3) deslizam em laço lento pelo CSS; o reflexo cintila. A paleta muda com sutileza ao longo do dia;
+     à noite o sol vira lua e aparecem poucas estrelas, sem escurecer a cena. */
+  const CAPA = {
+    manha: { ceu: '#F2DCCB', ceu2: '#F7EEE4', astro: '#E39A6C', halo: '#F0C6A5', horiz: '#C9DED7', mar1: '#79AAA8', mar2: '#4A8489', mar3: '#2E6470', areia: '#EBDDC6', areia2: '#DFCBAA', verde: '#24473A', verde2: '#4B6A56', brilho: '#FFF5E9' },
+    dia:   { ceu: '#E2EAE3', ceu2: '#F6F0E6', astro: '#E2A271', halo: '#F1D2B3', horiz: '#C2DCD5', mar1: '#68A3A4', mar2: '#3A7B84', mar3: '#265D69', areia: '#ECDFC8', areia2: '#E0CDAD', verde: '#25473A', verde2: '#4B6A56', brilho: '#FFF8EE' },
+    tarde: { ceu: '#EFCBAE', ceu2: '#F7E3CF', astro: '#D7764A', halo: '#ECB591', horiz: '#E1C0A6', mar1: '#5A8E95', mar2: '#336A77', mar3: '#214F5E', areia: '#E6CFAE', areia2: '#D8BC95', verde: '#1F3D30', verde2: '#3E5B45', brilho: '#FCE0C6' },
+    noite: { ceu: '#C6CFCF', ceu2: '#E6E2D9', astro: '#FBF7EF', halo: '#E4E3DB', horiz: '#A7C1C0', mar1: '#517F86', mar2: '#355F6A', mar3: '#23434F', areia: '#DCD0BC', areia2: '#CDBEA5', verde: '#1E3B30', verde2: '#3A5646', brilho: '#FFFFFF' }
+  };
+  const faixaOnda = (y, amp, L, cor, cls) => {
+    let d = `M-${2 * L} ${y}`; for (let i = 0; i < Math.ceil((400 + 6 * L) / L); i++) d += ` q ${L / 2} ${i % 2 ? amp : -amp} ${L} 0`;
+    return `<path class="${cls}" d="${d} V 520 H -${2 * L} Z" fill="${cor}"/>`;
+  };
+  function capa(momento) {
+    const m = CAPA[momento] ? momento : 'dia', P = CAPA[m], id = 'c' + (++seq), noite = m === 'noite';
+    const cx = 200, cy = 300, r = 56;
+    const raios = [-162, -138, -114, -90, -66, -42, -18].map((a, i) => { const k = a * Math.PI / 180, r1 = r + 16, r2 = r + (i % 2 ? 36 : 50);
+      return `M${(cx + r1 * Math.cos(k)).toFixed(1)} ${(cy + r1 * Math.sin(k)).toFixed(1)}L${(cx + r2 * Math.cos(k)).toFixed(1)} ${(cy + r2 * Math.sin(k)).toFixed(1)}`; }).join('');
+    const estrelas = noite ? `<g class="h-estrelas" fill="#FFFFFF">${[[64, 70, 1.4], [120, 128, 1], [300, 60, 1.2], [344, 150, 1], [250, 104, .9], [86, 196, .9], [356, 222, 1.1]].map(([x, y, rr]) => `<circle cx="${x}" cy="${y}" r="${rr}"/>`).join('')}</g>` : '';
+    return `<svg class="arte arte-capa" data-momento="${m}" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${noite ? 'Lua nascendo sobre o mar' : 'Sol nascendo sobre o mar'}, ondas e coqueiro na praia" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="ceu-${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.ceu}"/><stop offset=".62" stop-color="${P.ceu2}"/></linearGradient>
+        <radialGradient id="halo-${id}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${P.halo}" stop-opacity=".9"/><stop offset="1" stop-color="${P.halo}" stop-opacity="0"/></radialGradient></defs>
+      <rect x="-200" y="-200" width="800" height="900" fill="url(#ceu-${id})"/>${estrelas}
+      <g class="h-nuvem" fill="${P.brilho}" opacity="${noite ? .35 : .7}"><path d="M60 150c8-14 30-16 40-4 10-8 28-4 30 8 12 0 18 8 16 14H46c-4-10 4-18 14-18z"/><path d="M262 92c6-10 22-12 30-3 8-6 21-3 23 6 9 0 13 6 12 10h-73c-3-7 2-13 8-13z" opacity=".8"/></g>
+      ${noite ? '' : `<g class="h-aves" fill="none" stroke="${P.mar3}" stroke-width="1.6" stroke-linecap="round" opacity=".55"><path d="M118 214q6-6 12 0q6-6 12 0"/><path d="M146 196q4-4 8 0q4-4 8 0"/><path d="M286 186q5-5 10 0q5-5 10 0"/></g>`}
+      <g class="h-astro"><circle class="h-halo" cx="${cx}" cy="${cy}" r="150" fill="url(#halo-${id})"/>
+        <path class="h-raios" d="${raios}" stroke="${P.astro}" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="${noite ? .45 : .8}"/>
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="${P.astro}"/></g>
+      <g class="h-jangada" fill="${P.mar3}"><path d="M84 299 L84 268 Q 100 282 96 299 Z" opacity=".85"/><path d="M74 299 H 102 L 98 303 H 78 Z"/></g>
+      <rect x="-200" y="${cy}" width="800" height="240" fill="${P.horiz}"/>
+      <path d="M-200 ${cy + .5}H600" stroke="${P.mar3}" stroke-width="1" opacity=".35"/>
+      ${faixaOnda(312, 3, 40, P.mar1, 'h-onda1')}
+      <g class="h-reflexo" fill="${P.brilho}"><rect x="160" y="322" width="80" height="2.4" rx="1.2" opacity=".8"/><rect x="174" y="334" width="52" height="2.2" rx="1.1" opacity=".65"/><rect x="186" y="346" width="28" height="2" rx="1" opacity=".5"/></g>
+      ${faixaOnda(358, 4.5, 56, P.mar2, 'h-onda2')}
+      ${faixaOnda(404, 5.5, 72, P.mar3, 'h-onda3')}
+      <path class="h-espuma" d="M-40 444c60-14 120-10 170 0s110 14 170 4 80-10 140-6" stroke="${P.brilho}" stroke-width="2" fill="none" opacity=".55" stroke-linecap="round"/>
+      <path d="M-40 452c70-16 150-18 220-6s130 16 180 6 50-6 80-4V560H-40z" fill="${P.areia}"/>
+      <path d="M-40 482c90-10 170-8 250 2s120 8 230-2V560H-40z" fill="${P.areia2}" opacity=".7"/>
+      <g class="h-coqueiro">${coqueiro(372, 520, .92, P.verde, P.verde2, -64)}</g>
+    </svg>`;
   }
 
   /* Escolhe a cena mais adequada para um lugar do guia. */
@@ -172,5 +223,5 @@
     return ALIAS[l.categoria] || 'praia';
   }
 
-  window.Ilustra = { arte, cenaDoLugar, momentoAtual, PALETAS };
+  window.Ilustra = { arte, capa, cenaDoLugar, momentoAtual, PALETAS, TOM_CENA };
 })();

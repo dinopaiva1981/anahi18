@@ -211,7 +211,7 @@ function cardLugar_(l) {
   const meta = [c.rot, l.area].filter(tem);
   const src = l.foto && urlSegura(l.foto.src), sl = selos(l);
   return `<button type="button" class="card card-lugar${src ? ' com-foto' : ''}" data-abrir="${esc(l.id)}" aria-label="${esc(l.nome)}: ver detalhes">
-    ${src ? midia(l.foto) : `<span class="pict">${ic(ICONE_CENA[cena] || c.ic)}</span>`}
+    ${src ? midia(l.foto) : `<span class="pict" data-tom="${TOM_PICT[cena] || 'praia'}">${ic(ICONE_CENA[cena] || c.ic)}</span>`}
     <span class="card-meta">${meta.map(esc).join('<span class="sep" aria-hidden="true"></span>')}</span>
     <span class="h3">${esc(l.nome)}</span>
     ${tem(l.resumo) ? `<span class="card-resumo">${esc(l.resumo)}</span>` : ''}
@@ -229,13 +229,22 @@ function botaoWa(rotulo, texto, cls) {
   return u ? `<a class="btn ${cls || 'btn-prim'}" href="${esc(u)}" target="_blank" rel="noopener">${ic('whatsapp')}${esc(rotulo)}</a>` : '';
 }
 function cabecalho(olho, titulo, texto, voltar) {
-  return `<header class="pag-cab">${voltar ? `<a class="voltar" href="${voltar[0]}">${ic('seta', 'ic-sm')}${esc(voltar[1])}</a>` : ''}${olho ? `<span class="olho">${esc(olho)}</span>` : ''}<h1 class="h1">${titulo}</h1>${texto ? `<p class="lead">${esc(texto)}</p>` : ''}</header>`;
+  CAP_N = 0;
+  return `<header class="pag-cab"><div class="pag-txt">${voltar ? `<a class="voltar" href="${voltar[0]}">${ic('seta', 'ic-sm')}${esc(voltar[1])}</a>` : ''}${olho ? `<span class="olho">${esc(olho)}</span>` : ''}<h1 class="h1">${titulo}</h1>${texto ? `<p class="lead">${esc(texto)}</p>` : ''}</div><span class="pag-orn" aria-hidden="true">${simboloDecor()}</span></header>`;
 }
 function chips(itens, atual, chave, contagem) {
   return `<div class="filtros" role="group" aria-label="Filtrar">${itens.map(([v, r]) =>
     `<button type="button" class="chip" data-filtro="${chave}" data-valor="${esc(v)}" aria-pressed="${v === atual}">${esc(r)}${contagem ? ` <span class="n">${contagem(v)}</span>` : ''}</button>`).join('')}</div>`;
 }
 const secCab = (id, titulo, olho, acao) => `<div class="sec-cab"><div>${olho ? `<span class="olho">${esc(olho)}</span>` : ''}<h2 id="${id}" class="h2">${titulo}</h2></div>${acao || ''}</div>`;
+/* v6 · capítulo editorial: "01 ∿ Hoje". A onda é a do símbolo da marca. O número segue a ordem dos setores da página. */
+const ONDA = '<svg class="cap-onda" viewBox="0 0 34 10" aria-hidden="true"><path d="M1 5c2.6-3.4 5.4-3.4 8 0s5.4 3.4 8 0 5.4-3.4 8 0 5.4 3.4 8 0"/></svg>';
+const capitulo = (n, nome) => `<p class="cap"><span class="cap-n" aria-hidden="true">${String(n).padStart(2, '0')}</span>${ONDA}<span>${esc(nome)}</span></p>`;
+const cabSetor = (id, n, nome, titulo, acao, lead) => `<div class="sec-cab"><div>${capitulo(n, nome)}<h2 id="${id}" class="h2">${titulo}</h2>${lead ? `<p class="lead">${esc(lead)}</p>` : ''}</div>${acao || ''}</div>`;
+/* Numeração por página: cada setor visível pega o próximo número (blocos sem dado não "pulam" números). */
+let CAP_N = 0; const proxCap = () => ++CAP_N;
+const simboloDecor = (tema) => window.Marca ? Marca.simbolo({ tema: tema || 'claro', titulo: '' }) : '';
+const TOM_PICT = { piscina: 'mar', jangada: 'mar', peixeboi: 'mar', barra: 'mar', farol: 'mar', tunel: 'verde', capela: 'terra', vila: 'terra', comida: 'terra', praia: 'praia', casa: 'praia' };
 const fonteLink = (f) => f && urlSegura(f.url) ? `<a href="${esc(urlSegura(f.url))}" target="_blank" rel="noopener">${esc(f.titulo || 'fonte')}</a>` : '';
 const mais = (titulo, corpo, id) => corpo ? `<details class="mais"${id ? ` id="${esc(id)}"` : ''}><summary>${esc(titulo)}${ic('mais')}</summary><div class="mais-corpo">${corpo}</div></details>` : '';
 
@@ -586,7 +595,7 @@ function numerosCasa() {
   if (casa.banheiros != null && casa.banheiros !== '') it.push([casa.banheiros, 'banheiros']);
   if (casa.area_m2) it.push([casa.area_m2 + ' m²', 'de área']);
   if (it.length < 2) return '';
-  return `<ul class="numeros" data-n="${it.length}">${it.map(([v, r]) => `<li class="numero"><strong>${esc(v)}</strong><span>${esc(r)}</span></li>`).join('')}</ul>`;
+  return `<ul class="numeros" data-n="${it.length}">${it.map(([v, r]) => `<li class="numero"><strong${/^\d+$/.test(String(v)) ? ` data-conta="${esc(v)}"` : ''}>${esc(v)}</strong><span>${esc(r)}</span></li>`).join('')}</ul>`;
 }
 
 /* ---------- Disponibilidade: agenda espelhada do Airbnb ----------
@@ -597,13 +606,13 @@ let AG_MEMORIA = null;
 const agendaEndpoint = () => { const u = urlSegura(CFG.feedback_endpoint); return /^https:\/\//i.test(u) ? u : ''; };
 const agendaAtiva = () => CFG.agenda_visivel === true && !!agendaEndpoint() && !!window.GuiaAgenda;
 const fraseConfirma = () => linkReserva() && !ehAirbnb(linkReserva()) ? 'Disponibilidade sujeita a confirmação no momento da reserva.' : 'Disponibilidade sujeita a confirmação no Airbnb.';
-function blocoAgenda(pagina) {
+function blocoAgenda(pagina, n) {
   if (!agendaAtiva()) return '';
   const res = linkReserva();
-  return `<section class="sec agenda-sec${pagina ? ' agenda-pag' : ''}" id="disponibilidade" aria-labelledby="h-disp" data-agenda>
+  return `<section class="sec setor agenda-sec${pagina ? ' agenda-pag' : ''}" data-tom="papel" id="disponibilidade" aria-labelledby="h-disp" data-agenda>
     <div class="agenda">
       <div class="agenda-txt">
-        ${pagina ? '' : '<span class="olho">Disponibilidade</span>'}
+        ${pagina ? '' : n ? capitulo(n, 'Disponibilidade') : '<span class="olho">Disponibilidade</span>'}
         <h2 id="h-disp" class="h2">${pagina ? 'Calendário da casa' : 'Datas livres'}</h2>
         <p class="agenda-prox" data-ag-prox><span class="skeleton"></span></p>
         <p class="agenda-nota">${ic('alerta', 'ic-sm')}<span>${esc(fraseConfirma())}</span></p>
@@ -660,28 +669,37 @@ const P = {};
 P.inicio = () => {
   const ben = beneficiosAtivos(), aval = avaliacoesOk(), e = estadia();
   const blocos = [];
-  if (!e) blocos.push(S('início: a casa', () => { const nums = numerosCasa(); return nums ? `<section class="sec" aria-labelledby="h-casa">${secCab('h-casa', 'A casa', '', `<a class="btn-terc" href="#/estadia">Ver a estadia${ic('seta')}</a>`)}${nums}</section>` : ''; }));
-  blocos.push(S('início: roteiros', () => ROTEIROS.length ? `<section class="sec" aria-labelledby="h-rot">${secCab('h-rot', 'Roteiros prontos', '', `<a class="btn-terc" href="#/passeios">Todos os passeios${ic('seta')}</a>`)}
-    <div class="roteiros roteiros-trilho ate-3">${ROTEIROS.slice(0, 3).map(cardRoteiro).join('')}</div></section>` : ''));
-  if (aval.length) blocos.push(S('início: avaliações', () => `<section class="sec" aria-labelledby="h-aval">${secCab('h-aval', 'Quem já esteve aqui', '', aval.length > 2 ? `<a class="btn-terc" href="#/avaliacoes">Ver todas${ic('seta')}</a>` : '')}<div class="cards">${aval.slice(0, 2).map(cardAvaliacao).join('')}</div></section>`));
-  if (ben.length) blocos.push(S('início: benefícios', () => `<section class="sec" aria-labelledby="h-ben">${secCab('h-ben', 'Para hóspedes', '', `<a class="btn-terc" href="#/beneficios">Ver todos${ic('seta')}</a>`)}<div class="cards">${ben.slice(0, 3).map(cardBeneficio).join('')}</div></section>`));
+  CAP_N = 0;
+  // Setores da home, em ordem: Hoje (água) · [sua estadia] · [datas livres] · A casa (mar) · Roteiros (papel) · avaliações · benefícios.
+  const hoje = `<section class="sec dia setor" data-tom="agua" aria-labelledby="h-hoje" id="seu-dia">${S('início: hoje', () => painelDia())}</section>`;
+  const est = S('início: estadia', () => cartaoEstadia());
+  const ag = S('início: agenda', () => e || !agendaAtiva() ? '' : blocoAgenda(false, proxCap()));
+  if (!e) blocos.push(S('início: a casa', () => { const nums = numerosCasa(); return nums ? `<section class="sec setor casa-sec" data-tom="mar" aria-labelledby="h-casa">
+    <div class="casa-bloco"><div><h2 id="h-casa" class="cap"><span class="cap-n" aria-hidden="true">${String(proxCap()).padStart(2, '0')}</span>${ONDA}<span>A casa</span></h2>
+      ${tem(casa.sobre) ? `<p class="lead">${semViuva(casa.sobre)}</p>` : ''}<a class="btn-terc mt" href="#/estadia">Ver a estadia${ic('seta')}</a></div>${nums}</div></section>` : ''; }));
+  blocos.push(S('início: roteiros', () => ROTEIROS.length ? `<section class="sec setor" data-tom="papel" aria-labelledby="h-rot">${cabSetor('h-rot', proxCap(), 'Passeios', 'Roteiros prontos', `<a class="btn-terc" href="#/passeios">Todos os passeios${ic('seta')}</a>`)}
+    <div class="roteiros roteiros-trilho roteiros-capa">${ROTEIROS.slice(0, 3).map(cardRoteiro).join('')}</div></section>` : ''));
+  if (aval.length) blocos.push(S('início: avaliações', () => `<section class="sec setor" data-tom="areia" aria-labelledby="h-aval">${cabSetor('h-aval', proxCap(), 'Hóspedes', 'Quem já esteve aqui', aval.length > 2 ? `<a class="btn-terc" href="#/avaliacoes">Ver todas${ic('seta')}</a>` : '')}<div class="cards">${aval.slice(0, 2).map(cardAvaliacao).join('')}</div></section>`));
+  if (ben.length) blocos.push(S('início: benefícios', () => `<section class="sec setor" data-tom="papel" aria-labelledby="h-ben">${cabSetor('h-ben', proxCap(), 'Parceiros', 'Para hóspedes', `<a class="btn-terc" href="#/beneficios">Ver todos${ic('seta')}</a>`)}<div class="cards">${ben.slice(0, 3).map(cardBeneficio).join('')}</div></section>`));
   return `
   ${S('início: capa', () => capa(e))}
   ${S('início: rápido', () => rapido())}
-  <section class="sec dia" aria-labelledby="h-hoje" id="seu-dia">${S('início: hoje', () => painelDia())}</section>
-  ${S('início: estadia', () => cartaoEstadia())}
-  ${S('início: agenda', () => e ? '' : blocoAgenda())}
+  ${hoje}${est}${ag}
   ${blocos.filter(Boolean).slice(0, 3).join('')}`;
 };
+/* Capa v6: título em duas linhas ("Casa 18" / "Anahi" em itálico, recuado), com um fio de horizonte que termina num sol
+   nascendo, o mesmo desenho do símbolo. A arte é a capa animada (Ilustra.capa) na paleta da hora do dia. */
+const SOL_TITULO = '<svg class="hm-sol" viewBox="0 0 42 22" aria-hidden="true"><path d="M11 21a10 10 0 0 1 20 0M5.5 13.8 2 12.4M9.6 7.6 7.4 4.6M21 4.4V1M32.4 7.6l2.2-3M36.5 13.8l3.5-1.4"/></svg>';
 function capa(e) {
   const f0 = (casa.fotos || [])[0], fotoHero = f0 && urlSegura(f0.src), res = linkReserva();
-  const arte = fotoHero ? `<img src="${esc(fotoHero)}" alt="${esc(f0.alt || '')}" fetchpriority="high">` : (window.Ilustra ? Ilustra.arte('praia', { heroi: true, vb: '-20 10 440 250' }) : '');
-  return `<section class="hero" aria-labelledby="h-hero">
+  const momento = window.Ilustra ? Ilustra.momentoAtual() : 'dia', noite = momento === 'noite';
+  const arte = fotoHero ? `<img src="${esc(fotoHero)}" alt="${esc(f0.alt || '')}" fetchpriority="high">` : (window.Ilustra ? Ilustra.capa(momento) : '');
+  return `<section class="hero" aria-labelledby="h-hero" data-momento="${esc(momento)}">
     <div class="hero-texto">
-      <span class="hero-ola">${e ? esc(saudacao()) + ', ' + esc(e.primeiro) : esc(saudacao()) + ' · bem-vindo à'}</span>
-      <h1 id="h-hero" class="hero-marca" aria-label="${esc(NOME)}">${esc(NOME_PARTES[0])}${NOME_PARTES[1] ? ` <em>${esc(NOME_PARTES[1])}</em>` : ''}</h1>
-      <p class="hero-local">Praia do Marceneiro<span class="sep" aria-hidden="true"> · </span>Rota dos Milagres, AL</p>
+      <span class="hero-ola">${ic(noite ? 'lua' : 'sol')}${e ? esc(saudacao()) + ', ' + esc(e.primeiro) : esc(saudacao()) + ', bem-vindo à'}</span>
+      <h1 id="h-hero" class="hero-marca" aria-label="${esc(NOME)}"><span class="hm-l1">${esc(NOME_PARTES[0])}</span>${NOME_PARTES[1] ? `<span class="hm-l2"><em>${esc(NOME_PARTES[1])}</em><span class="hm-horiz" aria-hidden="true">${SOL_TITULO}</span></span>` : ''}</h1>
       ${tem(casa.frase) ? `<p class="hero-frase">${semViuva(casa.frase)}</p>` : ''}
+      <p class="hero-local">${ic('pino', 'ic-sm')}<span>Praia do Marceneiro, Rota dos Milagres, Alagoas</span></p>
       <div class="hero-acoes">${res ? `<a class="btn btn-prim btn-reserva" href="${esc(res)}" target="_blank" rel="noopener" data-reserva-hero>${esc(rotuloReserva())}${ic('seta', 'ic-sm')}<span class="sr-only"> (abre em nova aba)</span></a>`
         : RASCUNHO ? `<span class="btn-reserva-falta" data-reserva-falta>${ic('alerta', 'ic-sm')}Botão “Reservar”: configure o link no painel (A casa)</span>` : ''}</div>
     </div>
@@ -700,7 +718,7 @@ function rapido() {
   return `<ul class="rapido" aria-label="Atalhos rápidos">${it.map(([h, i, t, sub, x]) => `<li><a href="${esc(h)}"${x}><span class="pict">${ic(i)}</span><div><strong>${esc(t)}</strong><span>${esc(sub)}</span></div></a></li>`).join('')}</ul>`;
 }
 function painelDia() {
-  return `<div class="dia-cab"><h2 id="h-hoje" class="h2">Hoje</h2><span class="meta">${esc(maiuscula(dataLonga(hojeISO())))}</span></div>
+  return `<div class="dia-cab">${capitulo(proxCap(), 'Hoje')}<h2 id="h-hoje" class="h2"><time datetime="${hojeISO()}">${esc(maiuscula(dataLonga(hojeISO())))}</time></h2></div>
     <div class="dia-grade" id="dia-grade">
     <a class="dia-item" href="#/passeios/mare" id="dia-tempo"><span class="rot">${ic('sol')}Agora</span><strong><span class="skeleton"></span></strong><span class="sub">Previsão do tempo</span></a>
     <a class="dia-item" href="#/passeios/mare" id="dia-mare"><span class="rot">${ic('ondas')}Maré baixa</span><strong><span class="skeleton"></span></strong><span class="sub">Estimativa</span></a>
@@ -722,7 +740,8 @@ function sugestao(poeMs) {
     : !depoisDoPor && antesDoPor && rioMar ? ['Fim de tarde', rioMar.titulo, 'Pôr do sol onde o rio encontra o mar', '#/roteiro/rio-e-mar', 'por-sol']
     : !depoisDoPor ? ['Tarde livre', 'Devagar pelo Marceneiro', 'Capela, riacho e vilinha', rot('devagar-marceneiro', '#/passeios'), 'estrela']
     : ['Para amanhã', 'Planeje o dia', 'Maré, tempo e roteiros', '#/passeios/mare', 'estrela'];
-  return `<a class="dia-item destaque${X[5] ? ' ' + X[5] : ''}" id="dia-sug" href="${X[3]}"><span class="rot">${ic(X[4])}${esc(X[0])}</span><strong>${esc(X[1])}</strong><span class="sub">${esc(X[2])}</span></a>`;
+  const orn = X[5] ? '' : `<span class="orn" aria-hidden="true">${simboloDecor('escuro')}</span>`;
+  return `<a class="dia-item destaque${X[5] ? ' ' + X[5] : ''}" id="dia-sug" href="${X[3]}">${orn}<span class="rot">${ic(X[4])}${esc(X[0])}</span><strong>${esc(X[1])}</strong><span class="sub">${esc(X[2])}</span></a>`;
 }
 /* Pôr do sol: previsão quando houver; sem ela, cálculo local (funciona sem sinal). */
 function blocoSol(d) {
@@ -743,7 +762,7 @@ function preencherDia() {
     if (!el('dia-tempo')) return;
     const [desc, icone] = tempoDe(d.current.weather_code);
     const chuva = d.daily.precipitation_probability_max[0];
-    el('dia-tempo').innerHTML = `<span class="rot">${ic(icone)}Agora</span><strong>${Math.round(d.current.temperature_2m)}° · ${esc(desc)}</strong><span class="sub">Máx. ${Math.round(d.daily.temperature_2m_max[0])}° · chuva ${chuva}% · UV ${Math.round(d.daily.uv_index_max[0])}</span>`;
+    el('dia-tempo').innerHTML = `<span class="rot">${ic(icone)}Agora</span><strong>${Math.round(d.current.temperature_2m)}° <span class="sr-only">e </span><small>${esc(desc)}</small></strong><span class="sub">Máxima de ${Math.round(d.daily.temperature_2m_max[0])}°, chuva ${chuva}%, UV ${Math.round(d.daily.uv_index_max[0])}</span>`;
     const ps = new Date(d.daily.sunset[0] + ':00' + offsetTZ());
     el('dia-sol').innerHTML = blocoSol(d);
     const sg = el('dia-sug'); if (sg) sg.outerHTML = sugestao(ps.getTime());
@@ -779,7 +798,7 @@ P.roteiro = (id) => {
   return `
   ${cabecalho('Roteiro', esc(r.titulo), r.subtitulo, ['#/passeios', 'Passeios'])}
   ${midia(null, r.ilustracao || 'praia', 'capa')}
-  ${S('roteiro: paradas', () => `<section class="sec">
+  ${S('roteiro: paradas', () => `<section class="sec sec-curta" aria-label="Paradas do roteiro">${capitulo((r.paradas || []).length, 'paradas no dia')}
     <div class="grade g-8-4">
       <ol class="linha-tempo">${(r.paradas || []).map((p, i) => {
         const l = POR_ID[p.lugar];
@@ -818,18 +837,18 @@ function vistaLugares() {
   const dicas = (REG.dicas || []).filter(t => tem(t) && !AGUA_VIVA.test(t));
   return `
   ${S('passeios: maré de hoje', () => `<section class="sec sec-curta"><a class="mare-hoje" id="mare-hoje" href="#/passeios/mare">${ic('ondas')}<div><strong>Maré de hoje</strong><span>Horários estimados das marés baixas</span></div>${ic('seta')}</a></section>`)}
-  ${S('passeios: roteiros', () => ROTEIROS.length ? `<section class="sec" aria-labelledby="h-rots">${secCab('h-rots', 'Roteiros prontos')}
+  ${S('passeios: roteiros', () => ROTEIROS.length ? `<section class="sec setor" data-tom="papel" aria-labelledby="h-rots">${cabSetor('h-rots', proxCap(), 'Roteiros', 'Roteiros prontos')}
     <div class="roteiros roteiros-trilho">${ROTEIROS.map(cardRoteiro).join('')}</div></section>` : '')}
-  ${S('passeios: lugares', () => base.length ? `<section class="sec" aria-labelledby="h-lug">${secCab('h-lug', 'Lugares')}
+  ${S('passeios: lugares', () => base.length ? `<section class="sec setor" data-tom="areia" aria-labelledby="h-lug">${cabSetor('h-lug', proxCap(), 'Lugares', 'Perto da casa')}
     ${tipos.length > 2 ? chips(tipos, estado.tipo, 'tipo') : ''}
     <p class="sr-only" aria-live="polite">${vis.length} lugares</p>
     <div class="cards">${vis.slice(0, n).map(cardLugar).join('')}</div>
     ${vis.length > n ? `<button type="button" class="btn-terc ver-todos" data-ver-lugares>Ver todos os ${vis.length} lugares${ic('baixo', 'ic-sm')}</button>` : ''}
   </section>` : '')}
-  ${S('passeios: bom saber', () => { const prov = comerAtivo() ? '' : corpoProvar(); return prov || dicas.length || tem(REG.dias_de_chuva) ? `<section class="sec" aria-labelledby="h-saber">${secCab('h-saber', 'Bom saber')}
+  ${S('passeios: bom saber', () => { const prov = comerAtivo() ? '' : corpoProvar(); return prov || dicas.length || tem(REG.dias_de_chuva) ? `<section class="sec setor" data-tom="agua" aria-labelledby="h-saber">${cabSetor('h-saber', proxCap(), 'Antes de ir', 'Bom saber')}
     ${mais('O que provar', prov, 'provar')}${mais('Antes de sair', dicas.length ? listaLimitada('l-dicas', dicas) : '')}${mais('Se chover', tem(REG.dias_de_chuva) ? lista(REG.dias_de_chuva) : '')}
     <p class="aviso mt">${ic('folha')}<span>A rota fica na APA Costa dos Corais. Nas piscinas naturais, não pise nem toque nos corais.</span></p></section>` : ''; })}
-  <section class="sec sec-curta no-print"><a class="btn-terc" href="#/meu-roteiro">${ic('lista', 'ic-sm')}Montar meus dias${ic('seta')}</a></section>`;
+  <section class="sec no-print"><a class="mare-hoje meus-dias" href="#/meu-roteiro">${ic('lista')}<div><strong>Montar meus dias</strong><span>Escolha roteiros e lugares para cada dia da estadia</span></div>${ic('seta')}</a></section>`;
 }
 /* "O que provar" (e os poucos lugares de comer já publicados), enquanto a aba Comer não existe. */
 /* "O que provar" e, enquanto a aba Comer não existe, os poucos lugares de comer já publicados. */
@@ -846,13 +865,13 @@ function blocoProvar() {
 }
 function vistaMare() {
   return `
-  ${S('maré: hoje', () => `<section class="sec" aria-labelledby="h-alm">${secCab('h-alm', 'Hoje', '', `<span class="meta">${esc(maiuscula(dataLonga(hojeISO())))}</span>`)}
+  ${S('maré: hoje', () => `<section class="sec" aria-labelledby="h-alm">${cabSetor('h-alm', proxCap(), 'Hoje', esc(maiuscula(dataLonga(hojeISO()))))}
     <div id="almanaque">${almanaqueHTML()}</div></section>`)}
-  <section class="sec" aria-labelledby="h-mare" id="sec-mare">${secCab('h-mare', 'Próximas marés baixas')}
+  <section class="sec setor" data-tom="agua" aria-labelledby="h-mare" id="sec-mare">${cabSetor('h-mare', proxCap(), 'Maré', 'Próximas marés baixas')}
     <div class="card"><div id="mare"><span class="skeleton"></span></div>
       <p class="fonte">Estimativa por modelo (Open-Meteo Marine), sem altura em metros. Antes de sair, confirme na <a href="${TABUA}" target="_blank" rel="noopener">tábua oficial da Marinha</a> (porto de Maceió).</p></div>
   </section>
-  <section class="sec" aria-labelledby="h-prev" id="sec-prev">${secCab('h-prev', 'Próximos 3 dias', '', '<span class="fonte" id="prev-fonte"></span>')}
+  <section class="sec setor" data-tom="papel" aria-labelledby="h-prev" id="sec-prev">${cabSetor('h-prev', proxCap(), 'Tempo', 'Próximos 3 dias', '<span class="fonte" id="prev-fonte"></span>')}
     <div class="card"><div class="previsao" id="previsao">${[0, 1, 2].map(() => '<div class="dia-prev"><span class="skeleton"></span><span class="skeleton"></span></div>').join('')}</div></div>
   </section>
   ${S('maré: dicas', () => { const lev = S('maré: o que levar', () => blocoLevar('levar')); return tem(REG.mares) || tem(REG.quando_ir) || lev ? `<section class="sec" aria-label="Como ler a maré e o que levar">${mais('Como ler a maré', tem(REG.mares) ? listaLimitada('l-mares', REG.mares) : '')}${mais('Quando ir', tem(REG.quando_ir) ? lista(REG.quando_ir) : '')}${lev}</section>` : ''; })}`;
@@ -860,12 +879,12 @@ function vistaMare() {
 function vistaMapa() {
   const cats = Object.keys(CAT).filter(k => k !== 'casa' && LUGARES.some(l => l.categoria === k && l.lat != null));
   const vis = estado.mapa === 'todos' ? LUGARES : LUGARES.filter(l => l.categoria === estado.mapa);
-  const itens = vis.map(l => `<li><span class="pict">${ic(catDe(l).ic)}</span><span class="linha-txt"><strong>${esc(l.nome)}</strong><span>${esc([catDe(l).rot, l.area].filter(tem).join(' · '))}</span></span><button type="button" class="btn-ic linha-acao" data-abrir="${esc(l.id)}" aria-label="Detalhes: ${esc(l.nome)}">${ic('seta')}</button></li>`);
+  const itens = vis.map(l => `<li><span class="pict" data-tom="${TOM_PICT[window.Ilustra ? Ilustra.cenaDoLugar(l) : ''] || 'praia'}">${ic(catDe(l).ic)}</span><span class="linha-txt"><strong>${esc(l.nome)}</strong><span>${esc([catDe(l).rot, l.area].filter(tem).join(' · '))}</span></span><button type="button" class="btn-ic linha-acao" data-abrir="${esc(l.id)}" aria-label="Detalhes: ${esc(l.nome)}">${ic('seta')}</button></li>`);
   const L = limitar(itens);
   return `
-  <section class="sec">${cats.length > 1 ? chips([['todos', 'Tudo']].concat(cats.map(k => [k, CAT[k].rot])), estado.mapa, 'mapa') : ''}
+  <section class="sec sec-curta">${cats.length > 1 ? chips([['todos', 'Tudo']].concat(cats.map(k => [k, CAT[k].rot])), estado.mapa, 'mapa') : ''}
     <div class="mapa" id="mapa"></div><p class="fonte">Mapa © colaboradores do OpenStreetMap. Pontos tracejados têm localização aproximada.</p></section>
-  ${S('mapa: lista', () => vis.length ? `<section class="sec" aria-labelledby="h-l">${secCab('h-l', 'Todos os lugares')}<ul class="linhas" id="l-mapa">${L.html}</ul>${L.mais ? botaoVerTodos('l-mapa', L.mais) : ''}</section>` : '')}`;
+  ${S('mapa: lista', () => vis.length ? `<section class="sec setor" data-tom="papel" aria-labelledby="h-l">${cabSetor('h-l', proxCap(), 'Lista', 'Todos os lugares')}<ul class="linhas" id="l-mapa">${L.html}</ul>${L.mais ? botaoVerTodos('l-mapa', L.mais) : ''}</section>` : '')}`;
 }
 
 /* Maré e tempo: sol e lua calculados aqui; água e UV quando a previsão responde. */
@@ -991,8 +1010,8 @@ P.estadia = () => {
   ${cabecalho(NOME, 'Estadia', '')}
   ${anc.length > 1 ? `<nav class="ancoras" aria-label="Nesta página">${anc.map(([id, t]) => `<button type="button" class="chip" data-ir="${id}">${esc(t)}</button>`).join('')}</nav>` : ''}
   ${S('estadia: galeria', () => fotos.length ? `<section class="sec" aria-label="Fotos da casa"><div class="galeria">${fotos.slice(0, 5).map((f, i) => `<button type="button" data-foto="${i}" aria-label="Ampliar foto: ${esc(f.alt || 'foto da casa')}"><img src="${esc(urlSegura(f.src))}" alt="${esc(f.alt || '')}" loading="lazy" decoding="async"></button>`).join('')}</div></section>` : '')}
-  ${S('estadia: resumo', () => { const nums = numerosCasa(); return nums || tem(casa.sobre) ? `<section class="sec resumo-casa" aria-label="A casa em resumo">${tem(casa.sobre) ? `<p class="lead">${esc(casa.sobre)}</p>` : ''}${nums}</section>` : ''; })}
-  ${S('estadia: chegar', () => `<section class="sec" id="chegar" aria-labelledby="h-chegar">${secCab('h-chegar', 'Chegar')}
+  ${S('estadia: resumo', () => { const nums = numerosCasa(); return nums || tem(casa.sobre) ? `<section class="sec setor resumo-casa" data-tom="mar" aria-labelledby="h-resumo"><div class="casa-bloco"><div><h2 id="h-resumo" class="cap"><span class="cap-n" aria-hidden="true">${String(proxCap()).padStart(2, '0')}</span>${ONDA}<span>A casa</span></h2>${tem(casa.sobre) ? `<p class="lead">${semViuva(casa.sobre)}</p>` : ''}</div>${nums}</div></section>` : ''; })}
+  ${S('estadia: chegar', () => `<section class="sec setor" data-tom="areia" id="chegar" aria-labelledby="h-chegar">${cabSetor('h-chegar', proxCap(), 'Chegar', 'Como chegar e entrar')}
     <div class="grade g-5-7">
       <div class="card">
         ${horarios ? `<ul class="numeros horarios" data-n="2">${linhaHorario('Check-in', casa.checkin)}${linhaHorario('Check-out', casa.checkout)}</ul>` : ''}
@@ -1003,21 +1022,21 @@ P.estadia = () => {
     </div>
     ${entrar.length ? `<div class="mt"><h3 class="h3">Ao chegar</h3><ul class="linhas">${entrar.map(([t, v, i]) => `<li><span class="pict">${ic(i)}</span><span class="linha-txt"><strong>${esc(t)}</strong><span class="pre">${esc(v)}</span></span></li>`).join('')}</ul></div>` : ''}
   </section>`)}
-  ${S('estadia: na casa', () => temNaCasa ? `<section class="sec" id="na-casa" aria-labelledby="h-nacasa">${secCab('h-nacasa', 'Na casa')}
+  ${S('estadia: na casa', () => temNaCasa ? `<section class="sec setor" data-tom="papel" id="na-casa" aria-labelledby="h-nacasa">${cabSetor('h-nacasa', proxCap(), 'Na casa', 'O que você encontra')}
     <div class="grade${tem(casa.camas) ? ' g-2' : ''}">
-      ${tem(casa.comodidades) ? `<ul class="linhas${tem(casa.camas) ? '' : ' c2'}">${casa.comodidades.filter(c => c && tem(c.nome)).map(c => `<li><span class="pict">${ic(ICS[c.icone] || 'check')}</span><span class="linha-txt"><strong>${esc(c.nome)}</strong>${tem(c.descricao) ? `<span>${esc(c.descricao)}</span>` : ''}</span></li>`).join('')}</ul>` : ''}
+      ${tem(casa.comodidades) ? `<ul class="linhas${tem(casa.camas) ? '' : ' c2'}">${casa.comodidades.filter(c => c && tem(c.nome)).map(c => `<li><span class="pict" data-tom="mar">${ic(ICS[c.icone] || 'check')}</span><span class="linha-txt"><strong>${esc(c.nome)}</strong>${tem(c.descricao) ? `<span>${esc(c.descricao)}</span>` : ''}</span></li>`).join('')}</ul>` : ''}
       ${tem(casa.camas) ? `<div class="card"><h3 class="h3">Camas</h3>${lista(casa.camas)}</div>` : ''}
     </div>
     ${tem(casa.ambientes) ? `<div class="mt"><h3 class="h3">Ambientes</h3><div class="cards">${casa.ambientes.filter(a => a && tem(a.nome)).map(a => `<article class="card">${midia(a.foto)}<h4 class="h3">${esc(a.nome)}</h4>${tem(a.descricao) ? `<p class="card-resumo">${esc(a.descricao)}</p>` : ''}</article>`).join('')}</div></div>` : ''}
     ${regras.length ? `<div class="mt grade g-2">${regras.map(([t, it]) => `<div class="card"><h3 class="h3">${esc(t)}</h3>${lista(it)}</div>`).join('')}</div>` : ''}
     ${tem(casa.faq) ? `<div class="mt"><h3 class="h3">Dúvidas frequentes</h3>${casa.faq.filter(q => q && tem(q.pergunta)).map(q => `<details class="faq"><summary>${esc(q.pergunta)}${ic('mais')}</summary><p>${esc(q.resposta || '')}</p></details>`).join('')}</div>` : ''}
   </section>` : '')}
-  ${S('estadia: sair', () => temSair ? `<section class="sec" id="sair" aria-labelledby="h-sair">${secCab('h-sair', 'Sair')}
+  ${S('estadia: sair', () => temSair ? `<section class="sec setor" data-tom="agua" id="sair" aria-labelledby="h-sair">${cabSetor('h-sair', proxCap(), 'Sair', 'Antes de partir')}
     <div class="grade g-2">
       ${tem(ch.saida) ? `<div class="card">${tem(casa.checkout) ? `<p class="olho">Check-out até ${esc(casa.checkout)}</p>` : ''}<ol class="passos">${ch.saida.filter(tem).map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol></div>` : tem(casa.checkout) ? `<div class="card"><ul class="numeros horarios" data-n="1">${linhaHorario('Check-out', casa.checkout)}</ul></div>` : ''}
       ${tem(ch.imprevistos) ? `<div class="card"><h3 class="h3">Atrasos e imprevistos</h3><p class="pre">${esc(ch.imprevistos)}</p></div>` : ''}
     </div></section>` : '')}
-  ${S('estadia: agenda', () => blocoAgenda())}
+  ${S('estadia: agenda', () => agendaAtiva() ? blocoAgenda(false, proxCap()) : '')}
   ${waAnfitriao() ? `<section class="sec sec-curta">${botaoWa('Tirar uma dúvida', `Olá! Estou na ${NOME} e tenho uma dúvida sobre a casa:`, 'btn-sec')}</section>` : ''}`;
 };
 
@@ -1059,10 +1078,10 @@ P.ajuda = () => {
   return `
   ${cabecalho('', 'Ajuda', 'Emergência, saúde e o que saber antes do mar.')}
   ${S('ajuda: anfitrião', () => `<section class="sec sec-curta"><div class="card anfitriao"><span class="pict">${ic('pessoas')}</span><span class="linha-txt"><strong>${tem(casa.anfitriao) ? esc(casa.anfitriao) : 'Anfitrião'}</strong><span>${wa ? 'Dúvidas, manutenção ou qualquer imprevisto.' : 'Fale com o anfitrião pela plataforma da reserva.'}</span></span>${botaoWa('Chamar no WhatsApp', null, 'btn-prim')}</div></section>`)}
-  ${S('ajuda: contatos', () => `<section class="sec">${NIVEIS.map(([k, t]) => { const l = cs.filter(c => c.nivel === k); if (!l.length) return '';
+  ${S('ajuda: contatos', () => `<section class="sec setor" data-tom="papel" aria-labelledby="h-cont">${cabSetor('h-cont', proxCap(), 'Contatos', 'Telefones úteis')}${NIVEIS.map(([k, t]) => { const l = cs.filter(c => c.nivel === k); if (!l.length) return '';
       const tit = k === 'essencial' && l.every(c => SAUDE_RE.test(c.nome + ' ' + (c.categoria || ''))) ? 'Saúde' : t;
       return `<div class="grupo-tit"><h2 class="h3">${esc(tit)}</h2></div><div class="contatos">${l.map(linha).join('')}</div>`; }).join('')}</section>`)}
-  ${S('ajuda: antes do mar', () => `<section class="sec" aria-labelledby="h-mar">${secCab('h-mar', 'Antes do mar', '', `<a class="btn-terc" href="#/passeios/mare">Maré de hoje${ic('seta')}</a>`)}<div class="card lista-2">${listaLimitada('l-mar', mar)}</div></section>`)}
+  ${S('ajuda: antes do mar', () => `<section class="sec setor" data-tom="agua" aria-labelledby="h-mar">${cabSetor('h-mar', proxCap(), 'Segurança', 'Antes do mar', `<a class="btn-terc" href="#/passeios/mare">Maré de hoje${ic('seta')}</a>`)}<div class="card lista-2">${listaLimitada('l-mar', mar)}</div></section>`)}
   ${S('ajuda: locomoção', () => mob.length ? `<section class="sec" aria-label="Como se locomover">${mais('Como se locomover', listaLimitada('l-mob', mob))}</section>` : '')}
   ${canalFeedback() ? `<section class="sec sec-curta"><a class="btn-terc" href="#/feedback">${ic('estrela', 'ic-sm')}Contar ao anfitrião como está a estadia${ic('seta')}</a></section>` : ''}`;
 };
@@ -1412,7 +1431,8 @@ function render(modo) {
   const ativo = NAV_DE[r] || r;
   document.querySelectorAll('.nav-topo a, .nav-base a').forEach(a => { const al = a.getAttribute('href').replace('#/', ''); if (al === ativo) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   if (modo !== 'filtro') { revelar(); }
-  else $main.querySelectorAll('.rv').forEach(s => s.classList.add('on'));
+  tenta('indicador', moverIndicador);
+  if (modo === 'nav' && MOVE()) { $main.classList.remove('entra'); void $main.offsetWidth; $main.classList.add('entra'); }
   if (r === 'inicio') tenta('Hoje (início)', preencherDia);
   if (r === 'inicio' || r === 'estadia' || r === 'disponibilidade') tenta('agenda', preencherAgenda);
   tenta('reservar do topo', reservarDoTopo);
@@ -1441,8 +1461,9 @@ function rodape() {
     `<a href="#/privacidade">${ic('escudo', 'ic-sm')}Privacidade</a>`,
     `<a href="admin/" rel="nofollow">${ic('cadeado', 'ic-sm')}Área do anfitrião</a>`
   ].filter(Boolean);
+  const assinatura = window.Marca ? Marca.vertical({ tema: 'escuro', titulo: NOME }) : `<span class="marca-nome">${esc(NOME)}</span>`;
   return `<footer class="rodape">
-    <div class="rodape-marca"><span class="marca"><span class="marca-nome">${esc(NOME_PARTES[0])}</span>${NOME_PARTES[1] ? `<span class="marca-sub">${esc(NOME_PARTES[1])}</span>` : ''}</span>${tem(casa.endereco_publico) ? `<p>${esc(casa.endereco_publico)}</p>` : ''}</div>
+    <div class="rodape-marca">${assinatura}${tem(casa.frase) ? `<p class="rodape-frase">${semViuva(casa.frase)}</p>` : ''}${tem(casa.endereco_publico) ? `<p>${esc(casa.endereco_publico)}</p>` : ''}</div>
     <nav class="rodape-links" aria-label="Rodapé">${links.join('')}</nav>
     ${blocoInstalar()}</footer>`;
 }
@@ -1456,12 +1477,59 @@ function reservarDoTopo() {
   obsReserva = new IntersectionObserver((es) => es.forEach(e => rs.classList.toggle('na-capa', e.isIntersecting)), { threshold: 0 });
   obsReserva.observe(capa);
 }
+/* ---------- movimento (v6) ----------
+   Regra de ouro: o estado final é o padrão. Nada fica escondido sem JS, sem IntersectionObserver ou com
+   prefers-reduced-motion. A classe html.rv-pronto (que esconde o que ainda vai entrar) só é posta depois que o
+   observer existe; uma rede de segurança revela tudo se ele não responder, na impressão e em qualquer erro. */
+const MOVE = () => !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+const RV_ITENS = ':scope > .sec-cab, :scope > .dia-cab, .cards > *, .dia-grade > *, .numeros > *, .roteiros > *, .contatos > *, .almanaque > *, .mr-dias > *, .linha-tempo > *, .casa-bloco > div, :scope > .linhas, :scope > .card, :scope > .grade > *, :scope > .mt, :scope > details.mais, .agenda, .estadia-card, .mare-hoje, .rodape-marca, .rodape-links';
+let ioRv = null, rvSeguranca = 0;
+function revelarTudo() { document.querySelectorAll('.rv').forEach(x => x.classList.add('on')); }
 function revelar() {
-  const alvos = $main.querySelectorAll(':scope > .sec, :scope > .pag-cab');
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
-  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -6% 0px', threshold: .04 });
-  alvos.forEach((a, i) => { a.classList.add('rv'); if (i < 3) requestAnimationFrame(() => a.classList.add('on')); else io.observe(a); });
+  const raiz = document.documentElement;
+  if (ioRv) { ioRv.disconnect(); ioRv = null; }
+  clearTimeout(rvSeguranca);
+  if (!MOVE() || !('IntersectionObserver' in window)) { raiz.classList.remove('rv-pronto'); return; }
+  try {
+    let viu = false;
+    ioRv = new IntersectionObserver(es => es.forEach(e => {
+      viu = true;
+      if (!e.isIntersecting) return;
+      e.target.classList.add('on'); ioRv && ioRv.unobserve(e.target);
+      e.target.querySelectorAll('[data-conta]').forEach(contar); if (e.target.matches('[data-conta]')) contar(e.target);
+    }), { rootMargin: '0px 0px -8% 0px', threshold: 0 });
+    const secoes = $main.querySelectorAll(':scope > .sec:not(.hero), :scope > .pag-cab, :scope > .rodape');
+    secoes.forEach(sec => {
+      const itens = sec.matches('.pag-cab') ? [sec] : [...sec.querySelectorAll(RV_ITENS)].filter(x => !x.parentElement.closest('.rv'));
+      (itens.length ? itens : [sec]).forEach((x, i) => { x.classList.add('rv'); x.style.setProperty('--i', String(Math.min(i, 4))); ioRv.observe(x); });
+    });
+    raiz.classList.add('rv-pronto');
+    // Rede de segurança: se o observer não der sinal em 1,5 s, tudo aparece.
+    rvSeguranca = setTimeout(() => { if (!viu) revelarTudo(); }, 1500);
+  } catch (e) { raiz.classList.remove('rv-pronto'); revelarTudo(); }
 }
+window.addEventListener('beforeprint', revelarTudo);
+/* Contador: só números inteiros puros; o texto final já está no HTML (sem animação, ele simplesmente fica). */
+function contar(el) {
+  const alvo = parseInt(el.dataset.conta, 10); if (!MOVE() || !(alvo > 1) || el.dataset.contado) return;
+  el.dataset.contado = '1'; const t0 = performance.now(), dur = 900;
+  const passo = (t) => { const k = Math.min(1, (t - t0) / dur), v = Math.round(alvo * (1 - Math.pow(1 - k, 3))); el.textContent = String(v); if (k < 1) requestAnimationFrame(passo); else el.textContent = String(alvo); };
+  el.textContent = '0'; requestAnimationFrame(passo);
+}
+/* Indicador deslizante sob o item ativo (topo ≥ 900) e sobre o ícone (barra < 900). */
+function moverIndicador() {
+  document.querySelectorAll('.nav-topo, .nav-base').forEach(nav => {
+    const ind = nav.querySelector('.nav-ind'); if (!ind) return;
+    const a = nav.querySelector('a[aria-current=page]:not([hidden])');
+    if (!a || !a.offsetWidth) { ind.classList.remove('on'); return; }
+    const base = nav.matches('.nav-base');
+    const x = a.offsetLeft + (base ? (a.offsetWidth - 28) / 2 : 12), w = base ? 28 : a.offsetWidth - 24;
+    ind.style.setProperty('--x', x + 'px'); ind.style.setProperty('--w', w + 'px'); ind.classList.add('on');
+    requestAnimationFrame(() => ind.classList.add('pronto'));
+  });
+}
+window.addEventListener('resize', () => { clearTimeout(moverIndicador.t); moverIndicador.t = setTimeout(moverIndicador, 120); }, { passive: true });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(moverIndicador).catch(() => {});
 
 /* ---------- eventos ---------- */
 document.addEventListener('click', (e) => {
@@ -1562,6 +1630,8 @@ tenta('topo', () => {
   const n = document.querySelector('[data-marca-nome]'), s = document.querySelector('[data-marca-sub]');
   if (n) n.textContent = NOME_PARTES[0]; if (s) { s.textContent = NOME_PARTES[1]; s.hidden = !NOME_PARTES[1]; }
   const lk = document.querySelector('.topo .marca'); if (lk) lk.setAttribute('aria-label', NOME + ' · início');
+  // v6: o logo do cliente (símbolo sol + ondas, CASA 18 e ANAHI) no lugar do letreiro. O nome fica no aria-label do link.
+  if (lk && window.Marca) lk.innerHTML = Marca.horizontal({ tema: 'claro', titulo: '' });
   const rs = document.querySelector('[data-reservar]'), u = linkReserva(); if (rs && u) { rs.href = u; rs.hidden = false; rs.textContent = 'Reservar'; rs.setAttribute('aria-label', rotuloReserva() + ' (abre em nova aba)'); rs.title = rotuloReserva(); }
   document.querySelectorAll('[data-nav-comer]').forEach(a => { a.hidden = !comerAtivo(); });
 });
@@ -1572,6 +1642,7 @@ else if (RASCUNHO_FALTOU) document.body.insertAdjacentHTML('afterbegin', '<div c
 tenta('og:image', () => { const og = CFG.og_imagem && CFG.og_imagem.src; const m = document.querySelector('meta[property="og:image"]'); if (tem(og) && m && !m.content) m.content = new URL(og, location.href).href; });
 tenta('estadia', lerEstadiaDaUrl);
 if (!location.hash || location.hash === '#/' || location.hash === '#') history.replaceState(null, '', location.pathname + location.search + '#/inicio');
+if (MOVE()) document.documentElement.classList.add('anima');
 render('inicial');
 document.documentElement.setAttribute('data-guia', 'pronto');
 

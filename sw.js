@@ -6,11 +6,14 @@
    Tiles do mapa: cache próprio, só respostas CORS (não opacas), com teto de 200 tiles (sai o mais antigo).
    Agenda de disponibilidade (?acao=agenda no Apps Script): sempre da rede, nunca guardada aqui. A cópia de até
    30 min fica só no sessionStorage da aba (assets/site.js), então nada da agenda passa de 1 h no aparelho. */
-const VERSAO = 'guia-v10';
+const VERSAO = 'guia-v11';
 const TILES = 'guia-tiles-v1';
 const MAX_TILES = 200;
-const ESSENCIAIS = ['./', './index.html', './dados/conteudo.json', './assets/dados.js', './assets/agenda.js', './assets/calendario.js', './assets/calendario.css', './assets/site.css', './assets/site.js', './assets/ilustracoes.js', './assets/marca.js',
-  './assets/fontes/inter-400.woff', './assets/fontes/inter-600.woff',
+/* v11: CSS e JS com ?v=11, o mesmo endereço que o index.html pede. Assim uma página nova nunca pinta com a folha
+   de estilo antiga guardada (causa provável de "cartões sobrepostos" no site publicado). */
+const V = '?v=11';
+const ESSENCIAIS = ['./', './index.html', './dados/conteudo.json', './assets/dados.js' + V, './assets/agenda.js' + V, './assets/calendario.js' + V, './assets/calendario.css' + V, './assets/site.css' + V, './assets/site.js' + V, './assets/ilustracoes.js' + V, './assets/marca.js' + V,
+  './assets/fontes/inter-300.woff', './assets/fontes/inter-400.woff', './assets/fontes/inter-600.woff',
   './assets/fontes/instrument-serif-400.woff', './assets/fontes/instrument-serif-400i.woff',
   './manifest.webmanifest', './icone-192.png'];
 
