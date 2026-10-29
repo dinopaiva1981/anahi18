@@ -1,13 +1,13 @@
 {
   "name": "Casa 18 Anahi · Guia do hóspede",
   "short_name": "Casa 18 Anahi",
-  "description": "Guia da Casa 18 Anahi na Praia do Marceneiro, Rota dos Milagres (AL): estadia, praias, maré, onde comer e contatos úteis.",
+  "description": "Guia da Casa 18 Anahi na Praia do Marceneiro, Rota dos Milagres (AL): estadia, passeios, maré e contatos úteis.",
   "lang": "pt-BR",
   "start_url": "./#/inicio",
   "scope": "./",
   "display": "standalone",
   "background_color": "#F4EEE4",
-  "theme_color": "#1F3D2F",
+  "theme_color": "#F4EEE4",
   "icons": [
     {
       "src": "icone-192.png",
@@ -30,31 +30,31 @@
   ],
   "shortcuts": [
     {
+      "name": "Hoje",
+      "short_name": "Hoje",
+      "url": "./#/inicio",
+      "icons": [
+        {
+          "src": "icone-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Estadia: chegada e saída",
+      "short_name": "Estadia",
+      "url": "./#/estadia?ir=chegar",
+      "icons": [
+        {
+          "src": "icone-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
       "name": "Maré e tempo",
       "short_name": "Maré",
-      "url": "./#/planejar",
-      "icons": [
-        {
-          "src": "icone-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Chegada e saída",
-      "short_name": "Chegada",
-      "url": "./#/chegada",
-      "icons": [
-        {
-          "src": "icone-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Meu roteiro",
-      "short_name": "Roteiro",
-      "url": "./#/meu-roteiro",
+      "url": "./#/passeios/mare",
       "icons": [
         {
           "src": "icone-192.png",

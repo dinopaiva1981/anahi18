@@ -1,12 +1,14 @@
 /* Ilustrações autorais do litoral alagoano, em SVG.
    Usadas enquanto não houver fotografia real de um lugar.
-   arte(tipo, {momento}) -> string SVG (viewBox 400x300, preenche o espaço). */
+   arte(tipo, {momento}) -> string SVG (viewBox 400x300, preenche o espaço).
+   v5: sempre a paleta diurna suave, qualquer que seja a hora (a noturna deixava tudo azul-marinho e igual).
+   As outras paletas ficam disponíveis só quando pedidas explicitamente em {momento}. */
 (function () {
   'use strict';
 
   const PALETAS = {
     madrugada: { ceu: '#E9D9C6', ceu2: '#F2E6D6', astro: '#E6A57E', horiz: '#B9D9D3', mar1: '#3A8792', mar2: '#22607A', areia: '#EADCC4', verde: '#24473A', verde2: '#3D6450', brilho: '#F7E5D3' },
-    dia:       { ceu: '#EDE3D1', ceu2: '#F6EFE3', astro: '#E0A272', horiz: '#A6D6CF', mar1: '#2C7A86', mar2: '#1E5A73', areia: '#E9DBC1', verde: '#1F3D2F', verde2: '#3B5E49', brilho: '#FFF4E6' },
+    dia:       { ceu: '#ECE3D3', ceu2: '#F6F0E6', astro: '#E2A877', horiz: '#BCDAD3', mar1: '#4B8D95', mar2: '#2F6E80', areia: '#E8DCC6', verde: '#2C4A3B', verde2: '#4B6A56', brilho: '#FFF7EC' },
     tarde:     { ceu: '#EFCDAF', ceu2: '#F5DFC8', astro: '#D7774A', horiz: '#E2B79A', mar1: '#2F6F7E', mar2: '#1E4E66', areia: '#E2C9A6', verde: '#1D3A2D', verde2: '#38563F', brilho: '#FAD9BC' },
     noite:     { ceu: '#22364A', ceu2: '#2C4459', astro: '#ECE4D2', horiz: '#3B6670', mar1: '#1F5464', mar2: '#153B4C', areia: '#7E7461', verde: '#11261C', verde2: '#20392B', brilho: '#ECE4D2' }
   };
@@ -148,9 +150,9 @@
   function arte(tipo, opt) {
     opt = opt || {};
     const t = CENAS[tipo] ? tipo : (ALIAS[tipo] || 'praia');
-    const P = Object.assign({ id: 'a' + (++seq), heroi: !!opt.heroi }, PALETAS[opt.momento || momentoAtual()] || PALETAS.dia);
+    const P = Object.assign({ id: 'a' + (++seq), heroi: !!opt.heroi }, PALETAS[opt.momento || 'dia'] || PALETAS.dia);
     let extra = '';
-    if ((opt.momento || momentoAtual()) === 'noite' && ['praia', 'jangada', 'capela', 'farol', 'barra', 'casa', 'vila'].includes(t))
+    if (opt.momento === 'noite' && ['praia', 'jangada', 'capela', 'farol', 'barra', 'casa', 'vila'].includes(t))
       // No hero, o lado esquerdo fica livre de estrelas para não competir com o letreiro.
       extra = `<g fill="${P.brilho}" opacity=".7">${opt.heroi ? '' : '<circle cx="40" cy="30" r="1.2"/><circle cx="120" cy="50" r="1"/><circle cx="210" cy="24" r="1.3"/>'}<circle cx="360" cy="40" r="1"/><circle cx="${opt.heroi ? 390 : 250}" cy="70" r="1"/></g>`;
     return base(P, extra + CENAS[t](P), 'Ilustração: ' + (NOMES[t] || 'paisagem do litoral'), opt.vb);

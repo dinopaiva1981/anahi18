@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Guia digital da casa na Praia do Marceneiro, Rota dos Milagres, Alagoas: estadia, praias, piscinas naturais, maré, onde comer e contatos úteis.">
-<meta name="theme-color" content="#1F3D2F">
+<meta name="theme-color" content="#F4EEE4">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
@@ -13,18 +13,17 @@
 <title>Casa 18 Anahi · Guia do hóspede</title>
 <meta property="og:title" content="Casa 18 Anahi · Guia do hóspede">
 <meta property="og:description" content="Tudo para sua estadia e o melhor da Rota dos Milagres, a poucos toques.">
-<meta property="og:image" content="https://dinopaiva1981.github.io/anahi18/compartilhar.jpg?v=606k3d">
-<meta property="og:image:alt" content="Casa 18 Anahi">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:url" content="https://dinopaiva1981.github.io/anahi18/">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="">
+<meta property="og:image:alt" content="">
+<meta property="og:url" content="">
+<meta name="twitter:card" content="summary">
 <!-- compartilhar:fim -->
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3D2F'/%3E%3Csvg x='3' y='3' width='58' height='58' viewBox='2 2 60 60'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='4.2'%3E%3Cpath stroke='%23F0C394' d='M21.5 31A10.5 10.5 0 0 1 42.5 31M17.26 26.21L12.03 24.51M22.89 18.46L19.66 14.01M32 15.5L32 10M41.11 18.46L44.34 14.01M46.74 26.21L51.97 24.51'/%3E%3Cpath stroke='%23FFFDF9' d='M5 42 c6 -5.6 12 -5.6 18 0 s12 5.6 18 0 s12 -5.6 18 0M14 52 c6 -5.6 12 -5.6 18 0 s12 5.6 18 0'/%3E%3C/g%3E%3C/svg%3E%3C/svg%3E">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="format-detection" content="telephone=no">
 <link rel="preload" href="assets/fontes/inter-400.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="assets/fontes/inter-600.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="assets/fontes/instrument-serif-400.woff" as="font" type="font/woff" crossorigin>
 <link rel="preconnect" href="https://api.open-meteo.com" crossorigin>
 <link rel="stylesheet" href="assets/calendario.css">
@@ -39,7 +38,7 @@
 </head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<svg width="0" height="0" class="sr-only" aria-hidden="true">
   <symbol id="i-casa" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-chave" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 8-8m-3 3 2 2m-4 0 2 2"/></symbol>
   <symbol id="i-ondas" viewBox="0 0 24 24"><path d="M2 8c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 14c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 20c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2"/></symbol>
@@ -112,24 +111,25 @@
 
 <header class="topo">
   <div class="topo-in">
-    <a class="marca" href="#/inicio" aria-label="Casa 18 Anahi · início"><span class="marca-logo" data-logo></span></a>
+    <a class="marca" href="#/inicio" aria-label="Casa 18 Anahi · início"><span class="marca-nome" data-marca-nome>Casa 18</span><span class="marca-sub" data-marca-sub>Anahi</span></a>
     <nav class="nav-topo" aria-label="Navegação principal">
-      <a href="#/casa">A casa</a><a href="#/explorar">Explorar</a><a href="#/planejar">Maré e tempo</a><a href="#/comer">Onde comer</a><a href="#/ajuda">Ajuda</a>
+      <a href="#/inicio">Hoje</a><a href="#/estadia">Estadia</a><a href="#/passeios">Passeios</a><a href="#/comer" data-nav-comer hidden>Comer</a><a href="#/ajuda">Ajuda</a>
     </nav>
-    <button type="button" class="btn-ic" data-modo-sol aria-pressed="false" aria-label="Modo sol: letra maior e contraste máximo" title="Modo sol"><svg class="ic" aria-hidden="true"><use href="#i-sol-forte"/></svg></button>
-    <button type="button" class="btn-ic" data-buscar aria-label="Buscar no guia"><svg class="ic" aria-hidden="true"><use href="#i-lupa"/></svg></button>
-    <a class="btn-reservar" data-reservar hidden target="_blank" rel="noopener">Reservar</a>
-    <a class="btn-wa" href="#/ajuda" target="_blank" rel="noopener" aria-label="Falar com o anfitrião pelo WhatsApp"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-whatsapp"/></svg><span class="btn-wa-txt" aria-hidden="true">Falar com o anfitrião</span></a>
+    <div class="topo-acoes">
+      <button type="button" class="btn-ic" data-buscar aria-label="Buscar no guia"><svg class="ic" aria-hidden="true"><use href="#i-lupa"/></svg></button>
+      <a class="btn btn-sec btn-peq btn-wa" href="#/ajuda" target="_blank" rel="noopener" aria-label="Falar com o anfitrião pelo WhatsApp"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-whatsapp"/></svg><span class="btn-wa-txt" aria-hidden="true">Anfitrião</span></a>
+      <a class="btn btn-prim btn-peq btn-reservar" data-reservar hidden target="_blank" rel="noopener">Reservar</a>
+    </div>
   </div>
 </header>
 
-<main id="conteudo" tabindex="-1"><noscript><p style="padding:24px">Este guia precisa de JavaScript ativado para funcionar.</p></noscript></main>
+<main id="conteudo" tabindex="-1"><noscript><p class="erro-geral">Este guia precisa de JavaScript ativado para funcionar.</p></noscript></main>
 
 <nav class="nav-base" aria-label="Navegação rápida">
-  <a href="#/inicio"><svg class="ic" aria-hidden="true"><use href="#i-casa"/></svg>Início</a>
-  <a href="#/casa"><svg class="ic" aria-hidden="true"><use href="#i-chave"/></svg>A casa</a>
-  <a href="#/explorar"><svg class="ic" aria-hidden="true"><use href="#i-bussola"/></svg>Explorar</a>
-  <a href="#/comer"><svg class="ic" aria-hidden="true"><use href="#i-garfo"/></svg>Comer</a>
+  <a href="#/inicio"><svg class="ic" aria-hidden="true"><use href="#i-sol"/></svg>Hoje</a>
+  <a href="#/estadia"><svg class="ic" aria-hidden="true"><use href="#i-casa"/></svg>Estadia</a>
+  <a href="#/passeios"><svg class="ic" aria-hidden="true"><use href="#i-bussola"/></svg>Passeios</a>
+  <a href="#/comer" data-nav-comer hidden><svg class="ic" aria-hidden="true"><use href="#i-garfo"/></svg>Comer</a>
   <a href="#/ajuda"><svg class="ic" aria-hidden="true"><use href="#i-ajuda"/></svg>Ajuda</a>
 </nav>
 

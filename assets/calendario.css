@@ -69,3 +69,4 @@ tr>td.cal-meio:last-child,tr>td.cal-ini.cal-com-fim:last-child{border-radius:0 2
 .cal-fechar{background:var(--cal-tinta);color:#fff;border:0;border-radius:10px;padding:0 22px;min-height:48px;font:inherit;font-weight:600;font-size:.9375rem;cursor:pointer}
 .cal-fechar:hover{background:#000}
 
+@media (max-width:359px){.cal-campo>.cal-fmt{font-size:.9375rem;padding:0 10px}}

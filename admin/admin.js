@@ -447,6 +447,7 @@ function ondeFica(campo) {
   const p = campo.split('.'), sec = p[0];
   let ir = { casa: (p[1] === 'chegada' ? 'chegada' : 'casa'), provar: 'regiao', destaques: 'lugares' }[sec] || sec;
   if (sec === 'config' && p[1] === 'url_publica') ir = 'qr';
+  if (sec === 'config' && p[1] === 'agenda_visivel') ir = 'casa';
   let nome = sec === 'casa' && p[1] === 'chegada' ? 'Chegada e saída' : (NOMES_SECAO[sec] || sec);
   const col = A.draft && Array.isArray(A.draft[sec]) && /^\d+$/.test(p[1]) ? A.draft[sec][+p[1]] : null;
   if (col) nome += ' › ' + (col.nome || col.titulo || col.autor || ('item ' + (+p[1] + 1)));
@@ -599,11 +600,68 @@ function antesDoHospede() {
 function cartaoAntes() {
   const it = antesDoHospede(), ok = it.filter(i => i.ok).length, tot = it.length, pronto = ok === tot;
   return `<section class="card antes ${pronto ? 'pronto' : ''}" aria-labelledby="antes-tit">
-    <div class="antes-cab"><div><span class="olho">${pronto ? 'Tudo certo' : 'Obrigatório'}</span><h2 class="t2" id="antes-tit">Antes do primeiro hóspede</h2>
-      <p class="mudo" style="margin:4px 0 0">${pronto ? 'O essencial está preenchido. O hóspede consegue chegar, entrar em contato e avaliar a estadia.' : 'Sem estes itens o hóspede não consegue chegar, falar com você ou avaliar a estadia.'}</p></div>
+    <div class="antes-cab"><div><span class="olho">${pronto ? 'Tudo certo' : 'Essencial'}</span><h2 class="t2" id="antes-tit">Antes do primeiro hóspede</h2>
+      <p class="mudo">${pronto ? 'O hóspede consegue chegar, falar com você e avaliar a estadia.' : 'Sem estes itens o hóspede não consegue chegar, falar com você ou avaliar a estadia.'}</p></div>
       <div class="antes-num"><b>${ok} de ${tot}</b><span>prontos</span></div></div>
     <div class="barra-prog" role="progressbar" aria-valuenow="${ok}" aria-valuemin="0" aria-valuemax="${tot}" aria-valuetext="${ok} de ${tot} itens prontos" aria-label="Antes do primeiro hóspede"><span style="width:${Math.round(ok / tot * 100)}%"></span></div>
     <ol class="antes-lista">${it.map(i => `<li class="${i.ok ? 'ok' : 'falta'}">${ic(i.ok ? 'check' : 'alerta')}<span>${i.ok ? '<span class="sr-only">Pronto: </span>' + esc(i.txt) : '<span class="sr-only">Falta: </span>' + esc(i.falta)}</span>${i.ok ? '' : `<button type="button" class="btn btn-sec" data-ir-campo="${esc(i.campo)}">${esc(i.botao)}</button>`}</li>`).join('')}</ol>
+  </section>`;
+}
+/* ---------------- v5 · Para o site ficar completo ----------------
+   No site vale a regra "sem dado, o bloco não aparece". Aqui o painel cobra cada dado que faz um bloco sumir,
+   em linguagem simples, com um botão que leva direto ao campo. Nada é preenchido por conta própria. */
+function prontidao() {
+  const C = A.draft, casa = C.casa || {}, ch = casa.chegada || {}, cfg = C.config || {}, L = C.lugares || [];
+  const res = String(casa.link_reserva || '').trim(), resOk = tem(res) && urlValida(res, true) && !ehIcal(res);
+  const fotos = (casa.fotos || []).filter(f => f && tem(f.src)).length;
+  const comer = L.filter(l => l && l.status !== 'rascunho' && CATS_COMIDA.includes(l.categoria)).length;
+  const comerRasc = L.filter(l => l && l.status === 'rascunho' && CATS_COMIDA.includes(l.categoria)).length;
+  const agenda = cfg.agenda_visivel === true, ep = tem(cfg.feedback_endpoint);
+  const duvidosas = comodidadesDuvidosas();
+  const naCasa = [['regras_condominio', 'regras do condomínio'], ['lixo_limpeza', 'lixo e limpeza'], ['seguranca', 'segurança'], ['faq', 'dúvidas frequentes'], ['camas', 'camas'], ['ambientes', 'ambientes']].filter(([k]) => !tem(casa[k]));
+  const aoChegar = [['como_chegar', 'como chegar ao condomínio'], ['estacionamento', 'estacionamento']].filter(([k]) => !tem(ch[k]));
+  const co = casa.coordenadas || {}, pub = L.filter(l => l && l.status !== 'rascunho');
+  const semFoto = pub.filter(l => !(l.foto && tem(l.foto.src))).length;
+  const essenciais = (C.contatos || []).filter(c => c && c.nivel === 'essencial' && !/hospital|upa|saúde|saude|samu/i.test((c.categoria || '') + ' ' + (c.nome || ''))).length;
+  const hoje_ = hoje(), benef = (C.beneficios || []).filter(x => x && x.ativo !== false && !(x.validade && x.validade < hoje_)).length, aval = (C.avaliacoes || []).filter(x => x && x.autorizada).length;
+  const lista = (xs) => xs.map(x => x[1]).join(', ').replace(/, ([^,]*)$/, ' e $1');
+  return [
+    { ok: resOk, txt: 'Link da reserva (Airbnb)', falta: 'Falta o link da reserva (Airbnb)', perde: 'Sem ele, o botão “Reservar” não aparece no site.', campo: 'casa.link_reserva', botao: 'Colar link' },
+    { ok: tem(casa.anfitriao), txt: 'Seu nome como anfitrião', falta: 'Escreva o seu nome como anfitrião', perde: 'O hóspede não sabe quem vai recebê-lo.', campo: 'casa.anfitriao', botao: 'Escrever' },
+    { ok: tem(casa.regras_casa), txt: 'Regras da casa', falta: 'Escreva as regras da casa', perde: 'Os combinados somem do site e o cartão de regras não é impresso.', campo: 'casa.regras_casa', botao: 'Escrever' },
+    { ok: tem(ch.entrada), txt: 'Como entrar pela portaria', falta: 'Explique como entrar pela portaria', perde: 'A parte “Entrar” some do site.', campo: 'casa.chegada.entrada', botao: 'Explicar' },
+    { ok: tem(ch.chaves), txt: 'Chaves e acesso', falta: 'Explique onde pegar a chave (sem códigos)', perde: 'O hóspede chega sem saber como abrir a casa.', campo: 'casa.chegada.chaves', botao: 'Explicar' },
+    { ok: tem(ch.saida), txt: 'Checklist de saída', falta: 'Liste o que fazer na saída', perde: 'O site não diz nada sobre a saída.', campo: 'casa.chegada.saida', botao: 'Listar' },
+    { ok: !aoChegar.length, txt: 'Como chegar ao condomínio e estacionamento', falta: `Escreva ${lista(aoChegar)}`, perde: 'O bloco “Ao chegar” fica incompleto.', campo: 'casa.chegada.' + (aoChegar[0] || ['como_chegar'])[0], botao: 'Escrever' },
+    { ok: !naCasa.length, txt: 'Combinados e informações da casa', falta: `Na casa, falta: ${lista(naCasa)}`, perde: 'Cada um vira um bloco de “Na casa”; vazio, o bloco não aparece.', campo: 'casa.' + (naCasa[0] || ['faq'])[0], botao: 'Preencher' },
+    { ok: !duvidosas.length, txt: 'Comodidades conferidas', falta: `Confirme ou reescreva: ${duvidosas.map(n => '“' + n + '”').join(', ')}`, perde: 'O site mostra como está escrito. Só deixe o que é verdade (quantos metros? qual velocidade?).', campo: 'casa.comodidades.' + Math.max(0, ((C.casa || {}).comodidades || []).findIndex(c => c && duvidosas.includes(c.nome || 'sem nome'))) + '.nome', botao: 'Revisar', extra: `<button type="button" class="btn btn-fant" data-acao="confirmar-comodidades">Está tudo certo</button>` },
+    { ok: co.lat != null && co.lng != null, txt: 'Coordenadas da casa', falta: 'Informe as coordenadas da casa', perde: 'Maré, previsão e mapa usam um ponto aproximado da praia.', campo: 'casa.coordenadas.lat', botao: 'Informar' },
+    { ok: fotos >= 3, txt: fotos + ' fotos da casa', falta: `Envie pelo menos 3 fotos da casa (tem ${fotos})`, perde: 'Com menos de 3 fotos, a galeria da casa não aparece.', campo: 'casa.fotos', botao: 'Enviar fotos' },
+    { ok: comer >= 3, txt: comer + ' lugares para comer publicados', falta: `Publique pelo menos 3 lugares para comer (tem ${comer})`, perde: `A aba “Comer” só aparece com 3 ou mais.${comerRasc ? ` ${comerRasc} estão em rascunho esperando você conferir.` : ''}`, ir: 'lugares', botao: 'Conferir' },
+    agenda && !ep
+      ? { ok: false, falta: 'A agenda está ligada, mas falta o endereço do Apps Script (Configurações › Feedback): no site ela não aparece', perde: 'O mesmo endereço do feedback liga a agenda.', campo: 'config.feedback_endpoint', botao: 'Colar endereço' }
+      : { ok: agenda, txt: 'Agenda de datas livres ligada', falta: 'Agenda de datas livres desligada', perde: 'O site não mostra os dias livres.', campo: 'config.agenda_visivel', botao: 'Ver como ligar', opcional: true },
+    { ok: tem(ch.imprevistos), txt: 'Atrasos e imprevistos', falta: 'Diga o que fazer em caso de atraso ou imprevisto', perde: 'A seção “Sair” fica só com o checklist.', campo: 'casa.chegada.imprevistos', botao: 'Escrever', opcional: true },
+    { ok: !semFoto, txt: 'Lugares com foto', falta: `${semFoto} lugar(es) publicados sem foto`, perde: 'Os cartões mostram ilustração no lugar da foto.', ir: 'lugares', botao: 'Ver lugares', opcional: true },
+    { ok: essenciais > 0, txt: 'Farmácia e mercado em Contatos', falta: 'Cadastre farmácia e mercado em Contatos', perde: 'Em Ajuda, só aparece o grupo “Saúde”.', ir: 'contatos', botao: 'Cadastrar', opcional: true },
+    { ok: benef > 0 || aval > 0, txt: 'Benefícios ou avaliações publicados', falta: 'Nenhum benefício ativo nem avaliação autorizada', perde: 'Essas páginas ficam fora do site até ter conteúdo.', ir: aval ? 'beneficios' : 'avaliacoes', botao: 'Ver', opcional: true }
+  ];
+}
+/* Comodidades que o conteúdo ainda marca como a confirmar (_confirmar): o anfitrião reescreve ou confirma (fica lembrado neste aparelho). */
+const DUVIDOSAS = /alta velocidade|poucos metros|curta caminhada|gratuit/i;
+function comodidadesDuvidosas() {
+  const ok = new Set(ls.get('admin:comodidades-ok', []) || []);
+  return ((A.draft.casa || {}).comodidades || []).filter(c => c && DUVIDOSAS.test((c.nome || '') + ' ' + (c.descricao || '')) && !ok.has((c.nome || '') + '|' + (c.descricao || ''))).map(c => c.nome || 'sem nome');
+}
+function cartaoCompleto() {
+  const it = prontidao(), obrig = it.filter(i => !i.opcional), ok = obrig.filter(i => i.ok).length, tot = obrig.length, pronto = ok === tot;
+  const ordem = it.filter(i => !i.ok && !i.opcional).concat(it.filter(i => !i.ok && i.opcional), it.filter(i => i.ok));
+  return `<section class="card completo ${pronto ? 'pronto' : ''}" aria-labelledby="completo-tit">
+    <div class="antes-cab"><div><span class="olho">${pronto ? 'Tudo certo' : 'Para o site ficar completo'}</span><h2 class="t2" id="completo-tit">Blocos que ainda não aparecem no site</h2>
+      <p class="mudo">${pronto ? 'Todos os blocos do site têm conteúdo.' : 'Sem estes dados, o site esconde o bloco inteiro. Só você tem essas informações.'}</p></div>
+      <div class="antes-num"><b>${ok} de ${tot}</b><span>prontos</span></div></div>
+    <div class="barra-prog" role="progressbar" aria-valuenow="${ok}" aria-valuemin="0" aria-valuemax="${tot}" aria-valuetext="${ok} de ${tot} itens prontos" aria-label="Para o site ficar completo"><span style="width:${Math.round(ok / tot * 100)}%"></span></div>
+    <ol class="pronto-lista">${ordem.map(i => `<li class="${i.ok ? 'ok' : 'falta'}">${ic(i.ok ? 'check' : 'alerta')}<span class="pl-txt">${i.ok ? `<b><span class="sr-only">Pronto: </span>${esc(i.txt)}</b>` : `<b><span class="sr-only">Falta: </span>${esc(i.falta)}${i.opcional ? ' <span class="tag">opcional</span>' : ''}</b><small>${esc(i.perde)}</small>`}</span>${i.ok ? '' : i.campo ? `<span class="pl-acoes">${i.extra || ''}<button type="button" class="btn btn-sec" data-ir-campo="${esc(i.campo)}">${esc(i.botao)}</button></span>` : `<button type="button" class="btn btn-sec" data-ir="${esc(i.ir)}">${esc(i.botao)}</button>`}</li>`).join('')}</ol>
   </section>`;
 }
 
@@ -894,7 +952,7 @@ function sair(silencioso) {
 
 /* ---------------- estrutura ---------------- */
 const NAV = [
-  ['visao', 'Visão geral', 'painel'], ['feedback', 'Feedback', 'feedback'],
+  ['visao', 'Início', 'painel'], ['feedback', 'Feedback', 'feedback'],
   ['grupo', 'Hospedagem'], ['hospede', 'Receber hóspede', 'mala'], ['privados', 'Dados privados', 'cadeado'], ['impressos', 'Impressos', 'impressora'], ['virada', 'Virada da casa', 'lista'],
   ['grupo', 'Conteúdo do guia'], ['casa', 'A casa', 'casa'], ['chegada', 'Chegada e saída', 'chave'], ['lugares', 'Lugares', 'pino'], ['roteiros', 'Roteiros', 'bussola'],
   ['contatos', 'Contatos', 'fone'], ['beneficios', 'Benefícios', 'presente'], ['avaliacoes', 'Avaliações', 'estrela'], ['regiao', 'Região e sabores', 'ondas'],
@@ -931,11 +989,11 @@ function montar() {
 function atualizarBarra() {
   const e = $('#estado'); if (!e || !A.draft) return;
   const m = resumoMudancas();
-  e.innerHTML = m.length ? `<span class="ponto pendente"></span>${m.length === 1 ? 'Alterações em 1 seção, ainda não publicadas' : `Alterações em ${m.length} seções, ainda não publicadas`}` : `<span class="ponto"></span>Tudo publicado`;
+  e.innerHTML = m.length ? `<span class="ponto pendente"></span><span class="estado-longo">${m.length === 1 ? 'Alterações em 1 seção, ainda não publicadas' : `Alterações em ${m.length} seções, ainda não publicadas`}</span><span class="estado-curto" aria-hidden="true">Não publicado</span>` : `<span class="ponto"></span><span class="estado-longo">Tudo publicado</span><span class="estado-curto" aria-hidden="true">Publicado</span>`;
   $('#btn-publicar').disabled = !m.length;
-  const pend = verificar().filter(i => i.e !== 'ok').length;
-  const c = $('[data-cont="visao"]'); if (c) { c.hidden = !pend; c.textContent = pend; c.setAttribute('aria-label', pend + ' pendência(s)'); }
-  const cm = $('[data-cont="menu"]'); if (cm) { const falta = antesDoHospede().filter(i => !i.ok).length; cm.hidden = !falta; cm.textContent = falta; cm.setAttribute('aria-label', falta + ' item(ns) obrigatório(s) faltando'); }
+  const pend = antesDoHospede().filter(i => !i.ok).length + prontidao().filter(i => !i.ok && !i.opcional).length; // v5: o número do menu é o que falta para o site ficar completo
+  const c = $('[data-cont="visao"]'); if (c) { c.hidden = !pend; c.textContent = pend; c.setAttribute('aria-label', pend + ' item(ns) faltando para o site ficar completo'); }
+  const cm = $('[data-cont="menu"]'); if (cm) { const falta = pend; cm.hidden = !falta; cm.textContent = falta; cm.setAttribute('aria-label', falta + ' item(ns) faltando para o site ficar completo'); }
   const nfb = A.fb.itens ? A.fb.itens.filter(i => i.a.sentimento === 'negativo' && !resolvidos().has(i.id)).length : 0;
   const f = $('[data-cont="feedback"]'); if (f) { f.hidden = !nfb; f.textContent = nfb; f.setAttribute('aria-label', nfb + ' feedback(s) negativo(s) sem resolução'); }
 }
@@ -945,11 +1003,13 @@ function ir(v, inicial) {
   $$('.nav-item').forEach(b => { if (b.dataset.ir === v) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   const at = $('#menu-atual'); if (at) { const n = NAV.find(x => x[0] === v); at.textContent = n ? n[1] : ''; }
   menu(false);
-  const el = $('#vista'); el.innerHTML = VISTAS[v](); if (!inicial) el.focus({ preventScroll: true });
+  const el = $('#vista'); el.classList.toggle('estreita', ESTREITAS.has(v)); el.innerHTML = VISTAS[v](); if (!inicial) el.focus({ preventScroll: true });
   window.scrollTo(0, 0);
   if (VISTAS[v].depois) VISTAS[v].depois();
   marcarErrosCampos();
 }
+/* v5: telas de formulário usam a coluna de leitura (760 px); listas, fotos, feedback e impressos usam o container inteiro. */
+const ESTREITAS = new Set(['visao', 'casa', 'chegada', 'regiao', 'config', 'avancado', 'privados', 'lugares', 'roteiros', 'contatos', 'beneficios', 'avaliacoes']);
 /* A04: no celular as seções ficam num menu ("Seções") com aria-expanded, Esc fecha e o foco volta ao botão. */
 const menuCelular = () => { const b = $('#menu-btn'); return !!(b && b.offsetParent !== null); };
 function menu(abrir, focar) {
@@ -1047,30 +1107,35 @@ function galeria(p, rot) {
 
 /* ---------------- VISTAS ---------------- */
 const VISTAS = {};
-const cab = (olho, titulo, texto, acoes) => `<div class="cab"><div><span class="olho"><span class="num">${numSecao(A.view)}</span>${olho}</span><h1 class="t1">${titulo}</h1>${texto ? `<p>${texto}</p>` : ''}</div>${acoes ? `<div class="acoes">${acoes}</div>` : ''}</div>`;
+const cab = (olho, titulo, texto, acoes) => `<div class="cab"><div><span class="olho">${olho}</span><h1 class="t1">${titulo}</h1>${texto ? `<p>${texto}</p>` : ''}</div>${acoes ? `<div class="acoes">${acoes}</div>` : ''}</div>`;
 
 VISTAS.visao = () => {
-  const it = verificar(), ok = it.filter(i => i.e === 'ok').length, pct = Math.round(ok / it.length * 100);
-  const grupos = [...new Set(it.map(i => i.grupo))];
+  const it = verificar(), pend = it.filter(i => i.e !== 'ok');
+  const grupos = [...new Set(pend.map(i => i.grupo))];
   const L = A.draft.lugares || [];
   const fbRes = A.fb.itens ? Sentimento.consolidar(filtrarFb(A.fb.itens, '30')) : null;
   const dias = A.tokenExp ? Math.ceil((new Date(A.tokenExp) - Date.now()) / 864e5) : null;
   const ordem = { erro: 0, falta: 1, ok: 2 };
-  return `${cab('Visão geral', 'Bom te ver por aqui.', 'O que falta no guia e como os hóspedes estão avaliando a estadia.')}
+  const faltam = antesDoHospede().filter(i => !i.ok).length + prontidao().filter(i => !i.ok && !i.opcional).length;
+  return `${cab('Início', 'O que falta para o site ficar completo', faltam ? `${faltam === 1 ? 'Falta 1 item' : `Faltam ${faltam} itens`}. Cada item vazio esconde um pedaço do site do hóspede. Toque no botão ao lado para ir direto ao campo e, no fim, publique.` : 'O essencial está preenchido. Publique as alterações e acompanhe o que os hóspedes dizem.')}
   ${avisoArmaz()}
-  ${dias != null && dias <= 7 ? `<div class="aviso erro" role="alert" style="margin-bottom:14px">${ic('alerta')}<span>${validadeToken()}. Gere um token novo no GitHub antes de vencer e entre de novo.</span></div>` : ''}
-  ${A.correcoes.length ? `<div class="aviso" style="margin-bottom:14px">${ic('alerta')}<span><b>Corrigi ${A.correcoes.length} valor(es) em formato inválido</b> (por segurança, ficaram vazios): ${esc(A.correcoes.slice(0, 4).map(c => c.replace(/^([^:]+)/, (m) => ondeFica(m).nome)).join('; '))}${A.correcoes.length > 4 ? '…' : ''}. Publique para corrigir também no site.</span></div>` : ''}
+  ${dias != null && dias <= 7 ? `<div class="aviso erro" role="alert">${ic('alerta')}<span>${validadeToken()}. Gere um token novo no GitHub antes de vencer e entre de novo.</span></div>` : ''}
+  ${A.correcoes.length ? `<div class="aviso">${ic('alerta')}<span><b>Corrigi ${A.correcoes.length} valor(es) em formato inválido</b> (por segurança, ficaram vazios): ${esc(A.correcoes.slice(0, 4).map(c => c.replace(/^([^:]+)/, (m) => ondeFica(m).nome)).join('; '))}${A.correcoes.length > 4 ? '…' : ''}. Publique para corrigir também no site.</span></div>` : ''}
   ${cartaoAntes()}
+  ${cartaoCompleto()}
+  <h2 class="t2 secao-tit">Hospedagem</h2>
   ${cartaoHospedagem()}
-  <div class="card passos-card" style="margin-top:14px"><h2 class="t2">Como atualizar o guia</h2><ol class="passos">
-    <li><span><b>Edite</b> uma seção do menu, como “A casa”.</span></li><li><span><b>Envie fotos</b> tocando nos quadrados de foto.</span></li><li><span><b>Pré-visualize</b> para ver como o hóspede vai ver.</span></li><li><span><b>Publique</b>: o site atualiza em até alguns minutos.</span></li><li><span><b>Acompanhe</b> o que os hóspedes dizem em Feedback.</span></li></ol></div>
-  <div class="grade g4" style="margin-top:14px">
-    <div class="card kpi"><span class="rot">Guia completo</span><span class="val">${pct}%</span><span class="sub">${ok} de ${it.length} itens</span><div class="barra-prog" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" aria-label="Guia completo"><span style="width:${pct}%"></span></div></div>
+  <h2 class="t2 secao-tit">Em números</h2>
+  <div class="grade g3">
     <div class="card kpi"><span class="rot">Lugares publicados</span><span class="val">${L.filter(l => l.status !== 'rascunho').length}</span><span class="sub">${L.filter(l => l.status === 'rascunho').length} em rascunho</span></div>
-    <div class="card kpi"><span class="rot">Nota média · 30 dias</span><span class="val">${fbRes && fbRes.media ? fbRes.media.toFixed(1).replace('.', ',') : '—'}</span><span class="sub">${fbRes ? fbRes.n + ' feedback(s)' : '<button type="button" class="btn btn-fant" data-ir="feedback" style="padding:0;min-height:0">Ver feedback</button>'}</span></div>
+    <div class="card kpi"><span class="rot">Nota média · 30 dias</span><span class="val">${fbRes && fbRes.media ? fbRes.media.toFixed(1).replace('.', ',') : '—'}</span><span class="sub">${fbRes ? fbRes.n + ' feedback(s)' : '<button type="button" class="btn btn-fant" data-ir="feedback">Ver feedback</button>'}</span></div>
     <div class="card kpi"><span class="rot">Precisam de atenção</span><span class="val">${fbRes ? fbRes.cont.negativo : '—'}</span><span class="sub">feedbacks negativos · 30 dias</span></div>
   </div>
-  <div class="grade g2" style="margin-top:14px">${grupos.map(g => `<div class="card"><h2 class="t2" style="margin-bottom:6px">${esc(g)}</h2>${it.filter(i => i.grupo === g).sort((a, b) => ordem[a.e] - ordem[b.e]).map(i => `<div class="pend ${i.e}">${ic(i.e === 'ok' ? 'check' : 'alerta')}<span>${esc(i.txt)}</span>${i.e !== 'ok' && i.ir ? `<button type="button" class="btn btn-fant" data-ir="${esc(i.ir)}">Resolver</button>` : ''}</div>`).join('')}</div>`).join('')}</div>`;
+  <details class="card revisao"><summary>${pend.length ? `Revisão completa do guia · ${pend.length} ${pend.length === 1 ? 'ponto' : 'pontos'} para conferir` : 'Revisão completa do guia · nada pendente'}</summary>
+    ${pend.length ? grupos.map(g => `<div class="revisao-grupo"><h3>${esc(g)}</h3>${pend.filter(i => i.grupo === g).sort((a, b) => ordem[a.e] - ordem[b.e]).map(i => `<div class="pend ${i.e}">${ic('alerta')}<span>${esc(i.txt)}</span>${i.ir ? `<button type="button" class="btn btn-fant" data-ir="${esc(i.ir)}">Resolver</button>` : ''}</div>`).join('')}</div>`).join('') : '<p class="mudo">Nenhum ponto pendente. Senhas, links e textos conferidos.</p>'}
+  </details>
+  <div class="card passos-card"><h2 class="t2">Como atualizar o guia</h2><ol class="passos">
+    <li><span><b>Edite</b> uma seção do menu, como “A casa”.</span></li><li><span><b>Envie fotos</b> tocando nos quadros de foto.</span></li><li><span><b>Pré-visualize</b> para ver como o hóspede vai ver.</span></li><li><span><b>Publique</b>: o site atualiza em alguns minutos.</span></li></ol></div>`;
 };
 function cartaoHospedagem() {
   const p = privados(), v = virada(), cv = contaVirada(v), nPriv = ['wifi_rede', 'wifi_senha', 'portao', 'chaves'].filter(k => tem(p[k])).length;
@@ -1225,7 +1290,7 @@ function pintarEditor() {
   const y = $('#editor .ed-corpo') ? $('#editor .ed-corpo').scrollTop : 0;
   $('#editor').innerHTML = `<div class="ed-cab"><h2 class="t2" id="ed-titulo">${esc(D.linha(x).t || D.titulo)}</h2><button type="button" class="btn btn-sec btn-ic" data-fechar-editor aria-label="Fechar">${ic('x')}</button></div>
     <div class="ed-corpo"><p class="mudo peq" style="margin:0 0 12px">As alterações ficam guardadas no rascunho na hora. Para irem ao site, toque em Publicar.</p><div class="form">${D.form(q, x)}</div></div>
-    <div class="ed-rod"><div class="acoes"><button type="button" class="btn btn-perigo" data-excluir-item>${ic('lixo')}Excluir</button><button type="button" class="btn btn-sec" data-duplicar-item>${ic('copiar')}Duplicar</button></div><button type="button" class="btn btn-prim" data-fechar-editor>${ic('check')}Concluir</button></div>`;
+    <div class="ed-rod"><div class="acoes"><button type="button" class="btn btn-perigo" data-excluir-item>${ic('lixo')}<span class="rot-btn">Excluir</span></button><button type="button" class="btn btn-sec" data-duplicar-item>${ic('copiar')}<span class="rot-btn">Duplicar</span></button></div><button type="button" class="btn btn-prim" data-fechar-editor>${ic('check')}Concluir</button></div>`;
   $('#editor').setAttribute('aria-labelledby', 'ed-titulo');
   const c = $('#editor .ed-corpo'); if (c) c.scrollTop = y;
   marcarErrosCampos($('#editor'));
@@ -2190,6 +2255,7 @@ document.addEventListener('click', async (e) => {
       catch (x) { msg.textContent = 'Erro: ' + (x instanceof SyntaxError ? 'JSON com erro de formatação (' + x.message + ')' : x.message); msg.style.color = 'var(--alerta)'; }
       break;
     }
+    case 'confirmar-comodidades': { if (!confirm('Você confere que estas comodidades estão corretas como escritas (velocidade do Wi-Fi, distância da praia, estacionamento gratuito)?')) break; const ok = new Set(ls.get('admin:comodidades-ok', []) || []); ((A.draft.casa || {}).comodidades || []).forEach(c => c && ok.add((c.nome || '') + '|' + (c.descricao || ''))); ls.set('admin:comodidades-ok', [...ok]); atualizarBarra(); rerender(); toast('Comodidades marcadas como conferidas neste aparelho.'); break; }
     case 'imprimir-qr': document.body.classList.add('imprimir-qr'); window.print(); setTimeout(() => document.body.classList.remove('imprimir-qr'), 500); break;
     case 'copiar-url': try { await navigator.clipboard.writeText(urlPublica()); toast('Link copiado.'); } catch (x) { toast('Não consegui copiar. O link é: ' + urlPublica(), true); } break;
   }
